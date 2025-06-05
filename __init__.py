@@ -1,6 +1,3 @@
-# C:\Stable Diffusion\ComfyUI\custom_nodes\ComfyUI_MD_Nodes\__init__.py
-# (Note: This path assumes __init__.py is now at the root of your ComfyUI_MD_Nodes repository)
-
 # Initialize empty dictionaries to collect all mappings
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
