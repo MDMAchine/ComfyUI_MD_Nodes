@@ -1,0 +1,27 @@
+# Python cache directories
+__pycache__/
+
+# Miscellaneous backups and notes folder inside the package
+misc/
+
+# Ignore common large model/checkpoint files and binaries
+*.bin
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+
+# Ignore local config files
+*.ini
+*.local
+
+# Ignore documentation backups or editor temp files
+*.docx
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Editor backups and temp files
+*~
+*.swp

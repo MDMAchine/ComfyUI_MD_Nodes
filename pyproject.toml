@@ -1,0 +1,10 @@
+[project]
+name = "ComfyUI_MD_Nodes"
+version = "0.1.0"
+description = "A wild collection of custom nodes for ComfyUI including schedulers, samplers, audio tools, latent visualizers, and more — built for creative chaos."
+authors = [{ name = "MDMAchine" }]
+readme = "README.md"
+license = { text = "MIT" }
+
+[tool.comfy]
+entry_point = "MD_Nodes"
