@@ -7,4 +7,4 @@ readme = "README.md"
 license = { text = "MIT" }
 
 [tool.comfy]
-entry_point = "MD_Nodes"
+entry_point = "."
