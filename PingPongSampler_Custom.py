@@ -1,16 +1,21 @@
-# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 # ████ PINGPONGSAMPLER V0.8.15 – Optimized for Ace-Step Audio/Video! ████▓▒░
-# ░▒▓ Originally cast into the void by: blepping (The OG coder, respect!)
-# ▓▒░    Disassembled & warped by: MD (Machine Damage) – Because even perfect
+# ░▒▓ Originally cast into the void by: Junmin Gong - Ace-Step team member 
+# ▓▒░    and the original mind behind PingPong Sampler.
+# ░▒▓ blepping: Created the original ComfyUI version of PingPong Sampler 
+# ▓▒░    (with some of his own weird features). 
+# ▓▒░    You probably have used some of his work before!
+# ░▒▓ Disassembled & warped by: MD (Machine Damage) – Because even perfect
 # ▓▒░    code sometimes needs a good, hard whack.
-# ▓▒░    Critical fixes & re-re-engineering by: Gemini (Google) based on user
+# ░▒▓ Critical fixes & re-re-engineering by: Gemini (Google) based on user
 # ▓▒░    feedback. – Turning bug reports into features, like magic... or just
 # ▓▒░    really good debugging.
-# ▓▒░    Completionist fixups via: devstral / qwen3 (local) – The unsung heroes
+# ░▒▓ Completionist fixups via: devstral / qwen3 (local) – The unsung heroes
 # ▓▒░    who tie up loose ends, probably fuelled by questionable energy drinks.
-# ▓▒░ License: Apache 2.0 – Because sharing is caring, and we're not greedy
+# ░▒▓ License: Apache 2.0 – Because sharing is caring, and we're not greedy
 # ▓▒░    like those 3Dfx guys hoarding Voodoo cards.
-# ░▒▓ Original Source: https://gist.github.com/blepping/b372ef6c5412080af136aad942d9d76c
+# ░▒▓ Original Comfy node Source: 
+# ▓▒░    https://gist.github.com/blepping/b372ef6c5412080af136aad942d9d76c
 
 # ▓▒░ Description:
 #    A sampler node for ComfyUI, **specifically optimized and tested for
