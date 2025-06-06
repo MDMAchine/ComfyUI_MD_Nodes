@@ -1,152 +1,95 @@
-ComfyUI Noise Decay Scheduler (Custom) Manual
-1. What is the Noise Decay Scheduler (Custom) Node?
+# ComfyUI Noise Decay Scheduler (Custom) Manual
+
+---
+
+## 1. What is the Noise Decay Scheduler (Custom) Node?
+
 The "Noise Decay Scheduler (Custom)" is a specialized ComfyUI node designed to control how noise is faded out during the sampling process in diffusion models. Think of it like a dimmer switch for the "ancestral" noise in your generation: it doesn't remove the noise entirely, but rather dictates how quickly or slowly its influence diminishes over the steps of your sampling process.
 
-How it Works:
+### How it Works:
 
-At its core, this node generates a mathematical curve based on a cosine function, which is then shaped by a single parameter: decay_power. This curve acts as a "schedule" for the noise. When connected to a compatible sampler (like pingpongsampler_custom), the sampler uses this schedule to adjust the amount of noise applied at each step.
+At its core, this node generates a mathematical curve based on a cosine function, which is then shaped by a single parameter: `decay_power`. This curve acts as a "schedule" for the noise. When connected to a compatible sampler (like `pingpongsampler_custom`), the sampler uses this schedule to adjust the amount of noise applied at each step.
 
-What it Does:
+### What it Does:
 
-By manipulating the decay_power parameter, you can influence the visual or auditory characteristics of your generated output.
+By manipulating the `decay_power` parameter, you can influence the visual or auditory characteristics of your generated output.
 
-Steeper decay curves (higher decay_power) mean the noise reduces more quickly in the early stages of sampling. This can lead to outputs that are:
+* **Steeper decay curves (higher `decay_power`)** mean the noise reduces more quickly in the early stages of sampling. This can lead to outputs that are:
+    * Sharper and more detailed: Less noise influence for longer means the model refines the output more aggressively.
+    * Potentially less "noisy" overall: The final output might have a cleaner appearance.
+* **Gentler decay curves (lower `decay_power`)** prolong the influence of noise throughout the sampling process. This can result in outputs that are:
+    * Softer or more "dreamlike": The continued noise influence can blend elements more.
+    * Potentially more prone to artifacts: If too much noise is left in for too long, it can interfere with coherent generation.
 
-Sharper and more detailed: Less noise influence for longer means the model refines the output more aggressively.
+### How to Use It:
 
-Potentially less "noisy" overall: The final output might have a cleaner appearance.
+1.  **Add the Node**: In your ComfyUI workflow, right-click on the graph, go to `MD_Nodes -> Schedulers`, and select `Noise Decay Scheduler (Custom)`.
+2.  **Connect to Sampler**: Connect the `SCHEDULER` output of this node to the `noise_decay_scheduler` input of a compatible sampler node (e.g., `pingpongsampler_custom`).
+3.  **Adjust `decay_power`**: Experiment with the `decay_power` parameter to observe its effect on your generated output. Start with small adjustments and gradually increase or decrease to find the desired aesthetic.
 
-Gentler decay curves (lower decay_power) prolong the influence of noise throughout the sampling process. This can result in outputs that are:
+---
 
-Softer or more experimental: The prolonged noise can introduce more variability or a less "perfect" aesthetic.
+## 2. Detailed Parameter Information
 
-Potentially more "ancestral" artifacts: If you're looking for a specific kind of noisy texture, a gentler decay might preserve it longer.
+The Noise Decay Scheduler (Custom) node exposes a single, crucial parameter that controls its behavior.
 
-How to Use It:
+* **decay_power**
+    * **Type**: `FLOAT`
+    * **Default**: `0.75`
+    * **Min**: `0.0`
+    * **Max**: `2.0`
+    * **Step**: `0.01`
+    * **Description**: This parameter controls the "aggressiveness" or "steepness" of the noise decay curve. It directly influences how quickly the ancestral noise component diminishes over the sampling steps.
+    * **Use Cases & Why**:
+        * **`0.0` (Linear Decay)**: The noise influence decays linearly across the steps.
+        * **`1.0` (Cosine Decay)**: A standard cosine-based decay, where noise reduction is initially slower and then accelerates.
+        * **Greater than `1.0` (Steeper Decay)**: The noise influence diminishes very rapidly in the early steps, then levels off. This can lead to outputs that are quickly refined and might appear sharper.
+        * **Less than `1.0` (Gentler Decay)**: The noise influence persists longer into the sampling process. This can lead to softer, more blended results, or introduce more textural noise depending on the context.
+    * **How to Use**: Experimentation is key. Start with the default `0.75` and incrementally adjust. Higher values make the decay steeper, lower values make it gentler.
+    * **Analogy**: Imagine a hill. `decay_power` shapes how steep the hill is. If it's a very steep hill (high `decay_power`), you drop fast at the beginning. If it's a gentle slope (low `decay_power`), you descend slowly throughout.
 
-Add the Node: In your ComfyUI workflow, right-click on the canvas, go to Add Node, then navigate to schedulers/custom and select Noise Decay Scheduler (Custom).
+---
 
-Connect to a Compatible Sampler: The primary output of this node is a SCHEDULER object. You'll need to connect this output to an input on a sampler node that is designed to accept such a scheduler. The node's description specifically mentions pingpongsampler_custom as a primary target. Look for an input named scheduler or similar on your sampler node.
+## 3. In-Depth Technical Information
 
-Adjust decay_power: Use the slider in the node's properties panel to experiment with different decay_power values and observe their effects on your generated output. Start with the default and adjust incrementally.
+This section provides a more detailed look at the mathematical and architectural aspects of the Noise Decay Scheduler (Custom) node.
 
-2. Detailed Information about Parameters
-The "Noise Decay Scheduler (Custom)" node exposes only one adjustable parameter:
+### Mathematical Basis: Cosine Decay
 
-decay_power
-Type: FLOAT (a decimal number)
+The core of this scheduler is a cosine-based decay function. This type of function is often chosen in signal processing and machine learning for its smooth, non-linear progression.
 
-Default Value: 3.0
+The internal calculation for the decay curve generally follows a pattern similar to:
 
-Range: 0.1 (minimum) to 10.0 (maximum)
+`decay_factor = (1 - cos(x)) / 2`
 
-Step Size: 0.1 (the increment by which the slider adjusts the value)
+where `x` ranges from `0` to `π` (or `0` to `2π`) over the course of the sampling steps. The `decay_power` parameter is then applied to this `decay_factor` (e.g., `decay_factor^decay_power`) to further shape the curve.
 
-What it Does:
+* When `decay_power` is `1.0`, it's a standard cosine decay.
+* When `decay_power` is greater than `1.0`, the curve becomes concave, meaning initial drops are larger.
+* When `decay_power` is less than `1.0`, the curve becomes convex, meaning initial drops are smaller.
 
-The decay_power parameter is the exponent that directly controls the curvature of the cosine-based decay curve generated by the node.
+### Integration with Samplers
 
-Higher Values (e.g., 5.0 - 10.0):
+The node does not directly apply noise reduction. Instead, it generates a `SCHEDULER` object. This object is designed to be passed to a compatible sampler (like `pingpongsampler_custom`).
 
-Effect: Produce a steeper decay curve. This means the influence of noise diminishes much more rapidly in the initial steps of the diffusion process.
+The `SCHEDULER` object typically contains a method (e.g., `get_decay(num_steps)`) that, when called by the sampler, generates the actual noise decay curve (a NumPy array or PyTorch tensor) with the specified number of steps. This allows the scheduler to be flexible and adapt to the number of steps chosen in the sampler, rather than being fixed.
 
-Use Cases: Useful when you want the model to quickly move past the "noisy" initial stages and focus on refining details. This can lead to crisper, sharper, or more defined outputs, especially in image and video generation. In audio, it might lead to a quicker convergence to a clean signal.
+### Design Principles
 
-Lower Values (e.g., 0.1 - 2.0):
+* **Lazy Generation**: The actual noise decay curve is not calculated until the sampler explicitly requests it and provides the `num_steps`. This is efficient as the decay curve is only generated when it's actually needed by the sampler.
+* **NumPy-Powered**: The node relies solely on `NumPy` for numerical operations. This makes it more lightweight and potentially more compatible across different environments without requiring a full PyTorch installation for just the scheduler logic.
+* **Object-Oriented Output**: Instead of returning a raw tensor (as in older versions), the node returns a `SCHEDULER` object. This is a cleaner, more encapsulated approach. The object contains the logic and the `decay_power` parameter, allowing the sampler to interact with it via a defined interface (`get_decay` method).
 
-Effect: Create a gentler decay curve. The noise's influence persists for a longer duration across the diffusion steps.
+### Internal (Non-Exposed) Parameters/Concepts:
 
-Use Cases: Ideal for scenarios where you want the noise to have a prolonged impact, potentially leading to softer, more experimental, or abstract outputs. This can be useful for artistic exploration, generating "lo-fi" audio, or preserving certain textural qualities derived from noise.
+While the node's internal logic utilizes concepts like linear spacing for `0` to `π` radians, these are part of the implementation of the cosine decay and are not intended as direct user-adjustable parameters. They are fixed elements of how the decay curve is shaped.
 
-How to Use and Why:
+### Future Implementations (May or May Not Be):
 
-Experimentation is key with decay_power. The optimal value will depend heavily on your specific diffusion model, the sampler you are using, and the desired output.
+Currently, the node focuses on a single `decay_power` parameter for a cosine-based decay. Potential future implementations might explore:
 
-Start with the Default: Begin with 3.0 and run a generation.
-
-Iterate and Observe:
-
-If your output feels too "soft" or "muddy," try increasing decay_power incrementally (e.g., to 3.5, 4.0, 5.0).
-
-If your output seems too "sharp" too quickly, or if you want to introduce more "character" from the noise, try decreasing decay_power (e.g., to 2.5, 2.0, 1.5).
-
-Think about the "Ancestral" Noise: This parameter directly impacts how "ancestral" noise is faded out. If your sampler relies heavily on ancestral sampling methods, this parameter will have a significant impact on the final result.
-
-3. In-Depth Nerd Technical Information
-For those who want to peek under the hood, here's a more technical breakdown of the "Noise Decay Scheduler (Custom)" node:
-
-Node Class: NoiseDecayScheduler_Custom_V03
-
-Core Logic:
-
-The node's primary function is to instantiate and return an object of an internal class named NoiseDecayObject. This NoiseDecayObject is the actual "scheduler" that performs the decay calculation.
-
-The NoiseDecayObject:
-
-Constructor (__init__): Takes decay_power as its sole argument and stores it. This means the NoiseDecayObject carries the decay_power value throughout its lifecycle, ready to be used when needed.
-
-get_decay(self, num_steps: int) -> np.ndarray method: This is the crucial method. It's designed to be called by a compatible sampler.
-
-Input: num_steps - This integer represents the total number of sampling steps the diffusion process will perform. The sampler provides this value.
-
-Calculation:
-
-lin = np.linspace(0, np.pi / 2, num_steps): A linearly spaced array is created. This array effectively divides the quadrant of a circle (from 0 to  
-2
-π
-​
-  radians) into num_steps equal parts.
-
-return np.cos(lin) ** self.decay_power: For each value in the lin array:
-
-The cosine is calculated (np.cos). A standard cosine curve starts at 1 at 0 radians and smoothly decays to 0 at  
-2
-π
-​
-  radians.
-
-This cosine value is then raised to the power of self.decay_power.
-
-Output: A NumPy array (np.ndarray) of length num_steps. Each element in this array corresponds to the decay factor for a specific step in the sampling process. This array represents the "decay curve."
-
-Mathematical Formula:
-
-The decay factor at step i (where i ranges from 0 to num 
-s
-​
- teps−1) is given by:
-
-\text{decay}[i] = \cos\left( \frac{i \cdot \pi}{2 \cdot (\text{num_steps} - 1)} \right)^{\text{decay_power}}
-When decay_power = 1.0 (linear cosine decay), the noise decays directly proportional to the cosine curve.
-
-When decay_power > 1.0, the decay becomes steeper. Small changes in the initial steps of the cosine curve result in larger drops in the decay factor.
-
-When decay_power < 1.0, the decay becomes gentler. The noise lingers for longer before significantly dropping.
-
-Key Technical Design Choices:
-
-Lazy Computation: The decay curve (np.ndarray) is not computed when the NoiseDecayScheduler_Custom node is first run. Instead, it's computed "lazily" within the get_decay method of the NoiseDecayObject, only when the connected sampler explicitly requests it and provides the num_steps. This is efficient as the decay curve is only generated when it's actually needed by the sampler.
-
-NumPy-Powered: The node explicitly dropped PyTorch dependencies (as noted in the change log) and now relies solely on NumPy for numerical operations. This makes it more lightweight and potentially more compatible across different environments without requiring a full PyTorch installation.
-
-Object-Oriented Output: Instead of returning a raw tensor (as in older versions), the node returns a SCHEDULER object. This is a cleaner, more encapsulated approach. The object contains the logic and the decay_power parameter, allowing the sampler to interact with it via a defined interface (get_decay method).
-
-Internal (Non-Exposed) Parameters/Concepts:
-
-While the node's internal logic utilizes concepts like linear spacing for 0 to  
-2
-π
-​
-  radians, these are part of the implementation of the cosine decay and are not intended as direct user-adjustable parameters. They are fixed elements of how the decay curve is shaped.
-
-Future Implementations (May or May Not Be):
-
-Currently, the node focuses on a single decay_power parameter for a cosine-based decay. Potential future implementations might explore:
-
-Alternative decay functions (e.g., exponential, polynomial).
-
-More complex multi-parameter decay controls.
-
-Ability to input custom decay arrays.
+* Alternative decay functions (e.g., exponential, polynomial).
+* More complex multi-parameter decay controls.
+* Ability to input custom decay arrays.
 
 However, these are speculative and not part of the current node's functionality.
