@@ -105,10 +105,9 @@ git clone https://github.com/MDMAchine/ComfyUI_MD_Nodes.git
 | 🕶️ Handle         | 🧠 Role                                                  |
 |--------------------|--------------------------------------------------------- |
 | **MDMAchine**      | Main chaos wizard                                        |
-| **Junmin Gong**    | Original mind behind PingPongSampler                     |
-| **blepping**       | Created PingPongSampler node with some tweaks            |
-|                      Mind behind OG APG guider node                           |
-| **c0ffymachyne**   | Signal alchemist / audio IO / image output               |
+| **[Junmin Gong](https://github.com/ChuxiJ)**    | Original mind behind PingPongSampler - Ace-Step Team      |
+| **[blepping](https://gist.github.com/blepping)**       | Created PingPongSampler ComfyUI node with some tweaks<br>Mind behind OG APG guider node                           |
+| **[c0ffymachyne](https://github.com/c0ffymachyne)**   | Signal alchemist / audio IO / image output               |
 
 ### 💾 BORG SUPPORT TEAM 🤖
 
