@@ -79,11 +79,14 @@ Finally, listen without guessing.
 
 ### 🧰 INSTALLATION: JACK INTO THE MATRIX
 
+Should now be available to install in ComfyUI Manager under "MD Nodes"
+
 ```bash
 cd path/to/ComfyUI/custom_nodes
 git clone https://github.com/MDMAchine/ComfyUI_MD_Nodes.git
 ```
 > Don’t forget to restart ComfyUI. Even gods need to reboot.
+
 
 ---
 
