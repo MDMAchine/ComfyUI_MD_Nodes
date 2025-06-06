@@ -115,15 +115,16 @@ The PingPong Sampler node comes with a comprehensive set of parameters, combinin
     * **Example YAML Structure**:
         ```yaml
         # Example PingPong Sampler YAML Settings
-        steps: 30
-        cfg: 7.5
-        sampler_name: "dpmpp_2m"
-        scheduler_name: "karras"
-        ancestral_steps_start_ratio: 0.1
-        ancestral_steps_end_ratio: 0.95
-        ancestral_noise_strength: 0.8
-        blend_mode: "lerp"
-        step_blend_mode: "lerp"
+        verbose: true
+        step_random_mode: false
+        step_size: 5
+        first_ancestral_step: 15
+        last_ancestral_step: 35
+        start_sigma_index: 0
+        end_sigma_index: -1
+        enable_clamp_output: false
+        blend_mode: lerp
+        step_blend_mode: lerp
         ```
     * **Note**: Ensure valid YAML syntax. Boolean values (e.g., `True`/`False`) should be represented as `true`/`false` in YAML.
 
