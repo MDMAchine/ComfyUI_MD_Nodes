@@ -36,40 +36,41 @@ Packaged with ASCII-flavored love, open-source chaos, and a healthy disregard fo
 ---
 
 ### 🔥 **THE HOLY NODES OF CHAOTIC NEUTRALITY** 🔥
+Click the names for manuals
 
-**🧠 `HYBRID_SIGMA_SCHEDULER`**
+**🧠 [`HYBRID_SIGMA_SCHEDULER`](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/Hybrid_Sigma_Scheduler.md)**
 *‣ v0.69.420 🍆💦 – Your vibe, your noise.*
 Get Karras Fury (for when subtlety is dead) or Linear Chill (for flat, vibe-checked diffusion).
 Instantly generates noise levels like a bootleg synth wave generator trapped in a tensor. Built on rage, love, and nostalgia.
 
-**🔊 `MASTERING_CHAIN_NODE`**
+**🔊 [`MASTERING_CHAIN_NODE`](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/mastering_chain_node.md)**
 *‣ v0.9.0 – Make your audio thicc.*
 Think mastering, but with attitude. Slaps your waveform until it begs for release. Now with less clipping and more cowbell.
 
-**🔁 `PINGPONG_SAMPLER_CUSTOM`**
+**🔁 [`PINGPONG_SAMPLER_CUSTOM`](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/PingPong_Sampler_Custom.md)**
 *‣ v0.8.15 – Symphonic frequencies & lyrical chaos.*
 Imagine your noise bouncing like a rave ball in a VHS tape. Originally coded in a fever dream, fixed with duct tape and dark energy.
 
-**🔮 `SCENE_GENIUS_AUTOCREATOR`**
+**🔮 [`SCENE_GENIUS_AUTOCREATOR`](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/SCENE_GENIUS_AUTOCREATOR.md)**
 *‣ v0.1 – Prompter’s divine sidekick.*
 Feed it vibes, and it returns *raw latent prophecy.* Prompting was never supposed to be this dangerous. You’re welcome.
 
-**🎨 `ACE_LATENT_VISUALIZER`**
+**🎨 [`ACE_LATENT_VISUALIZER`](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/ACE_LATENT_VISUALIZER.md)**
 *‣ v0.3.1 – Decode the noise gospel.*
 Waveform. Spectrum. RGB channel hell. Perfect for those who *need* to know what the AI sees behind the curtain.
 Because latent space is beautiful and terrifying.
 
-**📉 `NOISEDECAY_SCHEDULER`**
+**📉 [`NOISEDECAY_SCHEDULER`](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/NoiseDecayScheduler_Custom.md)**
 *‣ v0.4.4 – Controlled fade into darkness.*
 Apply custom decay curves to your sigma schedule. Modulate noise like a sad synth player modulates a filter envelope.
 Bonus: comes with built-in cinematic moodiness.
 
-**📡 `APG_GUIDER_FORKED`**
+**📡 [`APG_GUIDER_FORKED`](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/APG_Guider_Forked.md)**
 *‣ v0.2.2 – Low-key guiding, high-key results.*
 Forked and retooled from APG Guider. Subtle prompt reinforcement that *nudges* rather than steamrolls.
 Now with a Chaos/Order slider.
 
-**🎛️ `ADVANCED_AUDIO_PREVIEW_AND_SAVE`**
+**🎛️ [`ADVANCED_AUDIO_PREVIEW_AND_SAVE`](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/AdvancedAudioPreviewAndSave.md)**
 *‣ v1.0 – Hear it before you overthink it.*
 Preview audio waveforms *inside* the workflow before exporting. Now includes safe saving, better waveform drawing, and normalized output.
 Finally, listen without guessing.
@@ -101,14 +102,21 @@ git clone https://github.com/MDMAchine/ComfyUI_MD_Nodes.git
 
 ### 💾 THE CREDITS - THESE LEGENDS WALKED SO YOU COULD SAMPLE
 
-| 🕶️ Handle          | 🧠 Role                              |
-| ------------------- | ------------------------------------ |
-| **MDMAchine**       | Core concept, main chaos wizard      |
-| **blepping**        | Original mind behind PingPongSampler |
-| **c0ffymachyne**    | Signal alchemist / audio IO          |
-| **devstral**        | Local l33t, fix-ologist              |
-| **Gemini (Google)** | Kernel rewriter, patch priest        |
-| **qwen3**           | Completionist with RGB soul          |
+| 🕶️ Handle         | 🧠 Role                                                  |
+|--------------------|--------------------------------------------------------- |
+| **MDMAchine**      | Main chaos wizard                                        |
+| **Junmin Gong**    | Original mind behind PingPongSampler                     |
+| **blepping**       | Created PingPongSampler node with some tweaks            |
+|                      Mind behind OG APG guider node                           |
+| **c0ffymachyne**   | Signal alchemist / audio IO / image output               |
+
+### 💾 BORG SUPPORT TEAM 🤖
+
+| **Handle**          | **Contribution**                                                               |
+|--------------------- |------------------------------------------------------------------------------ |
+| **devstral**         | Local l33t fix-ologist — patching holes and breaking stuff since dial-up days |
+| **Gemini (Google)**  | Kernel rewritin’ wizard and patch priest — holy hacks served fresh            |
+| **qwen3**            | RGB soul, code completions on point — basically your digital wingman          |
 
 ---
 
