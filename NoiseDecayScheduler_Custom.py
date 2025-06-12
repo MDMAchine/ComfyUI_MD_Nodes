@@ -1,44 +1,55 @@
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-# ████ NOISE DECAY SCHEDULER v0.3.1 – released to the wild ████▓▒░
-# ░▒▓ Crafted in the fumes of dial-up and hot solder smell ░▒▓
-# ▓▒░        Inspired by: Blepping? | https://github.com/blepping
-# ░▒▓        Originally bungled by: MDMAchine
-# ▒░▓        Made not-suck by: devstral (local l33t)
-# ░▒▓        License: Apache 2.0 like anyone actually reads that
-# ▓▒░
-# ░▒▓ Description:
-#    This ComfyUI scheduler node outputs a cosine-based decay curve
-#    raised to your almighty `decay_power`. Meant for use with
-#    pingpongsampler_custom or anyone stuck in aesthetic purgatory.
-#    **** - https://gist.github.com/MDMAchine/7edf8244c7cead4082f4168cdd8b2b23
-#
-# ▓▒░ Changes:
-# - V0.1 (OG release, barely functional):
-#    * Required both `sigmas` and `decay_power`
-#    * Returned a raw tensor in a dict – like it’s 1995 and we’re
-#      scared of objects
-#
-# - V0.2 (object-oriented enlightenment):
-#    * Killed the `sigmas` input – sampler does the legwork now
-#    * Added a scheduler class with `.get_decay(num_steps)` method
-#    * Output changed from tensor dump to actual `SCHEDULER` object
-#
-# - V0.3 (ComfyUI assimilation complete):
-#    * Renamed to `NoiseDecayScheduler_Custom_V03` (internally) for version hygiene
-#    * Dropped Torch like it’s hot – now 100% NumPy-powered
-#    * Lazy compute decay – won’t lift a finger until sampler calls
-#
-# - V0.3.1 (Refinement & Clarity Pass):
-#    * Consolidated node property definitions for cleaner code.
-#    * Explicitly added `RETURN_NAMES` for clearer UI output labeling.
-#    * Updated internal `NODE_DISPLAY_NAME_MAPPINGS` for consistency.
-#    * Added comprehensive tooltip for `decay_power`.
-#    * No functional changes to the decay logic, just structural cleanup.
-#
-# ░▒▓ Use at your own risk. May cause creative hallucinations,
-#    recursive memes, or spontaneous understanding of noise decay.
-#    Remember to feed your scheduler fresh packets daily.
+# ████ NOISE DECAY SCHEDULER v0.3.1 – Released to the Wild ████▓▒░
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+# ░▒▓ ORIGIN & DEV:
+#   • Crafted in the fumes of dial-up and hot solder smell
+#   • Inspired by: Blepping? | https://github.com/blepping
+#   • Originally bungled by: MDMAchine
+#   • Made not-suck by: devstral (local l33t)
+#   • License: Apache 2.0 — Because we’re polite anarchists
+
+# ░▒▓ DESCRIPTION:
+#   A ComfyUI scheduler that outputs a cosine-based decay curve,
+#   raised to your almighty `decay_power`. Perfect for:
+#     - pingpongsampler_custom
+#     - Escaping aesthetic purgatory
+#     - Those who say “vibe” unironically
+#   Example usage & details: https://gist.github.com/MDMAchine/7edf8244c7cead4082f4168cdd8b2b23
+
+# ░▒▓ CHANGELOG HIGHLIGHTS:
+#   - v0.1 “OG Release – Jank Included”:
+#       • Required `sigmas` and `decay_power`
+#       • Output as raw tensor in dict (1995-era vibes)
+#   - v0.2 “Object-Oriented Enlightenment”:
+#       • Dropped `sigmas` input; samplers handle it now
+#       • Added `.get_decay(num_steps)` method
+#       • Output: structured `SCHEDULER` object
+#   - v0.3 “ComfyUI-ification Complete”:
+#       • Renamed to `NoiseDecayScheduler_Custom_V03`
+#       • Torch removed—100% NumPy implementation
+#       • Lazy evaluation—no decay math until requested
+#   - v0.3.1 “Refinement & Clarity Pass”:
+#       • Consolidated property definitions
+#       • Added `RETURN_NAMES` for UI clarity
+#       • Mapped `NODE_DISPLAY_NAME_MAPPINGS` for consistency
+#       • Documented `decay_power` with useful tooltip
+
+# ░▒▓ CONFIGURATION:
+#   → Primary Use: Fine-tuning decay curves in custom schedulers
+#   → Secondary Use: Enhancing sampler behaviors with smooth decay
+#   → Edge Use: For those chasing that perfect vibe decay
+
+# ░▒▓ WARNING:
+#   This scheduler may trigger:
+#   ▓▒░ Creative hallucinations
+#   ▓▒░ Recursive memes
+#   ▓▒░ Sudden comprehension of “vibe decay”
+#   Remember: clean packets and chaotic intentions required.
+
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+
 
 import numpy as np  # Numerical operations for decay curve
 

@@ -1,63 +1,55 @@
-# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-# ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-# █▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀█
-# █▓▒░ ADVANCED AUDIO PREVIEW & SAVE (AAPS) v0.3.12 - THE METADATA PRIVACY FILTER! ░▒▓█
-# █░▒▓ Embracing harmony between Matplotlib, PIL, and ComfyUI for pixel-perfect waveforms! ▓▒░█
-# █▓▒░ Crafted with 386-DX power and a prayer to the digital gods. ░▒▓█
-# █▓▒░ Original Code by: MDMAchine (polished and perfected by Gemini) ░▒▓█
-# █▓▒░ Special thanks to:                                                ░▒▓█
-# █▓▒░  - https://github.com/c0ffymachyne/ComfyUI_SignalProcessing (for waveform display inspiration) ░▒▓█
-# █▓▒░  - https://github.com/comfyanonymous/ComfyUI (for foundational audio saving logic) ░▒▓█
-# █▓▒░ License: Public Domain, because sharing is caring in the BBS era. ░▒▓█
-# █▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█
-# ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-#
-# ░▒▓ Description:
-#    This ComfyUI node is your ultimate audio companion. Think of it as a digital sound
-#    engineer, ready to process, preview, and save your generated audio.
-#
-#    It takes raw audio data (like that sweet sonic output from your VAEAUDIO_Decode
-#    or any other audio-producing node) through a standardized "AUDIO" input.
-#
-#    Then, it does some cool stuff:
-#    1. It lets you **preview the audio** right on your ComfyUI canvas! Just connect
-#       its 'AUDIO' output to ComfyUI's built-in 'Preview Audio' node. It's like
-#       plugging your digital headphones in!
-#    2. It can **save your masterpiece to disk** in glorious FLAC (lossless, for
-#       audiophiles and workflow archivists), MP3 (universally compatible), or OPUS (efficient and high-quality for web/streaming).
-#    3. When saving, it's super smart: it can automatically grab your
-#       *entire ComfyUI workflow* (the blueprint of how you made the audio) and
-#       embed it directly into the audio file's hidden metadata, if enabled. This means you can
-#       drag that file back into ComfyUI later, and BAM! Your whole workflow
-#       reappears like magic. It's like a time capsule for your creativity!
-#    4. It also whips up a **snazzy waveform image** of your audio. This visual
-#       representation of your sound waves is outputted as a standard ComfyUI
-#       'IMAGE' tensor, which you can connect to any 'Preview Image' or 'Save Image'
-#       node to marvel at your sonic art. We're now armed with *extra* debug to fix
-#       any rogue pixels!
-#
-# ░▒▓ Features at a Glance:
-#    - **Audio Output for Preview:** The 'AUDIO' output is ready to connect to ComfyUI's 'Preview Audio' node.
-#    - **Waveform Image Output:** The 'WAVEFORM_IMAGE' output is ready for 'Preview Image' or 'Save Image' nodes.
-#    - **Save to Disk:** Choose between high-fidelity FLAC, universally compatible MP3, or efficient OPUS. (Default is now OFF, for quick previews!)
-#    - **Metadata Privacy Filter:** A new toggle ('Save Metadata') to control whether ANY metadata (including workflow, prompt, notes) is saved with the audio. Keep your sonic secrets safe!
-#    - **Custom Notes:** Add your own personal digital post-it note to audio file metadata.
-#    - **Normalize Audio:** Automatically scales your audio to prevent annoying clipping and ensure consistent loudness. Because nobody likes distorted sound!
-#    - **Customizable Waveform Colors:** Pick your own line and background colors for that perfect visual vibe!
-#    - **Customizable Waveform Dimensions:** Now you control the exact width and height of the waveform image!
-#
-# ░▒▓ Usage:
-#    1. Connect the 'AUDIO' output from your audio source (like 'VAEAUDIO_Decode' or your 'EQ' node)
-#       to this node's 'audio_input'.
-#    2. Wire this node's 'AUDIO' output to a 'Preview Audio' node for listening.
-#    3. Wire this node's 'WAVEFORM_IMAGE' output to a 'Preview Image' node to gaze upon your sound waves!
-#    4. Set your desired filename, choose your save format, and tweak the visual settings.
-#    5. Hit 'Queue Prompt' and witness the digital marvel!
-#
-# ░▒▓ Warning: May cause excessive enjoyment and workflow recall. Also, high-fives from your computer.
-# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█
-# ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-#
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+# ████ ADVANCED AUDIO PREVIEW & SAVE (AAPS) v0.3.12 – Optimized for Ace-Step Audio/Video ████▓▒░
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+# ░▒▓ ORIGIN & DEV:
+#   • Cast into the void by: MDMAchine (waveform conjurer)
+#   • Original AAPS code & concept by: MDMAchine & Gemini (pixel perfectionists)
+#   • Inspired by: c0ffymachyne’s ComfyUI_SignalProcessing & ComfyAnonymous audio saving logic
+#   • License: Public Domain — Sharing the sonic love of the BBS era
+
+# ░▒▓ DESCRIPTION:
+#   The ultimate audio companion node for ComfyUI with Ace-Step precision.
+#   Processes, previews, and saves audio from your generation workflows.
+#   Outputs audio streams ready for immediate playback and
+#   generates crisp waveform images for visualization or archival.
+#   Includes smart metadata embedding that keeps your workflow blueprints
+#   locked inside your audio files — or filtered out for privacy.
+
+# ░▒▓ FEATURES:
+#   ✓ Audio output compatible with ComfyUI Preview Audio node
+#   ✓ Waveform image output for real-time visual feedback
+#   ✓ Save audio in FLAC (lossless), MP3 (universal), or OPUS (efficient)
+#   ✓ Metadata Privacy Filter toggle — keep your secrets safe or share your process
+#   ✓ Add custom notes embedded into audio metadata
+#   ✓ Automatic audio normalization to prevent clipping
+#   ✓ Fully customizable waveform colors, size, and grid display
+
+# ░▒▓ CHANGELOG:
+#   - v0.1 (Initial Release):
+#       • Basic audio preview & saving functionality
+#       • Waveform visualization integrated
+#   - v0.2 (Feature Expansion):
+#       • Added support for MP3 & OPUS formats
+#       • Metadata embedding of workflow data
+#   - v0.3.12 (Privacy & Polish):
+#       • Metadata Privacy Filter added
+#       • Enhanced waveform rendering stability
+#       • User interface improvements & bug fixes
+
+# ░▒▓ CONFIGURATION:
+#   → Primary Use: Audio preview and file export within ComfyUI workflows
+#   → Secondary Use: Visual waveform generation for audio debugging or art
+#   → Edge Use: Metadata steganography and workflow archival in sound files
+
+# ░▒▓ WARNING:
+#   This node may trigger:
+#   ▓▒░ Uncontrollable groove sessions
+#   ▓▒░ Over-sharing or over-hiding your creative workflow
+#   ▓▒░ Obsessive waveform customization urges
+
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
 
 import os
 import torch

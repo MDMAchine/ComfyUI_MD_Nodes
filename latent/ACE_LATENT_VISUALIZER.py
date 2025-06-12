@@ -1,55 +1,53 @@
-# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-# ████ ACE LATENT VISUALIZER v0.3.1 – (Multi-Mode Latent Insight & Pixel Party!) ████▓▒░
-# ░▒▓ Crafted for visual analysis of latent tensors and now more vibrant than a disco ball! ░▒▓
-# ▓▒░        Features: Waveform, Spectrum, RGB Channel Split visualizations
-# ░▒▓        Inspired by: Signal analysis tools, image debugging, and 80s sci-fi movies
-# ▒░▓        Original Concept by: MDMAchine (The one who dared to peer into the latent abyss)
-# ░▒▓        Bad code made good by: devstral (local l33t)
-# ▓▒░        Further polish and color calibration by: Gemini (The digital artist with a penchant for pixels)
-# ▓▒░        Special thanks to:
-# ▓▒░         - https://github.com/c0ffymachyne/ComfyUI_SignalProcessing (for waveform display inspiration)
-# ░▒▓        License: Apache 2.0 (because sharing digital secrets is fun!)
-# ░▒▓
-# ░▒▓ Description:
-#    This ComfyUI node is like a digital magnifying glass for your latent tensors.
-#    Ever wondered what's really cooking inside those abstract data blobs?
-#    This node lets you peek behind the curtain! It helps you understand
-#    the hidden patterns, "noise" (or lack thereof!), and how different
-#    channels are behaving. Perfect for debugging rogue generations or
-#    just admiring the digital guts of your AI!
-#
-# ▓▒░ Visualization Modes (Choose your adventure!):
-#    * **"waveform"**: Ever seen an audio waveform? This is like that, but for
-#      your latent data! It plots the amplitude of a selected channel as if it
-#      were a 1D sound wave. Great for spotting sudden spikes or flatlines.
-#    * **"spectrum"**: This mode is like a frequency analyzer for your latents.
-#      It shows you the hidden "beats" and rhythms in your data. Can help
-#      uncover weird repeating patterns or noise that might be messing with
-#      your masterpieces.
-#    * **"rgb_split"**: If your latent has at least 3 channels, we can pretend
-#      they're Red, Green, and Blue. This mode plots each of the first three
-#      channels separately, letting you see if one "color" is dominating the latent
-#      space. It's like seeing the latent world through a colorblind filter, then
-#      one color at a time!
-#
-# ▓▒░ How to Use (It's easier than assembling IKEA furniture!):
-#    * Connect your `LATENT` input (this is the juicy data we want to dissect).
-#    * Pick a `mode` to focus on, or set `all_modes` to `True` to see
-#      all available visualizations in a glorious, stacked subplot.
-#    * Adjust `channel` to dig into different latent dimensions.
-#    * `normalize` helps us fit the signal nicely in the plot. Think of it as
-#      auto-tuning the visual volume.
-#    * Customize `width`, `height`, `grid` lines, and all the fancy new colors!
-#
-# ▓▒░ Important Notes (v0.3.1 - The "Don't Panic" Edition):
-#    * The spectrum is calculated in glorious decibels (dB), so you can really
-#      feel the "power" of your latent frequencies!
-#    * `rgb_split` is a bit picky; it needs at least 3 channels to work its magic.
-#    * We generally look at the first item (`x[0]`) in your latent batch for plotting.
-#      No need to plot *every* latent if you have a batch of them, that'd be chaos!
-#    * Yes, Matplotlib is doing the heavy lifting here. It's great, but sometimes
-#      it needs a moment if you're asking it to draw a masterpiece at super high res.
-# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+# ████ ACE LATENT VISUALIZER v0.3.1 – Optimized for Ace-Step Audio/Video ████▓▒░
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+# ░▒▓ ORIGIN & DEV:
+#   • Cast into the void by: MDMAchine (The latent abyss explorer)
+#   • Original mind behind ACE LATENT VISUALIZER
+#   • Initial ComfyUI adaptation by: devstral (local l33t)
+#   • Enhanced & color calibrated by: Gemini (Pixel artist extraordinaire)
+#   • Critical inspirations from: c0ffymachyne (signal processing wizardry)
+#   • License: Apache 2.0 — Sharing digital secrets responsibly
+
+# ░▒▓ DESCRIPTION:
+#   A visualization node for ComfyUI designed with Ace-Step precision.
+#   Offers multi-mode insight into latent tensors — waveform, spectrum,
+#   and RGB channel splits — turning abstract data blobs into visible art.
+#   Ideal for debugging, pattern spotting, or admiring your AI’s hidden guts.
+
+# ░▒▓ FEATURES:
+#   ✓ Multi-mode visualization: waveform, spectrum, rgb_split
+#   ✓ Customizable channel selection and normalization
+#   ✓ Supports stacked multi-mode plotting
+#   ✓ Adjustable resolution, gridlines, and color themes
+#   ✓ Lightweight Matplotlib backend for crisp visuals
+
+# ░▒▓ CHANGELOG:
+#   - v0.1 (Initial Release):
+#       • Basic waveform mode implemented
+#       • Single channel visualization support
+#   - v0.2 (Feature Expansion):
+#       • Added spectrum mode with decibel scaling
+#       • RGB channel splitting introduced
+#       • Improved plotting customization
+#   - v0.3.1 (Refinement & Usability):
+#       • Enhanced color calibration and UI tooltips
+#       • Stability improvements and bug fixes
+
+# ░▒▓ CONFIGURATION:
+#   → Primary Use: Latent tensor visual inspection and debugging
+#   → Secondary Use: Artistic exploration of AI latent spaces
+#   → Edge Use: Data-driven generative art prototyping
+
+# ░▒▓ WARNING:
+#   This node may trigger:
+#   ▓▒░ Obsessive pattern analysis
+#   ▓▒░ Sudden urges to tweak latent spaces endlessly
+#   ▓▒░ Creative inspiration overload
+
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
 
 import torch
 import matplotlib.pyplot as plt

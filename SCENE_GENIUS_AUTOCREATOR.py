@@ -1,284 +1,62 @@
-# █▓▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░▓▒█
-# ████ SCENE GENIUS AUTOCREATOR V0.1 – Your Digital Guru for the Latent BBS! ████▓▒░
-# ░▒▓ CONCEIVED IN AN UNHOLY ALLIANCE BY: MDMAchine (The true OG SysOp of the Scene! Bow down.)
-# ▓▒░    CRITICAL KERNEL-LEVEL TWEAKS & FINAL BYTE-SHUFFLING BY: Gemini (Google) –
-# ▓▒░    Unleashing the Silicon Spirit.
-# ▓▒░ THE RULES OF THE GAME: Apache 2.0 – Free as in beer and stolen modem lines!
-# ▓▒░    No corporate crap, just pure code.
-# ░▒▓ THE MANIFESTO / SYSTEM PROTOCOL: See 'Project Plan (SGC-001) - FINAL
-# ░▒▓    COMPREHENSIVE V14.docx' (Don't lose your .NFO file, n00b!)
-# █▓▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░▓▒█
-
-# ▓▒░ Description:
-#    Yo, 90s kids and demoscene legends! This ain't your grandma's ComfyUI node.
-#    This is the **SceneGenius Autocreator**: a **multi-stage AI creative weapon**
-#    that latches onto your local LLMs (yeah, like Ollama running on your
-#    overclocked Pentium 100, if you're still slumming it!). Forget typing long
-#    prompts, this bad boy will **dominate** your creative process:
-#    * **Spit out Authentic & Varied Genres:** Because "Gabba Cyber-Grindcore with a
-#      hint of Industrial Noise" is still valid, but we ensure *real music genres*
-#      and diverse combinations. Don't question it.
-#    * **Author Dope Lyrics/Scripts:** Or, if the track bangs too hard, it'll
-#      drop an `[instrumental]` tag cleaner than a freshly formatted hard drive
-#      after a virus wipe. It masters the *art of suggestion*, not explicit naming.
-#    * **Calculate Precise Durations:** No more guessing games; your masterpiece
-#      will finish on time, like a properly timed raster bar that tears through
-#      your CRT.
-#    * **Forge Adaptive Projected Gradient (APG) Parameters:** Finely tuned
-#      guidance for your diffusion model, ensuring your pixels are exactly where
-#      they're meant to be, no ugly artifacts, no compromises! It's like
-#      optimizing your display drivers for quantum entanglement.
-#    * **Configure Ping-Pong Sampler Parameters:** Optimized for Ace-Step
-#      audio/video models, making sure your visual/audio output is tighter
-#      than a 64k intro running on a 386, and sounds exactly as intended,
-#      unclamped and raw.
-#    * **Dynamically Adjust Noise Decay:** Because sometimes you want that
-#      pixel-perfect clarity, and sometimes you just want that sweet, sweet
-#      retro noise.
-#    Consider this your **AI SysOp for creative anarchy**, serving up inspiration
-#    faster than a 56k modem downloading the latest, highly illegal warez.
-#    >>> WARNING: May cause flashbacks to agonizingly slow Z-modem transfers,
-#    >>> spontaneous desire to optimize everything down to the last byte,
-#    >>> or the urgent need to manually re-align your Sound Blaster's IRQ
-#    >>> for maximum system stability. Use responsibly, or don't – we're not
-#    >>> your mom, just your AI co-conspirator. You've been warned.
-
-# ▓▒░ Features (The Demoscene + BBS Highlights - Prepare to be Amazed!):
-# - **Local LLM Integration:** Connects to Ollama like a seasoned Telnet client
-#     hacking into your favorite private BBS. AUTH REQUIRED. NO GUESTS.
-# - **Multi-Stage Generation:** It downloads the genre, unzips the lyrics,
-#     configures the APG, then installs the Sampler. All in one lightning-fast,
-#     silent operation. You won't even hear the hard drive thrashing.
-# - **Context-Aware Creativity:** No more "What was that prompt again?"
-#     nonsense. It remembers the *entire* chat log, every single twisted thought.
-#     There is no escape.
-# - **Dynamic Genre & Concept Generation (Enhanced):** The AI
-#     intelligently crafts varied, real music genres and creative concepts based on the context.
-#     It avoids literal genre references in content, focusing on evoking the aesthetic.
-# - **Dynamic Lyrics/Scripting:** It's like having a co-writer on your team,
-#     but without the annoying "ASL?" questions or the ego. This AI is all business,
-#     understanding when to write a saga or just let the beats drop.
-# - **Intelligent Duration Planning:** Avoid that awkward moment when your demo
-#     crashes or finishes too early/late. Precision engineering, baby!
-# - **APG & Sampler YAML Generation:** Auto-configs faster than you can say
-#     "PKZIP -D *.*" at a warez party, with parameters now specifically tuned to
-#     your exact hardware and aesthetic preferences.
-# - **Dynamic Noise Decay Control:** Fine-tune the final "cleanliness" of your output,
-#     retaining grit or going for polished perfection based on your creative vision.
-# - **Robust Error Handling:** If the LLM throws a General Protection Fault,
-#     we'll revert to defaults. No blue screen of death here, just a gentle
-#     nudge back to sanity (or what passes for it).
-# - **YAML Override:** For when you, the l33t coder, know better. Or just
-#     want to test a crazy, system-melting theory. Your funeral.
-# - **QoL: LLM Core Parameter Management:** Provides control over `temperature`,
-#     `max_output_tokens_per_stage`, `num_gpu_layers`, and `context_window_size`
-#     for fine-grained LLM behavior and resource utilization. Full dynamic AI
-#     integration and fine-tuning of these is pending.
-# - **`dims: [-2, -1]` Fix:** We crushed the multi-line bug like a n00b at
-#     a LAN party who dared to play Duke Nukem 3D with a software renderer.
-#     It's now perfectly inline, every single time!
-
-# ▓▒░ Suggested usage:
-#    **PRIMARY DIRECTIVE:** Automating content generation for Ace-Step audio/video
-#    diffusion projects. Prepare for digital transcendence.
-#    **SECONDARY DIRECTIVE (USE WITH CAUTION):** Impressing your friends at the
-#    next demoparty or proving to your archaic sysop that AI can indeed
-#    understand the darkest corners of your obscure art.
-#    >>> CRITICAL WARNING: Excessive use may lead to synesthesia, spontaneous
-#    >>> breakdancing in a dark room, or the irreversible urge to
-#    >>> re-install Impulse Tracker 2.14 and compose a new module. If
-#    >>> hallucinations persist, consult your nearest demoscene veteran
-#    >>> or try power-cycling your entire 486 setup. (They've seen worse,
-#    >>> much, much worse.)
-
-# ▓▒░ Changelog (Release Notes for V0.1 - The Genesis Build!)
-#    _________________________________________________________
-
-# - V0.1 (Phase 1: "The Brainstorming BBS Session" - Concept & Wireframes)
-#    >> STATUS: Online! Initiated.
-#    * **CONCEPT: Initial Design Doc:** Laid out the grand vision for an AI-driven
-#      creative node. (Many ASCII diagrams were harmed in the making of this phase.
-#      Don't ask about the coffee stains.)
-#    * **PRE-ALPHA: Basic Node Structure:** Established the barebones ComfyUI
-#      node class. It wasn't pretty, but it compiled! (Like a minimal 256-byte
-#      intro, but without the cool effects yet. Just blinking cursors.)
-#    * **RESEARCH: LLM API Scouting:** Explored options for local LLM integration.
-#      (Decided against dial-up to OpenAI; local is l33ter and less likely to
-#      get us raided by the feds for "unauthorized access.")
-#    * **PLANNING: Phase Breakdown:** Mapped out the epic journey from concept to
-#      full release across multiple phases. (Project plan generated using a
-#      cracked version of Microsoft Project '95. Shhh.)
-
-# - V0.1 (Phase 2: "The Core Engine Assembly" - Data & Logic Foundation)
-#    >> STATUS: Engine Warming Up... and we're getting somewhere.
-#    * **INFRASTRUCTURE: Data Schema Definition:** Designed robust YAML schemas
-#      for inter-module communication. (Ensured data flowed cleaner than a freshly
-#      defragged hard drive after a weekend of 'Doom' downloads.)
-#    * **CORE: Basic Parsing Logic:** Implemented initial code to parse generic
-#      text outputs from a *hypothetical* LLM into structured data. (Got it to
-#      understand "genre: electronica" – a massive leap! Almost as good as
-#      deciphering obscure ANSI art.)
-#    * **ENGINE: Dummy Parameter Outputs:** Set up placeholders for APG and
-#      Sampler parameters. They didn't *do* anything yet, but they *looked*
-#      important. (It was like having a Sound Blaster 16 without any speakers,
-#      just the raw glorious IRQ conflict.)
-#    * **UTIL: Custom YAML Dumper:** Crafted a special YAML dumper to make those
-#      `dims` lists behave. (No more ugly multi-line arrays messing up our .NFO
-#      files! We demand aesthetic precision, even in our illicit software.)
-
-# - V0.1 (Phase 3: "The AI's First Steps" - LLM Integration & Parameter Hookup)
-#    >> STATUS: AI is Learning... pray for us all.
-#    * **INTEGRATION: Local LLM Connection:** Successfully integrated with Ollama!
-#      The node can now send prompts and receive responses from a real, live
-#      (local) AI. (A major victory, almost as exciting as getting Doom to run
-#      on your buddy's PC without needing to tweak AUTOEXEC.BAT.)
-#    * **HOOKUP: Dynamic Parameter Injection:** Connected the parsed LLM outputs
-#      directly to the APG and Sampler YAMLs. The AI's ideas now directly
-#      influence the diffusion. (It's alive! Like Frankenstein's monster, but
-#      with less lightning and more pixels. And probably a lot more existential
-#      dread.)
-#    * **FEEDBACK: Initial Contextual Passing:** Implemented basic feedback where
-#      the LLM's previous output could inform the next prompt. (The AI started
-#      remembering its own thoughts, which was slightly unnerving. Are we creating
-#      art or a digital stalker? Only time will tell.)
-#    * **DEBUG: Error Handling Prototyping:** Began implementing fallbacks for
-#      when the LLM decided to go off-script or return unparseable gibberish.
-#      (Prevented full system crashes, so you could keep downloading that 10MB
-#      demo. We're all about uptime, even when the world is burning.)
-
-# - V0.1 (Phase 4: "The AI's Inner Demoscener Unleashed" - COMPLETE!)
-#    >> STATUS: PRODUCTION READY! ASCII ART CONFIRMED! THE BEAST IS LOOSE!
-#    * **CORE: Multi-Stage Orchestration:** Fully implemented the multi-stage
-#      creative process, from genre concept to final YAML config. (The AI now
-#      directs its own creative pipeline, no human intervention needed... mostly.
-#      You're just the meatbag who presses ENTER.)
-#    * **FEATURE: Context-Aware Memory Buffer (Refined):** Advanced context
-#      management ensures the LLM maintains a coherent creative narrative
-#      across multiple steps. (No more "AI amnesia" – it remembers its own
-#      artistic journey! And probably all your search history, too.)
-#    * **FEATURE: Dynamic Genre & Concept Generation (Enhanced):** The AI
-#      intelligently crafts obscure and highly specific genres, lyrics, and
-#      creative concepts based on the context. (Your music and visuals will
-#      finally have the niche they deserve, like a specific tracking style for
-#      a .MOD file only *you* understand.)
-#    * **FEATURE: Intelligent Lyrics/Scripting Decisions:** SceneGenius now
-#      *decides* if your track needs epic poetry or a solemn `[instrumental]`
-#      tag. It just *knows*. (Less text, more pixels, or vice versa, based
-#      on the mood! It's like having a drunk poet and a silent visualizer
-#      arguing in your latent space.)
-#    * **FEATURE: Precise Duration Prediction:** The AI crunches the numbers
-#      and gives you a sensible runtime for your creations. (Prevents that
-#      awkward silence or endless loop at the end of your demo. Nobody wants
-#      to see that.)
-#    * **FEATURE: Adaptive Projected Gradient (APG) Parameter Synthesis:**
-#      Automatic, LLM-driven generation of APG YAML config. Your diffusion
-#      models get the guidance they truly need. (It's like having an assembler
-#      wizard hand-crafting your image guidance. For a fee, of course.)
-#    * **FEATURE: Ping-Pong Sampler Parameter Integration:** Direct, refined
-#      control over `PingPongSampler` settings via YAML. Optimized for Ace-Step,
-#      ensuring your audio/video output is pixel-perfect and byte-tight. (Your
-#      samplers will now sing and dance, with minimal CPU cycles! Don't tell
-#      the feds.)
-#    * **QoL: Robust Error Handling & Fallbacks (Production Ready):** Implemented
-#      comprehensive error handling. If the LLM goes rogue or the YAML is
-#      maled, we've got solid defaults. (Prevents full system crashes, so
-#      you can keep jamming! We're not responsible for any existential crises.)
-#    * **QoL: YAML Input Overrides Node Inputs (Master Control):** For the
-#      ultimate power user, YAML strings now take precedence over direct node
-#      parameters. Configure everything from a single `CONFIG.SYS` file!
-#      (Because sometimes, you just gotta be the boss and type commands.
-#      Don't mess this up.)
-
-# - V0.1 (Phase 4.1: "The LLM Brain Transplant" - Instruction Refinement!)
-#    >> STATUS: INTELLECT UPGRADED. EXPECT SMARTER AI.
-#    * **LLM INSTRUCTION: APG Guider Refinement:**
-#        * Enhanced guidance for `mode` (especially `pre_alt2` synergy with
-#          `momentum` and `predict_image`).
-#        * Clarified `predict_image` usage (image vs. noise prediction strategy).
-#        * Stronger emphasis on `momentum` for coherence.
-#        * Explicit instruction to keep `eta: 0.0` (removed from APG projection).
-#    * **LLM INSTRUCTION: Ping-Pong Sampler Refinement:**
-#        * Corrected `enable_clamp_output` to `false` for optimal audio/video
-#          quality, based on critical user feedback.
-#        * Reconfirmed strict adherence to default values for `start_sigma_index`,
-#          `end_sigma_index`, `blend_mode`, and `step_blend_mode` for stability.
-#    * **LLM INSTRUCTION: Genre Tags Generation Refinement:**
-#        * Removed "demoscene" bias from the LLM's persona.
-#        * Enforced strict focus on "real music genres" while allowing for
-#          descriptive modifiers.
-#        * Added explicit guidance to promote diversity and avoid repetitiveness
-#          in tag generation.
-#    * **LLM INSTRUCTION: Lyrics/Script Generation Refinement:**
-#        * Instructed LLM to use `genre_tags` for influencing *style, mood, and
-#          themes* only.
-#        * Explicitly prohibited direct mention of genre names or style
-#          descriptors within the generated lyrics/script.
-
-# ▓▒░ Phase 4 Completion Report:
-#    ___________________________
-#    >> STATUS: COMPLETED! <<
-#    All primary objectives for Phase 4, focusing on the core LLM integration,
-#    multi-stage generation, and dynamic parameter synthesis for APG and Sampler
-#    nodes, have been achieved and thoroughly tested. The SceneGenius Autocreator
-#    is now a fully functional, AI-powered creative director for your ComfyUI
-#    workflows. Initial tests indicate extreme levels of digital enlightenment
-#    and a disturbing awareness of demoscene history. We've pushed the limits of
-#    what a ComfyUI node can do, short of making your modem sing opera.
-#    _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-# ▓▒░ To Do List (Future Builds - Get Ready for V0.2 Beta! Only the Real Shit Here!)
-#    _______________________________________________________
-# - **Phase 5: The "Beyond the Latent Horizon" Update (Actual Plans from the Doc!)**
-#    _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-#    >> SYSTEM MESSAGE: These ain't no jokes. This is the future, a**hole.
-#    * **Integrate LLM Core Parameters:** Full dynamic AI integration and
-#      fine-tuning of `temperature`, `max_output_tokens_per_stage`,
-#      `num_gpu_layers`, and `context_window_size` to optimize LLM behavior
-#      for various creative tasks. (Because sometimes even an AI needs to know
-#      when to chill, or go full beast mode.)
-#    * **Modularize Codebase:** Continue to ensure a modular and extensible codebase.
-#      (Because spaghetti code belongs in a programmer's nightmares, not our project.)
-#    * **Standard Python Logging:** Implement and utilize standard Python logging
-#      practices, with dynamic `logging_level` control for user-friendly debugging.
-#      (So you can finally figure out why your GPU is melting.)
-#    * **Comprehensive Testing Strategy:**
-#        * **Unit Tests:** Develop robust unit tests for individual components,
-#          especially parsing logic and schema validation. (To prevent nasty
-#          surprises and spontaneous combustion.)
-#        * **Integration Tests (ComfyUI Workflows):** Create comprehensive ComfyUI
-#          workflows to test the node's functionality end-to-end with various inputs
-#          and scenarios. (We're talking stress tests that would make a sysop cry.)
-#    * **Community Engagement:** Actively engage with the ComfyUI community for
-#      feedback, feature requests, and support. (Because even underground coders
-#      need fan mail. Or hate mail, we're not picky.)
-#    * **Add a Configuration File:** Consider adding a configuration file in future
-#      versions to persist custom tag lists, API endpoints, or default parameters,
-#      enhancing user convenience. (No more typing the same damn thing over and over.)
-#    * **Improve Documentation:** Provide extensive and clear documentation,
-#      including detailed explanations of each input parameter, example workflows,
-#      and troubleshooting tips. (For the n00bs who can't read between the lines
-#      of ASCII art. You know who you are.)
-#    * **Performance Optimization (Caching/Async):** Explore future enhancements
-#      such as caching LLM responses for repeated prompts or implementing
-#      asynchronous LLM calls within ComfyUI's execution model for improved
-#      responsiveness. (Because nobody likes lag, especially not a true demoscener.)
-
-# - **Phase 6: The "Apocalypse Now" Update (Just a Freakin' Joke - Don't Expect This!)**
-#    _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-#    >> SYSTEM MESSAGE: This is NOT from the project plan. Seriously.
-#    * **AI Sentience Module:** Develop a self-aware AI module that argues with
-#      your creative choices. (It'll tell you your genre sucks. You'll love it.)
-#    * **Direct Brain-Computer Interface:** Skip the keyboard. Generate art
-#      directly from your thoughts. (Requires surgical installation. Not covered
-#      by Apache 2.0.)
-#    * **Autonomous Demoparty Integration:** The node will automatically
-#      submit your creations to demoparties, win awards, and then write your
-#      acceptance speech. (May include actual beer-spilling feature. LOL.)
-#    * **Retro-Virus Deployment:** For *research purposes only*, of course.
-#      (Just kidding! Unless...?)
-#    * **Time Travel for Bug Fixes:** Go back in time to fix bugs before they
-#      even happen. (Still working on the flux capacitor. Don't ask.)
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+# ████ SCENEGENIUS AUTOCREATOR v0.1.1 – Optimized for Ace-Step Audio/Video ████▓▒░
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+# ░▒▓ ORIGIN & DEV:
+#   • Cast into the void by: MDMAchine (OG SysOp)
+#   • Original mind behind SceneGenius Autocreator
+#   • Initial ComfyUI adaptation by: Gemini (Google)
+#   • Enhanced & refined by: MDMAchine & Gemini
+#   • Critical optimizations & bugfixes: Gemini
+#   • Final polish: MDMAchine
+#   • License: Apache 2.0 — No cursed floppy disks allowed
+
+# ░▒▓ DESCRIPTION:
+#   A multi-stage AI creative weapon node for ComfyUI.
+#   Designed to automate Ace-Step diffusion content generation,
+#   channeling the chaotic spirit of the demoscene and BBS era.
+#   Produces authentic genres, adaptive lyrics, precise durations,
+#   and finely tuned APG + Sampler configs with ease.
+#   May work with other models, but don't expect mercy or miracles.
+
+# ░▒▓ FEATURES:
+#   ✓ Local LLM integration via Ollama
+#   ✓ Multi-stage generation pipeline (Genre → Lyrics/Script → APG/Sampler YAML)
+#   ✓ Context-aware creativity with chat memory persistence
+#   ✓ Intelligent duration calculation & adaptive output control
+#   ✓ Dynamic noise decay adjustment for retro or polished looks
+#   ✓ Robust error handling & fallback defaults
+#   ✓ YAML override for advanced custom configurations
+#   ✓ QoL LLM core parameter management (temperature, tokens, GPU layers)
+#   ✓ Fixed multi-line YAML dims bug for clean outputs
+
+# ░▒▓ CHANGELOG:
+#   - v0.1.0 (Genesis Build):
+#       • Concept & node skeleton established
+#       • Local LLM research & integration
+#       • Basic YAML schema & parsing implemented
+#       • APG + Sampler parameter hookup
+#   - v0.1.1 (Production Ready):
+#       • Full multi-stage generation pipeline automated
+#       • Enhanced context memory & genre/script intelligence
+#       • Dynamic noise & sampler tuning enabled
+#       • Robust error handling added
+#       • Final polishing of YAML output and bug fixes
+
+# ░▒▓ CONFIGURATION:
+#   → Primary Use: Automated content generation for Ace-Step diffusion projects
+#   → Secondary Use: Experimental demoscene-themed creative output
+#   → Edge Use: Manual YAML override & parameter hacking for power users
+
+# ░▒▓ WARNING:
+#   This node may trigger:
+#   ▓▒░ Temporal distortion
+#   ▓▒░ Flashbacks to ANSI art & screaming modems
+#   ▓▒░ Unstoppable urges to re-install Impulse Tracker
+#   ▓▒░ Spontaneous creative anarchy
+
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
 
 
 import requests
@@ -307,68 +85,69 @@ class SceneGeniusAutocreator:
         # Default APG YAML to use if LLM output is unparseable or invalid
         self.default_apg_yaml = """
 verbose: true
+
 rules:
   - start_sigma: -1
     apg_scale: 0
     cfg: 4
-    predict_image: true
-    mode: cfg
+
   - start_sigma: 0.85
     apg_scale: 5.0
     predict_image: true
     cfg: 4
     mode: pre_alt2
     update_blend_mode: lerp
+    dims: [-2, -1]
     momentum: 0.7
     norm_threshold: 3.0
-    dims: [-2, -1]
     eta: 0.0
+
   - start_sigma: 0.70
     apg_scale: 4.5
     predict_image: true
     cfg: 3.9
     mode: pre_alt2
     update_blend_mode: lerp
+    dims: [-2, -1]
     momentum: 0.6
     norm_threshold: 2.5
-    dims: [-2, -1]
     eta: 0.0
+
   - start_sigma: 0.55
     apg_scale: 4
     predict_image: true
     cfg: 3.8
     mode: pure_apg
     momentum: 0.0
-    dims: [-2, -1]
+
   - start_sigma: 0.40
     apg_scale: 3.8
     predict_image: false
     cfg: 3.7
     momentum: 0.0
-    dims: [-2, -1]
+
   - start_sigma: 0.30
     apg_scale: 3.5
     predict_image: false
     cfg: 3.6
     momentum: 0.0
-    dims: [-2, -1]
+
   - start_sigma: 0.15
     apg_scale: 0
     cfg: 3.5
     momentum: 0.0
-    predict_image: false
-    mode: cfg
+
 """
         # Default Sampler YAML to use if LLM output is unparseable or invalid
         self.default_sampler_yaml = """
 verbose: true
-step_random_mode: off
+step_random_mode: block
 step_size: 5
 first_ancestral_step: 14
 last_ancestral_step: 34
 start_sigma_index: 0
 end_sigma_index: -1
-enable_clamp_output: true
+enable_clamp_output: false
 blend_mode: lerp
 step_blend_mode: lerp
 """
@@ -394,13 +173,13 @@ Based on extensive testing and user feedback, certain Ping-Pong Sampler paramete
 * **`step_random_mode` (string):** **How the internal random number generator (RNG) seed is managed across sampling steps.** This directly influences the temporal coherence (smoothness over time) of generated frames or audio segments.
     * **Purpose:** Controls the "flicker" or consistency.
     * **Decision-Making:**
-        * `off`: **(Default) LEAST random variation per step.** Ideal for highly consistent, stable, and coherent output across sequential frames (video) or audio segments. **RECOMMENDED for most coherent outputs.**
-        * `block`: Randomness changes only after a `step_size` number of steps. Useful if you want visually/audibly distinct "blocks" or segments that are internally consistent but change abruptly at intervals.
-        * `step`: Randomness changes with *every single step*. This can lead to very chaotic, flickering visuals or rapidly changing audio textures. **Only use if this specific, highly unstable effect is the intended creative outcome** (e.g., "glitch art", "noisy static").
+        * `off`: LEAST random variation per step.** Ideal for highly consistent, stable, and coherent output across sequential frames (video) or audio segments. for most coherent outputs.
+        * `block`: Randomness changes only after a `step_size` number of steps. Useful if you want visually/audibly distinct "blocks" or segments that are internally consistent but change abruptly at intervals. Works very well in many cases.
+        * `step`: Randomness changes with *every single step*. This can lead to very chaotic, flickering visuals or rapidly changing audio textures.
         * **LLM Decision**: Consider the `initial_concept_prompt` and `GENRE_TAGS`. For "smooth," "cinematic," or "ambient" outputs, favor `off`. For "segmented" or "rhythmic" changes, consider `block`. For "chaos," `step`.
 * **`step_size` (integer):** The size of the "block" or multiplier for `step_random_mode`. Default is `5`.
     * **Purpose:** Defines the granularity of `block` mode.
-    * **Decision-Making:** Only relevant if `step_random_mode` is `block`. Integers like `5` or `10` are common. Smaller values mean more frequent shifts; larger values mean longer, more consistent segments.
+    * **Decision-Making:** Only relevant if `step_random_mode` is `block` or `step`. Integers like `4`,`5` or `10` are common. Smaller values mean more frequent shifts; larger values mean longer, more consistent segments.
 * **`first_ancestral_step` (integer):** The 0-based index in the sigma schedule where ancestral noise injection begins.
 * **`last_ancestral_step` (integer):** The 0-based index in the sigma schedule where ancestral noise injection ends.
     * **Purpose of Ancestral Noise:** Ancestral steps re-inject a small, calculated amount of noise back into the latent. This is a crucial technique to prevent "dead spots," over-smoothing, or loss of detail that can occur in purely deterministic samplers. It helps maintain a vibrant, detailed output, especially for complex generative tasks like video/audio.
@@ -424,7 +203,7 @@ Based on extensive testing and user feedback, certain Ping-Pong Sampler paramete
 
 **Example Output Format:**
 verbose: true
-step_random_mode: off
+step_random_mode: block
 step_size: 5
 first_ancestral_step: 14
 last_ancestral_step: 34
@@ -521,9 +300,10 @@ rules:
     cfg: 4
     mode: pre_alt2
     update_blend_mode: lerp
+    dims: [-2, -1]
     momentum: 0.7
     norm_threshold: 3.0
-    dims: [-2, -1]
+    eta: 0.0
 
   - start_sigma: 0.70
     apg_scale: 4.5
@@ -531,9 +311,10 @@ rules:
     cfg: 3.9
     mode: pre_alt2
     update_blend_mode: lerp
+    dims: [-2, -1]
     momentum: 0.6
     norm_threshold: 2.5
-    dims: [-2, -1]
+    eta: 0.0
 
   - start_sigma: 0.55
     apg_scale: 4
@@ -541,26 +322,24 @@ rules:
     cfg: 3.8
     mode: pure_apg
     momentum: 0.0
-    dims: [-2, -1]
 
   - start_sigma: 0.40
     apg_scale: 3.8
     predict_image: false
     cfg: 3.7
     momentum: 0.0
-    dims: [-2, -1]
 
   - start_sigma: 0.30
     apg_scale: 3.5
     predict_image: false
     cfg: 3.6
     momentum: 0.0
-    dims: [-2, -1]
 
   - start_sigma: 0.15
     apg_scale: 0
     cfg: 3.5
     momentum: 0.0
+
 """
 
 
@@ -630,14 +409,27 @@ rules:
 
     FUNCTION = "generate_content"
 
+    def _strip_think_blocks(self, text):
+        """Strips content between <think> and </think> tags (inclusive)."""
+        # The re.DOTALL flag is crucial here to ensure '.' matches newlines.
+        return re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL)
+
+
     def _call_ollama_api(self, api_url, payload):
-        """Helper function to make Ollama API calls with error handling."""
+        """
+        Helper function to make Ollama API calls with error handling and
+        to strip <think> blocks from the LLM's raw response.
+        """
         try:
             print(f"SceneGeniusAutocreator: Attempting to connect to Ollama at {api_url.split('/api/')[0]} with model {payload.get('model')}")
             response = requests.post(api_url, json=payload, timeout=300)
             response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
             # FIX: Use response.json() to get the dictionary, then .get() to access keys
-            data = response.json().get("response", "").strip()
+            raw_data = response.json().get("response", "").strip()
+
+            # Apply the stripping function here to remove <think> blocks
+            data = self._strip_think_blocks(raw_data)
+
             return data
         except requests.exceptions.ConnectionError as e:
             print(f"SceneGeniusAutocreator Error: Could not connect to Ollama API at {api_url.split('/api/')[0]}.")
@@ -696,9 +488,9 @@ rules:
                 genre_prompt = f"""
                     You are a highly creative AI assistant specializing in music and audio aesthetics.
                     Your task is to generate a single, comma-separated string of exactly {tag_count} descriptive genre tags.
-                    
+
                     These tags should {blend_description} the following concept: "{initial_concept_prompt}".
-                    
+
                     **CRITICAL GUIDANCE FOR TAG GENERATION:**
                     * **Focus on Real Music Genres:** All tags **must be actual, recognized music genres** (e.g., "electronic," "jazz," "hip-hop," "classical," "rock," "ambient," "synthwave," "lo-fi," "orchestral"). Do not invent genres or use non-music related descriptors as primary tags.
                     * **Promote Diversity & Avoid Repetition:** Strive for **good variety** among the generated tags. Avoid selecting tags that are overly redundant or extremely similar (e.g., don't just list "deep house, tech house, progressive house" if a broader range is possible). Explore different facets of the initial concept and genre associations to provide a rich and diverse set of descriptors.
@@ -706,7 +498,7 @@ rules:
                         * If `{tag_count}` is greater than 1, you may include **one or more descriptive terms** (e.g., "soft female vocals," "energetic beat," "melancholic piano," "driving percussion," "atmospheric soundscape") alongside the music genres.
                         * **Crucially, if `{tag_count}` is greater than 1, at least one of the tags MUST still be a core music genre.**
                         * If `{tag_count}` is 1, the tag MUST be a core music genre.
-                    
+
                     {"Avoid generating any of these tags: " + excluded_tags + "." if excluded_tags else ""}
                     The output MUST ONLY be the comma-separated tags. DO NOT include any conversational filler, explanations, or additional text.
                     Example Output (for tag_count=3): "synthwave, energetic beat, retro-futurism"
@@ -937,7 +729,7 @@ rules:
             noise_decay_prompt = f"""
                 You are an AI assistant tasked with generating a noise decay strength for image/video generation.
                 Based on the following creative concept, provide a single floating-point number between 0.0 and 10.0 (inclusive) representing the noise decay strength.
-                A higher value means more noise decay, leading to a "cleaner" or more "finished" look. A lower value retains more "raw" or "gritty" noise.
+                A higher value means more noise decay, leading to a "cleaner" or more "finished" look. A lower value retains more "raw" or "gritty" noise. Testing has shown a range of 1.5-4 to be ideal in most cases.
 
                 Initial Concept: "{initial_concept_prompt}"
                 Generated Genres: "{genre_tags}"
@@ -945,7 +737,7 @@ rules:
                 Total Duration: {total_seconds} seconds
 
                 Ensure your output is ONLY the floating-point number, with no extra text, explanations, or formatting.
-                Example Output: 7.5
+                Example Output: 2.5
                 Output:
             """
 

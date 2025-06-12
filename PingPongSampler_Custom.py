@@ -1,258 +1,63 @@
-# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-# ████ PINGPONGSAMPLER V0.8.15 – Optimized for Ace-Step Audio/Video! ████▓▒░
-# ░▒▓ Originally cast into the void by: Junmin Gong - Ace-Step team member 
-# ▓▒░    and the original mind behind PingPong Sampler.
-# ░▒▓ blepping: Created the original ComfyUI version of PingPong Sampler 
-# ▓▒░    (with some of his own weird features). 
-# ▓▒░    You probably have used some of his work before!
-# ░▒▓ Disassembled & warped by: MD (Machine Damage) – Because even perfect
-# ▓▒░    code sometimes needs a good, hard whack.
-# ░▒▓ Critical fixes & re-re-engineering by: Gemini (Google) based on user
-# ▓▒░    feedback. – Turning bug reports into features, like magic... or just
-# ▓▒░    really good debugging.
-# ░▒▓ Completionist fixups via: devstral / qwen3 (local) – The unsung heroes
-# ▓▒░    who tie up loose ends, probably fuelled by questionable energy drinks.
-# ░▒▓ License: Apache 2.0 – Because sharing is caring, and we're not greedy
-# ▓▒░    like those 3Dfx guys hoarding Voodoo cards.
-# ░▒▓ Original Comfy node Source: 
-# ▓▒░    https://gist.github.com/blepping/b372ef6c5412080af136aad942d9d76c
-
-# ▓▒░ Description:
-#    A sampler node for ComfyUI, **specifically optimized and tested for
-#    Ace-Step audio and video diffusion models**. This sampler appreciates
-#    noise amplitude like a proper tracker module appreciating a well-timed
-#    breakbeat. The core ancestral noise logic keeps it synchronized with
-#    the original `blepping` sampler, and we've ejected parameters like
-#    `s_noise` and `dynamic_noise`. Why? Because sometimes, you just need
-#    the raw, unadulterated signal without extra compression artifacts
-#    messing with your vibe. **While it *might* work with image models,
-#    results may vary wildly and aren't guaranteed to be pretty. Consider
-#    this your audio/video workhorse – it's here to party, not to render
-#    your next Instagram selfie.**
-#    Warning: May induce flashbacks to 256-byte intros or cause spontaneous
-#    desire to optimize everything down to the last byte. Use responsibly,
-#    unless you're trying to impress your old demoscene crew.
-
-# ▓▒░ Changes:
-# - V0.5 (the wobbly one):
-#    * Added noise decay and stepped randomness support. Like a plasma effect,
-#      but for your data – mesmerizing, chaotic, and vaguely reminiscent
-#      of Windows 95 screensavers.
-#    * Removed wave shape selection (sine died for your sins, square rules
-#      the world of hardcore digital audio. Deal with it.)
-
-# - V0.8 (consolidated weirdness edition):
-#    * External-scheduler-driven noise decay integration. Your sampler, now with
-#      a proper tempo – no more off-beat synths or dragging visuals.
-#    * Added "step" mode for seed variation on each frame. Like a subtle pixel
-#      shimmer, or that one glitch in the matrix you only notice after your
-#      third Red Bull.
-#    * Optional output clamping (for the safety-conscious. No overbright
-#      scanlines here! We respect your eyeballs, mostly.)
-#    * Start/end sigma index skipping (controls your entry/exit. Don't waste
-#      cycles where they're not needed – efficiency is key, like in your old
-#      demos where every byte counted.)
-#    * Unified callback and model wrappers (no more dangling hacks or segfaults.
-#      Your code should be tighter than your jeans in '98.)
-#    * Constant-sampler ("is RF") detection for low-motion cases (for when
-#      things get too static and you need to tell the system to chill out.)
-#    * Signature cleanup to allow scheduler passthrough support. Plug 'n' play,
-#      baby! Like a new ISA card that actually works on the first try.
-
-# - V0.8.1 (Flashback to the 90s! Initial audio experiments. Remember when
-#          modems screamed?):
-#    * Added comprehensive frequency control parameters (as placeholders
-#      initially. We tried to make it sing! Turns out, it just made high-pitched
-#      noises, like a forgotten dial-up connection.)
-#    * Introduced `audio_type` parameter with optimized settings for: Music,
-#      Speech, Voice. (It was a phase. We all have those experimental years.)
-#    * Dynamic noise control added for adaptive sampling behavior. (More squelches,
-#      less clean. For when you want your output to sound like it's been through
-#      a proper bitcrusher.)
-
-# - V0.8.4 (Conceptual Frequency Implementation & UX & Updated Attribution -
-#          The Great Purge):
-#    * **Farewell, Frequencies!** Removed conceptual frequency masking/boosting.
-#      They didn't quite vibe. Sometimes, less is more (or at least, less is less
-#      confusing. Our bad, ASCII!).
-#    * `Q_width` parameter also packed its bags. (Nobody knew what it did anyway,
-#      it was just there, like that weird relative at family gatherings.)
-#    * Updated comprehensive tooltips for all *remaining* parameters in the ComfyUI
-#      node for better UX. (Because even l33t coders need tooltips. Don't lie.)
-#    * **Removed direct attribution to `lks-ai/ComfyUI-StableAudioSampler`
-#      as those audio-specific enhancements are no longer utilized.** We're back
-#      to raw pixel pushing, baby! The sound was good, but the visuals are where
-#      the real magic happens.
-
-# - V0.8.5 (No more audio_type presets - Unplugged Session):
-#    * Removed the 'audio_type' preset selector logic. All parameters are now
-#      controlled directly by node inputs or explicit YAML settings, without
-#      conditional overrides. (No more hand-holding, figure it out yourself,
-#      you're an adult now!)
-
-# - V0.8.6 (Critical Fixes & Re-engineering - Initial Attempt):
-#    * **Ancestral Step Order Fix:** Corrected logic for `first_ancestral_step`
-#      and `last_ancestral_step` to correctly determine active range, even if
-#      inputs are inverted. (No more off-by-one errors, that's so last century,
-#      like using Netscape Navigator.)
-#    * **Noise Scaling Correction:** Eliminated redundant `sigma_next`
-#      multiplication for ancestral noise, preventing overblown noise. (We hate
-#      clipping! Keep your signal clean, unlike your browser history.)
-#    * **Default Noise Sampler Conditioning:** Modified default `noise_sampler`
-#      to condition noise by `sigma_next / sigma` for potentially better spectral
-#      properties in audio. (This was a fleeting ghost of audio's past, like that
-#      one obscure chiptune track you can't find anymore.)
-#    * **`effective_noise_strength` Clamping:** Added clamping of
-#      `effective_noise_strength` to `1.0` to prevent excessive noise injection.
-#      (Keep it within bounds, like a good raster bar, or your internet bill.)
-#    * **Clamping Timing:** Moved `enable_clamp_output` to apply only if
-#      `sigma_next` is sufficiently small, preventing clamping of intermediate
-#      noisy latents. (Don't crush those early vibes! We save the big clamps
-#      for the grand finale.)
-
-# - V0.8.7 (Buzzkill Protocol Activated - Final Refinements):
-#    * **Ancestral Step Order Fix (Refined):** Ensures `first_ancestral_step`
-#      and `last_ancestral_step` are always correctly interpreted as a `min` to
-#      `max` range in `__init__`. (Precise pixel placement, every time. No
-#      room for fuzziness here, unless it's intentional fuzziness.)
-#    * **Default Noise Sampler Conditioning (Refined):** The default noise
-#      sampler now scales `randn_like` by `sqrt(sigma_next / sigma)` for better
-#      spectral properties, preventing high-frequency buzzing. (Still a little
-#      bit of audio nostalgia, but we're mainly visual now! No unwanted modem
-#      screeches.)
-#    * **Ancestral Update Formula Reworked:** The core ancestral update
-#      `x = denoised + sigma_gen * noise_sample * noise_multiplier` is now more
-#      robust, ensuring `s_noise` and dynamic noise apply correctly without
-#      over-amplifying. `sigma_gen` explicitly handles the noise difference
-#      between steps. (Less crackle, more sizzle. Like a good demo party.)
-#    * **`is_rf` (CONST Model) Handling:** Adjusted the `is_rf` branch to align
-#      with the new ancestral update, ensuring consistent behavior across model
-#      types. (No model left behind! We support all our silicon children.)
-#    * **Clamping Logic Refined:** `enable_clamp_output` now applies only at the
-#      very final stages of denoising, preventing premature clamping of noisy
-#      latents. (We save the big clamps for the end credits, when everyone's
-#      already impressed.)
-#    * **`PingPongSamplerNode.get_sampler` Signature Update:** Corrected the
-#      `get_sampler` method to properly accept and pass through `dynamic_noise`,
-#      `noise_threshold`, `noise_gain`, `noise_decay_rate`, and `yaml_settings_str`
-#      from the ComfyUI node UI. (More parameters, more power! Like a cheat code
-#      for reality.)
-#    * **YAML Merging Logic Refined:** Improved YAML parsing and merging to
-#      correctly prioritize direct node inputs, especially for nested dictionaries
-#      like `pingpong_options`. (No more config confusion, YAML is boss now!
-#      It's the `.INI` file of the future, without the cryptic numbers.)
-
-# - V0.8.8 (Ace-Step Refit - Unified Noise & Distortion Control):
-#    * **Default Noise Sampler De-conditioning:** The `default_noise_sampler`
-#      now *always* returns raw, unconditioned `torch.randn_like` noise. All
-#      explicit scaling happens in the main sampling loop for better control.
-#      (Pure noise, just the way you like it – unfiltered, untamed, like your
-#      favorite underground techno.)
-#    * **Unified Ancestral Noise Injection:** The `is_rf` (CONST model) branch
-#      was removed for ancestral steps. All ancestral noise additions now
-#      consistently use the `denoised + sigma_gen * noise_sample * noise_multiplier`
-#      formula. This ensured standard ancestral behavior regardless of internal
-#      model type detection. (One formula to rule them all! The pixel-perfect
-#      algorithm you've always dreamed of.)
-
-# - V0.8.9 (Ace-Step Synchronization - Reverting Noise to Original `blepping` Logic):
-#    * **Ancestral Noise Logic Reverted:** The core ancestral noise application
-#      logic for `is_rf` and non-`is_rf` models has been reverted to match the
-#      original `blepping` implementation. This is based on user feedback that
-#      the original code works better for Ace-Step. (If it ain't broke, don't
-#      fix it with newfangled ideas. Sometimes, the old ways are the best ways,
-#      like using a trackball for gaming.)
-#        * `is_rf` (CONST model) branch now uses
-#          `self.step_blend_function(denoised, scaled_noise, sigma_next)`.
-#        * Non-`is_rf` branch now uses `self.step_blend_function`.
-#    * **Internal Blend Modes:** `blend_mode` and `step_blend_mode` are
-#      re-introduced as selectable options, defining `torch.lerp`, `a_only`,
-#      or `b_only` internally without external dependencies. (Choose your fighter!
-#      Like selecting your favorite character in Mortal Kombat.)
-#    * **`s_noise` and Dynamic Noise Application:** These are now correctly
-#      applied as a multiplier to the raw noise *before* the original `blepping`
-#      ancestral formulas are used. (Noise, but with an adjustable volume knob.
-#      Because sometimes you want it subtle, sometimes you want it to blow out
-#      the speakers.)
-#    * **No `pingpong_blend` or `external_sampler`:** These complex features
-#      from the original are omitted for simplicity and focus on the core noise
-#      issue. (Keep it simple, stupid. K.I.S.S! We're not trying to build a
-#      space shuttle here, just awesome visuals.)
-
-# - V0.8.10 (Precision Noise Control - Addressing `s_noise` and Dynamic Noise Sensitivity):
-#    * **Refined Noise Multiplier Calculation:** The calculation of `scaled_noise_sample`
-#      (which applies `s_noise` and dynamic noise) has been reworked.
-#        * `s_noise` now consistently acts as the *base multiplier* for noise amplitude.
-#        * Dynamic noise now applies as a *modulating factor* on top of this
-#          `s_noise` base, avoiding direct additions or aggressive clamping that
-#          caused artifacts. This should allow `s_noise` to work correctly at
-#          values other than `1.0`.
-#        * This aimed to resolve the "high freq static" from dynamic noise and
-#          the "high/mid range static" when `s_noise` is not `1.0`. (This attempt
-#          was unsuccessful, leading to V0.8.11. Sometimes, the demo just crashes
-#          and you have to reboot.)
-
-# - V0.8.11 (Ace-Step Compatibility - Strict Noise Application):
-#    * **Removed `s_noise` and Dynamic Noise:** Based on user feedback that `s_noise`
-#      values other than 1.0 and `dynamic_noise` always caused artifacts with Ace-Step,
-#      these parameters and their corresponding noise scaling logic have been
-#      completely removed for ancestral steps. (No more unwanted pixel snow!
-#      We're going for clean, crisp output, not a blurry mess from a low-res GIF.)
-#    * **Raw Noise Application:** For ancestral steps, the raw `torch.randn_like`
-#      noise is now applied directly without any additional multiplicative scaling.
-#      This ensures the sampler provides the exact noise characteristics that
-#      Ace-Step expects from the original `blepping` implementation. (Pure,
-#      unadulterated noise. Like a fresh .MOD file from the scene, straight
-#      to your ears.)
-
-# - V0.8.12 (Fix: Keyword Argument Duplication Error - Stack Overflow Prevention):
-#    * **Resolved `TypeError` for `blend_function`:** Corrected how `blend_function`
-#      and `step_blend_function` (and other node-specific parameters) are passed
-#      from `get_sampler` through `go` to `__init__`. Parameters are now explicitly
-#      `pop()`-ed from `kwargs` in `go` before being passed to `__init__`,
-#      preventing duplicate keyword arguments when `**kwargs` is unpacked. This
-#      resolves the `TypeError: got multiple values for keyword argument
-#      'blend_function'`. (No more "multiple definition" errors. We're not coding
-#      in Turbo Pascal anymore, where every error was a personal insult.)
-
-# - V0.8.13 (Feature: YAML Overrides Node Inputs - Config Boss Mode):
-#    * **Changed Parameter Override Logic:** The `yaml_settings_str` input now
-#      takes precedence and *overrides* any conflicting parameters set directly
-#      on the node's input fields. If a parameter is defined in both the YAML
-#      string and the node input, the YAML value will be used. This provides
-#      more flexible configuration management. (YAML is the new `CONFIG.SYS`,
-#      controlling everything! Embrace the text-based tyranny.)
-
-# - V0.8.14 (Maintenance: Header Refresh & Humor Injection):
-#    * **Updated header attribution and version number.** Because keeping it fresh
-#      is key, like a perfectly optimized 64k intro.
-#    * **Clarified that audio enhancements from `lks-ai/ComfyUI-StableAudioSampler`
-#      are no longer in use,** since `s_noise` and `dynamic_noise` have been
-#      removed to prioritize Ace-Step image generation. This sampler is all about
-#      the visuals now! (We're focusing on what truly matters: pixels, glorious pixels!)
-#    * **Increased demoscene-era humor throughout comments and descriptions.** Get
-#      ready for some serious nostalgia and probably a few groans.
-
-# - V0.8.15 (Targeted Optimization - Ace-Step Audio/Video Focus):
-#    * **Updated description to specifically highlight optimization for Ace-Step
-#      audio and video models.**
-#    * **Added a disclaimer that while it *might* work with image models,
-#      results are not guaranteed.** (Don't come crying to us if your anime waifu
-#      turns into a low-res pixelated mess. You've been warned.)
-#    * **Incremented version number.**
-
-# ░▒▓ Suggested usage:
-#    **Primary use:** Generating high-quality audio or video with Ace-Step
-#    diffusion models. Prepare for digital transcendence – it's like having
-#    a supercomputer from the future, but it actually works!
-#    **Secondary use (proceed with caution):** Experimenting with visuals if
-#    you're feeling adventurous and don't mind unexpected results. Think of
-#    it as a digital LSD trip – you might see things.
-#    Caution: Excessive use may lead to synesthesia, spontaneous breakdancing,
-#    or the urge to re-install Impulse Tracker.
-#    If hallucinations persist, consult your nearest demoscene veteran.
-#    (They've seen worse, probably while coding in assembly at 3 AM.)
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+# ████ PINGPONGSAMPLER v0.8.15 – Optimized for Ace-Step Audio/Video! ████▓▒░
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+# ░▒▓ ORIGIN & DEV:
+#   • Cast into the void by: Junmin Gong (Ace-Step team)
+#   • Original mind behind PingPong Sampler
+#   • ComfyUI adaptation by: blepping (original ComfyUI port with quirks)
+#   • Disassembled & warped by: MD (Machine Damage)
+#   • Critical fixes & re-engineering by: Gemini (Google) based on user feedback
+#   • Completionist fixups via: devstral / qwen3 (local heroes)
+#   • License: Apache 2.0 — Sharing is caring, no Voodoo hoarding here
+#   • Original source gist: https://gist.github.com/blepping/b372ef6c5412080af136aad942d9d76c
+
+# ░▒▓ DESCRIPTION:
+#   A sampler node for ComfyUI, tuned specifically for Ace-Step
+#   audio and video diffusion models. Embraces noise amplitude like
+#   a tracker module loves a breakbeat. Maintains ancestral noise
+#   sync with the original blepping sampler while ditching parameters
+#   that muddy the raw signal. May work with image models but results
+#   can vary wildly — consider it your party-ready audio/video workhorse,
+#   not your Instagram selfie filter.
+#   Warning: May induce flashbacks to 256-byte intros or
+#   compulsive byte-optimization urges. Use responsibly.
+
+# ░▒▓ CHANGELOG HIGHLIGHTS:
+#   - v0.5 “The Wobbly One”:
+#       • Noise decay & stepped randomness introduced
+#       • Removed wave shape selection (square reigns)
+#   - v0.8 “Consolidated Weirdness”:
+#       • Scheduler & tempo sync integration
+#       • Step mode per-frame seed variation
+#       • Output clamping, sigma skipping, and is_rf detection added
+#   - v0.8.1 “Modem Memories”:
+#       • Audio_type presets & dynamic noise control debuted
+#   - v0.8.11 “Strict Ace-Step Mode”:
+#       • Removed s_noise and dynamic_noise for ancestral steps
+#       • Pure raw noise injection, no fluff
+#   - v0.8.13 “YAML is Boss”:
+#       • YAML overrides take priority over node inputs
+#   - v0.8.15 “Targeted Ace-Step Optimization”:
+#       • Full optimization declared for Ace-Step audio/video models
+#       • Use with non-Ace-Step image models with caution
+
+# ░▒▓ CONFIGURATION:
+#   → Primary Use: High-quality audio/video generation with Ace-Step diffusion
+#   → Secondary Use: Experimental visual generation (expect wild results)
+#   → Edge Use: For demoscene veterans and bytecode wizards only
+
+# ░▒▓ WARNING:
+#   This node may trigger:
+#   ▓▒░ Flashbacks to ANSI art and 256-byte intros
+#   ▓▒░ Spontaneous breakdancing or synesthesia
+#   ▓▒░ Urges to reinstall Impulse Tracker
+#   ▓▒░ Extreme focus on byte-level optimization
+#   Consult your nearest demoscene vet if hallucinations persist.
+
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+
 
 #!/usr/bin/env python3
 
