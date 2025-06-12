@@ -1,124 +1,106 @@
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 # ████ APG GUIDER (FORKED) v0.1 – Unleashed from the shadows ████▓▒░
-# ░▒▓ Crafting pixels with rebellious intent and pure APG magic ░▒▓
-# ▓▒░        Original Sorcerer: Blepping? | https://github.com/blepping
-# ▓▒░        (The architect of latent space, probably in a dark basement.)
-# ░▒▓        Forged in the fires of: MDMAchine & devstral (local l33t)
-# ░▒▓        (Who knew coding could be this much fun? And confusing?)
-# ▒░▓        License: Apache 2.0 (because sharing is caring, mostly –
-# ▒░▓        we're not selling NFTs of your output, probably.)
-# ░▒▓
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 
-# ░▒▓ Description:
-#    A powerful fork of Blepping's APG Guider. This node injects Adaptive
-#    Projected Gradient (APG) guidance into your ComfyUI sampling, allowing
-#    for advanced control over how your latent space evolves. Ideal for
-#    those who demand more from their diffusion models than mere mortal
-#    CFG can provide. Now with extra sauce! It's like giving your AI a
-#    precision screwdriver instead of a sledgehammer.
+# ░▒▓ ORIGIN & DEV:
+#   • Original Sorcerer: Blepping? — github.com/blepping
+#     (The architect of latent space, probably in a dark basement.)
+#   • Forged in the fires of: MDMAchine & devstral (local l33t)
+#     (Who knew coding could be this much fun? And confusing?)
+#   • License: Apache 2.0 — We're not selling NFTs of your output... probably.
 
-# ▓▒░ Changes (This Fork):
-# - V0.1 (Initial Fork Release):
-#    * New fresh header for this distinct fork. (Because every good project
-#      needs a stylish intro, right?)
-#    * Removed eta scaling from `apg` projection for simplified guidance.
-#      (Less math, more art. You're welcome, liberal arts majors.)
-#    * Refined `dims` parsing in `APGConfig.fixup_param` for robust input
-#      handling. (No more segfaults from incorrectly formatted arrays –
-#      we've patched that exploit.)
-#    * Preserved all original APG functionalities, extending its
-#      pixel-bending might. (We didn't break anything important, promise!)
-#    * Added comprehensive tooltips for all parameters. (Because even l33t
-#      coders forget what `norm_threshold` does at 3 AM.)
-#    * Included a suggested YAML example in the header. (For when you're
-#      too lazy to RTFM, we got you.)
+# ░▒▓ DESCRIPTION:
+#   A powerful fork of Blepping's APG Guider.
+#   This node injects Adaptive Projected Gradient (APG) guidance into
+#   your ComfyUI sampling pipeline, allowing for advanced control over
+#   latent space evolution. CFG is nice — APG is a damn scalpel.
+#   Expect surgical precision... or chaos, depending on your config.
+
+# ░▒▓ FEATURES:
+#   ✓ Adaptive APG scheduling via YAML
+#   ✓ CFG + APG hybrid guidance
+#   ✓ Per-rule momentum, prediction, and mode control
+#   ✓ Built-in debug visibility (verbose output)
+#   ✓ Annotated example config included below
+
+# ░▒▓ CHANGELOG:
+#   - v0.1 (Initial Fork Release):
+#       • Fresh header branding (style is power)
+#       • Removed eta scaling from `apg` projection (simplified flow)
+#       • More robust `dims` parsing in `fixup_param`
+#       • Tooltips added for all parameters
+#       • YAML config example bundled directly in header
+
+# ░▒▓ CONFIGURATION:
+#   → Primary Use: APG-enhanced guided sampling
+#   → Secondary Use: Experimental latent control for advanced users
+#   → Edge Use: Replace traditional CFG-only workflows entirely
+
+# ░▒▓ WARNING:
+#   This node may trigger:
+#   ▓▒░ Temporal distortion
+#   ▓▒░ Memories of ANSI art & screaming modems
+#   ▓▒░ A sense of unstoppable creative power
 
 # ░▒▓ YAML EXAMPLE INPUT (start here, tweak later, probably break something):
-# verbose: true # Set to true to see debug messages in ComfyUI console.
-#              # For when you want to feel like a hacker in a movie.
+# verbose: true  # Set to true to see debug messages in ComfyUI console.
+#                # For when you want to feel like a hacker in a movie.
 # rules:
-#    # Rule 1: Starts at the very beginning (-1 = infinity sigma) with no APG (cfg=4).
-#    # This serves as a baseline or initial phase. Think of it as the
-#    # "before coffee" stage of your AI's workday.
-# - start_sigma: -1.0 # This effectively means "applies from the start of sampling"
-#    apg_scale: 0.0     # No APG guidance applied here (APG blend implicitly 0)
-#    cfg: 4.0           # Standard CFG scale for this phase – don't get too wild yet.
-#    # Rule 2: Active from sigma 0.85 down to the next rule's start_sigma.
-#    # Uses pre_alt2 mode for APG, with image prediction and momentum for
-#    # smoother transitions. This is where the magic (and GPU sweat) begins.
-# - start_sigma: 0.85
-#    apg_scale: 5.0
-#    predict_image: true
-#    mode: pre_alt2
-#    update_blend_mode: lerp
-#    dims: [-2, -1] # Dimensions for normalization (typically H and W).
-#                  # Because size *does* matter, pixels-wise.
-#    momentum: 0.7  # Introduces a running average for smoother APG updates.
-#                  # Like a seasoned gamer's aim, steady and precise.
-#    norm_threshold: 3.0 # Clamps the norm of the guidance vector. Don't let
-#                       # your pixels get too excited.
-#    eta: 0.0       # Controls the projection (0.0 means fully orthogonal guidance).
-#                  # Keeps things squared away, literally.
-#    # Rule 3: Active from sigma 0.70. Similar to Rule 2 but with slightly
-#    # reduced APG scale and momentum. The AI is still awake, but maybe
-#    # considering a coffee break.
-# - start_sigma: 0.70
-#    apg_scale: 4.0
-#    predict_image: true
-#    mode: pre_alt2
-#    update_blend_mode: lerp
-#    dims: [-2, -1]
-#    momentum: 0.6
-#    norm_threshold: 2.5
-#    eta: 0.0
-#    # Rule 4: Active from sigma 0.55. Switches to 'pure_apg' mode with no
-#    # momentum. Time to go full-on APG, no holding back!
-# - start_sigma: 0.55
-#    apg_scale: 3.5
-#    predict_image: true
-#    mode: pure_apg
-#    momentum: 0.0 # No momentum for this phase. Pure, unadulterated pixel power.
-#    # Rule 5: Active from sigma 0.40. APG scale further reduced, switches to
-#    # noise prediction. Now we're getting into the nitty-gritty, embracing
-#    # the chaos.
-# - start_sigma: 0.40
-#    apg_scale: 2.0
-#    predict_image: false # Predict noise instead of image. Let's get noisy!
-#    cfg: 4.3             # Custom CFG for this phase. Because sometimes
-#                        # rules are meant to be broken.
-#    momentum: 0.0
-#    # Rule 6: Active from sigma 0.30. Further reduced APG scale.
-#    # The AI is starting to see the finish line, but not quite there yet.
-# - start_sigma: 0.30
-#    apg_scale: 1.5
-#    predict_image: false
-#    cfg: 4.2
-#    momentum: 0.0
-#    # Rule 7: Active from sigma 0.15. APG scale significantly reduced.
-#    # Almost done, just a few more tweaks. Like rendering the final
-#    # few frames of a demoscene intro.
-# - start_sigma: 0.15
-#    apg_scale: 0.5
-#    cfg: 4.1
-#    momentum: 0.0
-#    # Rule 8: Active from sigma 0.05. Very low APG scale for fine-tuning.
-#    # The last polish before the grand reveal. Don't mess it up now!
-# - start_sigma: 0.05
-#    apg_scale: 0.1
-#    cfg: 4.0
-#    momentum: 0.0
-#    # Rule 9: Active from sigma 0.01. APG is effectively off, using only CFG.
-#    # Victory lap! The AI has done its job. Now, bask in the glory.
-# - start_sigma: 0.01
-#    apg_scale: 0.0 # APG guidance is off. It's all CFG from here.
-#    cfg: 4.0
-#    momentum: 0.0
+#   - start_sigma: -1.0
+#     apg_scale: 0.0
+#     cfg: 4.0
+#   - start_sigma: 0.85
+#     apg_scale: 5.0
+#     predict_image: true
+#     mode: pre_alt2
+#     update_blend_mode: lerp
+#     dims: [-2, -1]
+#     momentum: 0.7
+#     norm_threshold: 3.0
+#     eta: 0.0
+#   - start_sigma: 0.70
+#     apg_scale: 4.0
+#     predict_image: true
+#     mode: pre_alt2
+#     update_blend_mode: lerp
+#     dims: [-2, -1]
+#     momentum: 0.6
+#     norm_threshold: 2.5
+#     eta: 0.0
+#   - start_sigma: 0.55
+#     apg_scale: 3.5
+#     predict_image: true
+#     mode: pure_apg
+#     momentum: 0.0
+#   - start_sigma: 0.40
+#     apg_scale: 2.0
+#     predict_image: false
+#     cfg: 4.3
+#     momentum: 0.0
+#   - start_sigma: 0.30
+#     apg_scale: 1.5
+#     predict_image: false
+#     cfg: 4.2
+#     momentum: 0.0
+#   - start_sigma: 0.15
+#     apg_scale: 0.5
+#     cfg: 4.1
+#     momentum: 0.0
+#   - start_sigma: 0.05
+#     apg_scale: 0.1
+#     cfg: 4.0
+#     momentum: 0.0
+#   - start_sigma: 0.01
+#     apg_scale: 0.0
+#     cfg: 4.0
+#     momentum: 0.0
 
 # ░▒▓ Use at your own risk. May cause your images to transcend mere reality,
-#    or just look a bit different. No refunds for spontaneous enlightenment
-#    or existential crises. Remember to keep your GPUs cool (like your
-#    attitude) and your dreams wild (like your code).
+#   or just look a bit different. No refunds for spontaneous enlightenment
+#   or existential crises. Remember to keep your GPUs cool (like your
+#   attitude) and your dreams wild (like your code).
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
 
 import math
 import yaml
