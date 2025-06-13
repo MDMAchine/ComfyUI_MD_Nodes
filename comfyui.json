@@ -2,7 +2,7 @@
   "name": "md_nodes",
   "description": "████ MD_Nodes by MDMAchine - The L337est Collection of ComfyUI Unleashed! ████▓▒░\n\nForged in the digital fires, this node pack brings next-level tensor manipulation, advanced image alchemy, and precision audio sorcery to your ComfyUI workflows. Optimized for maximum creative chaos and minimal dependency friction. Expect surgical precision... or beautiful catastrophe, depending on your vibe. This is not your grandpappy's ComfyUI – this is the future, delivered.",
   "author": "MDMAchine (Pixel Pimp)",
-  "version": "0.1337",
+  "version": "0.1.0",
   "dependencies": [
     "PyYAML",
     "requests",
