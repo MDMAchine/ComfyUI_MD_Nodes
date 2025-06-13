@@ -1,0 +1,32 @@
+{
+  "name": "md_nodes",
+  "description": "████ MD_Nodes by MDMAchine - The L337est Collection of ComfyUI Unleashed! ████▓▒░\n\nForged in the digital fires, this node pack brings next-level tensor manipulation, advanced image alchemy, and precision audio sorcery to your ComfyUI workflows. Optimized for maximum creative chaos and minimal dependency friction. Expect surgical precision... or beautiful catastrophe, depending on your vibe. This is not your grandpappy's ComfyUI – this is the future, delivered.",
+  "author": "MDMAchine (Pixel Pimp)",
+  "version": "0.1337",
+  "dependencies": [
+    "PyYAML",
+    "requests",
+    "matplotlib",
+    "soundfile",
+    "scipy",
+    "pedalboard",
+    "numpy",
+    "pillow"
+    // PyTorch and related libraries (torch, torchaudio, torchvision) are
+    // typically provided by the main ComfyUI environment and are not listed here
+    // to prevent conflicts with existing user installations.
+  ],
+  "tags": [
+    "utility",
+    "tensor",
+    "image processing",
+    "audio",
+    "MDMAchine",
+    "advanced",
+    "demonic_magic",
+    "chaos"
+  ],
+  "repository": "https://github.com/MDMAchine/ComfyUI_MD_Nodes",
+  "license": "Apache-2.0",
+  "notes": "░▒▓ Deploy this manifest to unleash the full power. Compatibility guaranteed with your spirit. ░▒▓"
+}
