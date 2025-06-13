@@ -46,7 +46,7 @@ Outputs a tensor of sigmas to control diffusion noise levels with flexible start
 **🔊 [`MASTERING_CHAIN_NODE`](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/mastering_chain_node.md)**
 *‣ v1.2 – Latent-space audio mastering for generative sound!*
 
-This ComfyUI custom node is an audio transformation station that accepts spectrogram latents and applies audio-style mastering techniques, making it like "Ableton Live for your tensors." It features Global Gain control to crank it to 11, a Multi-band Equalizer for sculpting frequencies, advanced Compression for dynamic shaping, and a Lookahead Limiter to prevent pesky digital overs. Now with more cowbell and less clipping, it supports custom preset chains for rapid prototyping, putting your sweet audio through the wringer in a good way.
+This ComfyUI custom node is an audio transformation station that accepts spectrogram latents and applies audio-style mastering techniques, making it like "Ableton Live for your tensors." It features Global Gain control to crank it to 11, a Multi-band Equalizer for sculpting frequencies, advanced Compression for dynamic shaping, and a Lookahead Limiter to prevent pesky digital overs. Now with more cowbell and less clipping, putting your sweet audio through the wringer in a good way.
 
 **🔁 [`PINGPONG_SAMPLER_CUSTOM`](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/PingPong_Sampler_Custom.md)**
 *‣ v0.8.15 – Iterative denoise/re-noise dance!*
@@ -66,17 +66,17 @@ Peek behind the curtain to see what your model sees. This visualization node dec
 **📉 [`NOISEDECAY_SCHEDULER`](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/NoiseDecayScheduler_Custom.md)**
 *‣ v0.4.4 – Variable-step decay scheduling with cosine-based curve control*
 
-A custom noise decay scheduler inspired by adversarial re-noising research, this node outputs a cosine-based decay curve raised to your decay_power to control steepness. It's great for stylized outputs, consistent animations, and model guidance training. Designed for use with pingpongsampler_custom or anyone seeking to escape aesthetic purgatory, you can replace standard schedulers with this if you're feeling brave and want to precisely modulate noise like a sad synth player modulates a filter envelope.
+A custom noise decay scheduler inspired by adversarial re-noising research, this node outputs a cosine-based decay curve raised to your decay_power to control steepness. It's great for stylized outputs, consistent animations, and model guidance training. Designed for use with pingpongsampler_custom or anyone seeking to escape aesthetic purgatory, use with PingPong Sampler Custom if you're feeling brave and want to precisely modulate noise like a sad synth player modulates a filter envelope.
 
 **📡 [`APG_GUIDER_FORKED`](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/APG_Guider_Forked.md)**
 *‣ v0.2.2 – Plug-and-play guider module for surgical precision in latent space*
 
-A powerful fork of the original APG Guider, this module drops into any sampler to inject Adaptive Projected Gradient (APG) guidance, offering easy plug-in guidance behavior. It features better logic and adjustable strength, providing advanced control over latent space evolution for surgical precision in your ComfyUI sampling pipeline. Expect precise results, or chaos, depending on your configuration. This node, forged by MDMAchine & devstral, also includes image previews to help visualize its impact.
+A powerful fork of the original APG Guider, this module drops into any suitable sampler to inject Adaptive Projected Gradient (APG) guidance, offering easy plug-in guidance behavior. It features better logic and adjustable strength, providing advanced control over latent space evolution for surgical precision in your ComfyUI sampling pipeline. Expect precise results, or chaos, depending on your configuration. Allows for advanced configuration via YAML parameters that can override direct node inputs
 
 **🎛️ [`ADVANCED_AUDIO_PREVIEW_AND_SAVE`](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/AdvancedAudioPreviewAndSave.md)**
 *‣ v1.0 – Realtime audio previews with advanced WAV save logic and metadata privacy!*
 
-The ultimate audio companion node for ComfyUI with Ace-Step precision. Preview generated audio directly in the UI before export, and process it with features like normalization and silence trimming. This node saves your audio as WAV files with optional suffix formatting and generates crisp waveform images for visualization or archival. It also includes smart metadata embedding that can keep your workflow blueprints locked inside your audio files, or filter them out for privacy, offering flexible control over your sonic creations.
+The ultimate audio companion node for ComfyUI with Ace-Step precision. Preview generated audio directly in the UI, process it with normalization. This node saves your audio with optional suffix formatting and generates crisp waveform images for visualization. It also includes smart metadata embedding that can keep your workflow blueprints locked inside your audio files, or filter them out for privacy, offering flexible control over your sonic creations.
 
 ---
 
