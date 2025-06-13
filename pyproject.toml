@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "A wild collection of custom nodes for ComfyUI including schedulers, samplers, audio tools, latent visualizers, and more — built for creative chaos."
 authors = [{ name = "MDMAchine" }]
 readme = "README.md"
-license = { text = "Apache-2.0" } # <--- Changed this line
+license = { text = "Apache-2.0" }
 
 [tool.comfy]
 entry_point = "."
