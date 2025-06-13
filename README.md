@@ -56,7 +56,7 @@ A sampler that alternates between denoising and renoising to refine media over t
 **🔮 [`SCENE_GENIUS_AUTOCREATOR`](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/SCENE_GENIUS_AUTOCREATOR.md)**
 *‣ v0.1.1 – Automatic scene prompt & input generation for batch jobs, powered by AI creative weapon node!*
 
-This multi-stage AI (ollama) creative weapon node for ComfyUI allows you to plug in basic concepts or seeds. Designed to automate Ace-Step diffusion content generation, it produces authentic genres, adaptive lyrics, precise durations, and finely tuned APG and Sampler configs with ease, making batch experimentation a breeze.
+This multi-stage AI (ollama) creative weapon node for ComfyUI allows you to plug in basic concepts or seeds. Designed to automate Ace-Step diffusion content generation, it produces authentic genres, adaptive lyrics, precise durations, and finely tuned Noise Decay, APG and PingPong Sampler TAML configs with ease, making batch experimentation a breeze.
 
 **🎨 [`ACE_LATENT_VISUALIZER`](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/ACE_LATENT_VISUALIZER.md)**
 *‣ v0.3.1 – Latent-space decoder with zoom, color maps, channels, optimized for Ace-Step Audio/Video!*
