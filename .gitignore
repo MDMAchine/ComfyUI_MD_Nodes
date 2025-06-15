@@ -3,6 +3,7 @@ __pycache__/
 
 # Miscellaneous backups and notes folder inside the package
 misc/
+testing/
 
 # Ignore common large model/checkpoint files and binaries
 *.bin

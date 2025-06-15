@@ -106,7 +106,7 @@ import math
 import yaml
 
 from enum import Enum, auto
-from typing import NamedTuple
+from typing import NamedTuple, Union
 
 import torch
 import torch.nn.functional as F
@@ -142,7 +142,7 @@ class APGConfig(NamedTuple):
     momentum: float = -0.5
     eta: float = 0.0
     apg_scale: float = 4.0
-    norm_threshold: float = 2.5
+    norm_threshold: float = 2.5 # Default is 2.5
     dims: tuple = (-2, -1)
     update_mode: UpdateMode = UpdateMode.DEFAULT
     update_blend_mode: str = "lerp"
@@ -157,7 +157,6 @@ class APGConfig(NamedTuple):
         if k == "dims":
             if isinstance(v, str):
                 dims = v.strip()
-                # Fix: Handle empty string after strip for dims correctly.
                 # If dims is empty, return an empty tuple.
                 return tuple(int(d) for d in dims.split(",")) if dims else ()
             else:
@@ -168,6 +167,11 @@ class APGConfig(NamedTuple):
         if k == "start_sigma":
             # Convert negative values to infinity as per tooltip
             return math.inf if v < 0 else float(v)
+        # --- NEW ADDITION FOR norm_threshold ---
+        if k == "norm_threshold":
+            # Ensure norm_threshold is a float, fallback to default if None
+            return float(v) if v is not None else APGConfig.__annotations__['norm_threshold'].__forward_arg__
+        # --- END NEW ADDITION ---
         return v
 
     @classmethod
@@ -184,11 +188,14 @@ class APGConfig(NamedTuple):
         params["update_mode"] = "default" if update_mode_str in {"apg", "cfg"} else update_mode_str
         
         fields = frozenset(cls._fields)
-        params = {k: cls.fixup_param(k, v) for k, v in params.items() if k in fields}
+        # Apply fixup_param to all relevant parameters
+        processed_params = {k: cls.fixup_param(k, v) for k, v in params.items() if k in fields}
+        
         defaults = cls()
-        # Merge default values for any missing parameters
-        params = {**{k: getattr(defaults, k) for k in fields if k not in params}, **params}
-        return cls(**params)
+        # Merge default values for any missing parameters after processing
+        final_params = {**{k: getattr(defaults, k) for k in fields if k not in processed_params}, **processed_params}
+        
+        return cls(**final_params) # Use final_params
 
     def __str__(self):
         # Determine which fields to display in the string representation
@@ -253,7 +260,10 @@ class APG:
 
     def apg(self, cond: torch.Tensor, uncond: torch.Tensor) -> torch.Tensor:
         pred_diff = self.update(cond - uncond)
-        if self.norm_threshold > 0:
+        # Check if norm_threshold is not None before comparison
+        # The fix in APGConfig.build should make this unnecessary,
+        # but it's good for robustness.
+        if self.norm_threshold is not None and self.norm_threshold > 0:
             diff_norm = pred_diff.norm(p=2, dim=self.dims, keepdim=True)
             scale_factor = torch.minimum(torch.ones_like(pred_diff), self.norm_threshold / diff_norm)
             pred_diff = pred_diff * scale_factor
@@ -457,7 +467,7 @@ class APGGuiderNode:
                 momentum=momentum,
                 eta=eta,
                 apg_scale=apg_scale, # Use apg_scale as the parameter name
-                norm_threshold=norm_threshold,
+                norm_threshold=norm_threshold, # Pass the input norm_threshold directly
                 dims=dims,
                 predict_image=predict_image,
                 mode=mode,
@@ -473,7 +483,7 @@ class APGGuiderNode:
                 ))
         else:
             # If YAML rules exist, build them from the YAML data
-            # Fix: Ensure rules are built correctly and filtered by start_sigma > 0
+            # Fix: Ensure rules are built correctly and filtered by start_sigma >= 0
             rules = tuple(cfg for cfg in (APGConfig.build(**rule) for rule in rules) if cfg.start_sigma >= 0)
 
         # Sort rules by start_sigma in ascending order

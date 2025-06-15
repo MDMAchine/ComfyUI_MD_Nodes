@@ -33,13 +33,26 @@ try:
 except Exception as e:
     print(f"WARNING: Could not load NoiseDecayScheduler_Custom: {e}")
 
+# --- Import the ORIGINAL PingPong Sampler Custom ---
 try:
     from .PingPongSampler_Custom import NODE_CLASS_MAPPINGS as PPS_CLASS_MAPPINGS
     from .PingPongSampler_Custom import NODE_DISPLAY_NAME_MAPPINGS as PPS_DISPLAY_MAPPINGS
     NODE_CLASS_MAPPINGS.update(PPS_CLASS_MAPPINGS)
     NODE_DISPLAY_NAME_MAPPINGS.update(PPS_DISPLAY_MAPPINGS)
+    print("INFO: Successfully loaded original PingPong Sampler (Custom).")
 except Exception as e:
     print(f"WARNING: Could not load PingPongSampler_Custom: {e}")
+
+# --- Import the FBG-integrated PingPong Sampler (V0.9.9) ---
+try:
+    from .PingPongSampler_Custom_FBG import NODE_CLASS_MAPPINGS as PPS_FBG_CLASS_MAPPINGS
+    from .PingPongSampler_Custom_FBG import NODE_DISPLAY_NAME_MAPPINGS as PPS_FBG_DISPLAY_MAPPINGS
+    NODE_CLASS_MAPPINGS.update(PPS_FBG_CLASS_MAPPINGS)
+    NODE_DISPLAY_NAME_MAPPINGS.update(PPS_FBG_DISPLAY_MAPPINGS)
+    print("INFO: Successfully loaded PingPong Sampler (Custom V0.9.9 FBG).")
+except Exception as e:
+    print(f"WARNING: Could not load PingPongSampler_Custom_FBG: {e}")
+
 
 try:
     from .SCENE_GENIUS_AUTOCREATOR import NODE_CLASS_MAPPINGS as SGC_CLASS_MAPPINGS
