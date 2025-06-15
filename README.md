@@ -53,9 +53,9 @@ This ComfyUI custom node is an audio transformation station that accepts spectro
 
 A sampler that alternates between denoising and renoising to refine media over time, acting like a finely tuned echo chamber for your latent space. You set how "pingy" (denoise) or "pongy" (re-noise) it gets, allowing for precise control over the iterative refinement process, whether aiming for crisp details or a more ethereal quality. It works beautifully for both image and text-to-audio latents, and allows for advanced configuration via YAML parameters that can override direct node inputs.
 
-💫 [`PINGPONG_SAMPLER_CUSTOM_FBG`](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/PingPong_Sampler_Custom_FGB.md)**
+**💫 [`PINGPONG_SAMPLER_CUSTOM_FBG`](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/PingPong_Sampler_Custom_FBG.md)**
 
-‣ v0.9.9 FBG – Denoise with Feedback Guidance for dynamic control & consistency!
+*‣ v0.9.9 FBG – Denoise with Feedback Guidance for dynamic control & consistency!*
 
 A powerful evolution of the PingPong Sampler, this version integrates Feedback Guidance (FBG) for intelligent, dynamic adjustment of the guidance scale during denoising. It combines controlled ancestral noise injection with adaptive guidance to achieve both high fidelity and temporal consistency, particularly effective for challenging time-series data like audio and video. FBG adapts the guidance on-the-fly, leading to potentially more efficient sampling and improved results.
 
@@ -122,6 +122,12 @@ The term 'ping-pong sampling' is explicitly introduced and applied in the contex
 The original concept for the **PingPong Sampler in the context of ace-step diffusion** was implamented by **Junmin Gong** (Ace-Step team member).
 
 The first ComfyUI implementation of the PingPong Sampler per ace-step was created by **blepping**.
+
+FBG addition based off of Feedback-Guidance-of-Diffusion-Models:
+     https://github.com/FelixKoulischer/Feedback-Guidance-of-Diffusion-Models/
+      https://arxiv.org/abs/2506.06085
+ComfyUI FBG adaptation by: blepping:
+     https://gist.github.com/blepping/d424e8fd27d76845ad27997820a57f6b
 
 | 🕶️ Handle         | 🧠 Role                                                  |
 |--------------------|--------------------------------------------------------- |
