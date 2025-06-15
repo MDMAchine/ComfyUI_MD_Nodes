@@ -123,11 +123,9 @@ The original concept for the **PingPong Sampler in the context of ace-step diffu
 
 The first ComfyUI implementation of the PingPong Sampler per ace-step was created by **blepping**.
 
-FBG addition based off of Feedback-Guidance-of-Diffusion-Models:
-https://github.com/FelixKoulischer/Feedback-Guidance-of-Diffusion-Models/
-https://arxiv.org/abs/2506.06085
-ComfyUI FBG adaptation by: blepping:
-https://gist.github.com/blepping/d424e8fd27d76845ad27997820a57f6b
+FBG addition based off of [Feedback-Guidance-of-Diffusion-Models](https://github.com/FelixKoulischer/Feedback-Guidance-of-Diffusion-Models/) - [Paper](https://arxiv.org/abs/2506.06085)
+
+[ComfyUI FBG adaptation by: blepping](https://gist.github.com/blepping/d424e8fd27d76845ad27997820a57f6b)
 
 | 🕶️ Handle         | 🧠 Role                                                  |
 |--------------------|--------------------------------------------------------- |
