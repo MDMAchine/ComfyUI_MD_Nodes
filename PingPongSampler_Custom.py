@@ -3,8 +3,14 @@
 # ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 
 # ░▒▓ ORIGIN & DEV:
-#   • Cast into the void by: Junmin Gong (Ace-Step team)
-#   • Original mind behind PingPong Sampler
+#   • Foundational principles for iterative sampling, including concepts that underpin 'ping-pong sampling'
+#   • Consistency Models by Song et al. (2023)
+#   •      https://arxiv.org/abs/2303.01469
+#   • The term 'ping-pong sampling' is explicitly introduced and applied in the context of fast text-to-audio
+#   • generationin the paper "Fast Text-to-Audio Generation with Adversarial Post-Training" by Novack et al.
+#   • (2025) from Stability AI
+#   •      https://arxiv.org/abs/2505.08175
+#   • original concept for the PingPong Sampler for ace-step diffusion by: Junmin Gong (Ace-Step team)
 #   • ComfyUI adaptation by: blepping (original ComfyUI port with quirks)
 #   • Disassembled & warped by: MD (Machine Damage)
 #   • Critical fixes & re-engineering by: Gemini (Google) based on user feedback

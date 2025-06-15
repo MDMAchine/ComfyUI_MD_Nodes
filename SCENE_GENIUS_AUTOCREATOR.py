@@ -1,5 +1,5 @@
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-# ████ SCENEGENIUS AUTOCREATOR v0.1.1 – Optimized for Ace-Step Audio/Video ████▓▒░
+# ████ SCENEGENIUS AUTOCREATOR v0.1.4 – Optimized for Ace-Step Audio/Video ████▓▒░
 # ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 
 # ░▒▓ ORIGIN & DEV:
@@ -8,6 +8,9 @@
 #   • Initial ComfyUI adaptation by: Gemini (Google)
 #   • Enhanced & refined by: MDMAchine & Gemini
 #   • Critical optimizations & bugfixes: Gemini
+#   • FBG Sampler integration & version selection by: Gemini (Google)
+#   • Removed version numbers from sampler selection by: Gemini (Google)
+#   • **FIXED: FBG Sampler default YAML on LLM failure.**
 #   • Final polish: MDMAchine
 #   • License: Apache 2.0 — No cursed floppy disks allowed
 
@@ -17,6 +20,8 @@
 #   channeling the chaotic spirit of the demoscene and BBS era.
 #   Produces authentic genres, adaptive lyrics, precise durations,
 #   and finely tuned APG + Sampler configs with ease.
+#   Now supports selection between original PingPong Sampler and FBG-integrated version,
+#   without needing version number updates in the Scene Genius node itself.
 #   May work with other models, but don't expect mercy or miracles.
 
 # ░▒▓ FEATURES:
@@ -29,6 +34,8 @@
 #   ✓ YAML override for advanced custom configurations
 #   ✓ QoL LLM core parameter management (temperature, tokens, GPU layers)
 #   ✓ Fixed multi-line YAML dims bug for clean outputs
+#   ✓ Selectable PingPong Sampler version (Original vs. FBG Integrated, version-agnostic)
+#   ✓ **Fixed FBG Sampler default YAML fallback.**
 
 # ░▒▓ CHANGELOG:
 #   - v0.1.0 (Genesis Build):
@@ -42,6 +49,18 @@
 #       • Dynamic noise & sampler tuning enabled
 #       • Robust error handling added
 #       • Final polishing of YAML output and bug fixes
+#   - v0.1.2 (Sampler Select):
+#       • Added option to select between original PingPong Sampler (v0.8.15) and
+#         FBG-integrated PingPong Sampler (v0.9.9) for YAML generation.
+#       • Dynamic LLM prompting for Sampler YAML based on selected version.
+#       • Updated default Sampler YAML to match FBG version's defaults.
+#   - v0.1.3 (Version Agnostic Sampler Select):
+#       • Removed explicit version numbers from the 'sampler_version' input to simplify
+#         future maintenance and allow seamless updates to PingPong Sampler nodes.
+#   - v0.1.4 (FBG Default Fix):
+#       • Corrected the `default_sampler_yaml_fbg` to precisely match the user's
+#         desired FBG YAML, ensuring proper fallback on LLM generation failure.
+
 
 # ░▒▓ CONFIGURATION:
 #   → Primary Use: Automated content generation for Ace-Step diffusion projects
@@ -56,7 +75,6 @@
 #   ▓▒░ Spontaneous creative anarchy
 
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-
 
 
 import requests
@@ -138,8 +156,8 @@ rules:
     momentum: 0.0
 
 """
-        # Default Sampler YAML to use if LLM output is unparseable or invalid
-        self.default_sampler_yaml = """
+        # Default Sampler YAML for original PingPongSampler_Custom to use if LLM output is unparseable or invalid
+        self.default_sampler_yaml_original = """
 verbose: true
 step_random_mode: block
 step_size: 5
@@ -151,15 +169,53 @@ enable_clamp_output: false
 blend_mode: lerp
 step_blend_mode: lerp
 """
-        # Full default prompt for Sampler YAML generation
-        self.DEFAULT_SAMPLER_PROMPT = """
-You are an expert diffusion model sampling and parameter configuration specialist, specifically for the "Ping-Pong Sampler" (a custom sampler highly optimized for Ace-Step audio and video diffusion models). Your task is to generate YAML-formatted parameters for this sampler.
+        # Default Sampler YAML for PingPongSampler_Custom_FBG to use if LLM output is unparseable or invalid
+        # This now matches the specific FBG YAML provided by the user.
+        self.default_sampler_yaml_fbg = """
+verbose: true
+step_random_mode: block
+step_size: 4
+first_ancestral_step: 15
+last_ancestral_step: 35
+enable_clamp_output: false
+start_sigma_index: 0
+end_sigma_index: -1
+blend_mode: lerp
+step_blend_mode: lerp
+fbg_config:
+  sampler_mode: EULER
+  cfg_scale: 7.0
+  cfg_start_sigma: 1.0
+  cfg_end_sigma: 0.004
+  fbg_start_sigma: 1.0
+  fbg_end_sigma: 0.006
+  fbg_guidance_multiplier: 1.0
+  ancestral_start_sigma: 1.0
+  ancestral_end_sigma: 0.004
+  max_guidance_scale: 15.0
+  max_posterior_scale: 3.0
+  initial_value: 0.0
+  initial_guidance_scale: 1.0
+  guidance_max_change: 0.5
+  temp: 0.0
+  offset: 0.0
+  pi: 0.5
+  t_0: 0.5
+  t_1: 0.4
+fbg_eta: 0.0
+fbg_s_noise: 1.0
+debug_mode: true
+"""
+
+        # Base prompt for Sampler YAML generation (common to both versions)
+        self.DEFAULT_SAMPLER_PROMPT_BASE = """
+You are an expert diffusion model sampling and parameter configuration specialist. Your task is to generate YAML-formatted parameters for the Ping-Pong Sampler.
 
 **Your understanding of the creative context:**
-* **Initial Concept:** "{initial_concept_prompt}" (The core idea guiding the visual/audio style)
-* **Generated Genres:** "{genre_tags}" (E.g., 'lo-fi' suggests softer transitions, 'punk' might tolerate more abruptness)
-* **Lyrics/Script Status:** "{lyrics_or_script}" (A narrative might need higher coherence; instrumental might allow more abstract patterns)
-* **Total Duration (seconds):** "{total_seconds}" (Longer durations emphasize the need for temporal coherence)
+* **Initial Concept:** "{initial_concept_prompt}"
+* **Generated Genres:** "{genre_tags}"
+* **Lyrics/Script Status:** "{lyrics_or_script}"
+* **Total Duration (seconds):** "{total_seconds}"
 * **Generated APG Parameters (Crucial context for overall guidance strategy):** "{apg_yaml_params}"
 
 **Your task: Generate a VALID YAML string containing parameters for the Ping-Pong Sampler. Be acutely aware of the impact of each parameter.**
@@ -167,21 +223,21 @@ You are an expert diffusion model sampling and parameter configuration specialis
 **CRITICAL GUIDANCE FOR STABILITY AND QUALITY (Read Carefully!):**
 Based on extensive testing and user feedback, certain Ping-Pong Sampler parameters (`start_sigma_index`, `end_sigma_index`, `blend_mode`, `step_blend_mode`) are **extremely sensitive and have a high likelihood of producing noisy, corrupted, or unfinished outputs if changed from their default values.** These parameters control fundamental aspects of the sampler's internal blending and sigma schedule traversal. **Therefore, you MUST prioritize using the default values for these specific parameters unless there is an absolute, well-understood technical necessity for alteration (which is exceedingly rare and likely beyond typical creative adjustments).** Focus your creative adjustments on `step_random_mode`, `step_size`, `first_ancestral_step`, and `last_ancestral_step`.
 
-**Key Parameters & How to Think About Them:**
+**Key Parameters & How to Think About Them (Common to both Sampler Versions):**
 
 * **`verbose` (boolean):** Set to `true` or `false` to enable/disable debug messages for the sampler.
 * **`step_random_mode` (string):** **How the internal random number generator (RNG) seed is managed across sampling steps.** This directly influences the temporal coherence (smoothness over time) of generated frames or audio segments.
     * **Purpose:** Controls the "flicker" or consistency.
     * **Decision-Making:**
-        * `off`: LEAST random variation per step.** Ideal for highly consistent, stable, and coherent output across sequential frames (video) or audio segments. for most coherent outputs.
+        * `off`: LEAST random variation per step. Ideal for highly consistent, stable, and coherent output across sequential frames (video) or audio segments.
         * `block`: Randomness changes only after a `step_size` number of steps. Useful if you want visually/audibly distinct "blocks" or segments that are internally consistent but change abruptly at intervals. Works very well in many cases.
         * `step`: Randomness changes with *every single step*. This can lead to very chaotic, flickering visuals or rapidly changing audio textures.
         * **LLM Decision**: Consider the `initial_concept_prompt` and `GENRE_TAGS`. For "smooth," "cinematic," or "ambient" outputs, favor `off`. For "segmented" or "rhythmic" changes, consider `block`. For "chaos," `step`.
-* **`step_size` (integer):** The size of the "block" or multiplier for `step_random_mode`. Default is `5`.
+* **`step_size` (integer):** The size of the "block" or multiplier for `step_random_mode`. Default is `5` (for original) or `4` (for FBG).
     * **Purpose:** Defines the granularity of `block` mode.
-    * **Decision-Making:** Only relevant if `step_random_mode` is `block` or `step`. Integers like `4`,`5` or `10` are common. Smaller values mean more frequent shifts; larger values mean longer, more consistent segments.
-* **`first_ancestral_step` (integer):** The 0-based index in the sigma schedule where ancestral noise injection begins.
-* **`last_ancestral_step` (integer):** The 0-based index in the sigma schedule where ancestral noise injection ends.
+    * **Decision-Making:** Only relevant if `step_random_mode` is `block` or `step`. Integers like `4`, `5` or `10` are common. Smaller values mean more frequent shifts; larger values mean longer, more consistent segments.
+* **`first_ancestral_step` (integer):** The 0-based index in the sigma schedule where ancestral noise injection begins. Default is `14` (for original) or `15` (for FBG).
+* **`last_ancestral_step` (integer):** The 0-based index in the sigma schedule where ancestral noise injection ends. Default is `34` (for original) or `35` (for FBG).
     * **Purpose of Ancestral Noise:** Ancestral steps re-inject a small, calculated amount of noise back into the latent. This is a crucial technique to prevent "dead spots," over-smoothing, or loss of detail that can occur in purely deterministic samplers. It helps maintain a vibrant, detailed output, especially for complex generative tasks like video/audio.
     * **Decision-Making:** These two parameters define the "active ancestral mixing period."
         * **LLM Decision**: These values should define a window within the total sampling steps where this noise mixing is beneficial. Avoid starting too early (when latents are very noisy) or ending too late (when details are critical). For typical 50-step processes, values like `first_ancestral_step: 10-15` and `last_ancestral_step: 30-40` might be a good starting point to encompass the critical detail-forming stages.
@@ -199,9 +255,11 @@ Based on extensive testing and user feedback, certain Ping-Pong Sampler paramete
     * **Purpose:** Controls the blending during ancestral noise re-injection.
     * **Decision-Making:** **ALWAYS set this to `lerp` (linear interpolation, default). Do not change.** Similar to `blend_mode`, other options are highly experimental and detrimental to stable output.
 
+{fbg_section}
+
 **Your output must ONLY be the valid YAML string, with no conversational filler, explanations, or additional text.**
 
-**Example Output Format:**
+**Example Output Format (for original PingPong Sampler):**
 verbose: true
 step_random_mode: block
 step_size: 5
@@ -213,8 +271,75 @@ enable_clamp_output: false
 blend_mode: lerp
 step_blend_mode: lerp
 
+**Example Output Format (for FBG Integrated PingPong Sampler):**
+verbose: true
+step_random_mode: block
+step_size: 4
+first_ancestral_step: 15
+last_ancestral_step: 35
+enable_clamp_output: false
+start_sigma_index: 0
+end_sigma_index: -1
+blend_mode: lerp
+step_blend_mode: lerp
+fbg_config:
+  sampler_mode: EULER
+  cfg_scale: 7.0
+  cfg_start_sigma: 1.0
+  cfg_end_sigma: 0.004
+  fbg_start_sigma: 1.0
+  fbg_end_sigma: 0.006
+  fbg_guidance_multiplier: 1.0
+  ancestral_start_sigma: 1.0
+  ancestral_end_sigma: 0.004
+  max_guidance_scale: 15.0
+  max_posterior_scale: 3.0
+  initial_value: 0.0
+  initial_guidance_scale: 1.0
+  guidance_max_change: 0.5
+  temp: 0.0
+  offset: 0.0
+  pi: 0.5
+  t_0: 0.5
+  t_1: 0.4
+fbg_eta: 0.0
+fbg_s_noise: 1.0
+debug_mode: true
+
 **IMPORTANT: When generating the actual YAML, DO NOT include the ```yaml or ``` delimiters in your final output. These are only for demonstration in this example.**
 """
+
+        # FBG specific prompt section to be conditionally added
+        self.FBG_PROMPT_SECTION = """
+---
+
+**Feedback Guidance (FBG) Parameters (for FBG Integrated PingPong Sampler only):**
+These parameters are for the `fbg_config` dictionary and top-level FBG inputs.
+
+* **`fbg_config` (dictionary):** This nested dictionary holds the core FBG configuration.
+    * **`sampler_mode` (string):** FBG's base sampler mode for internal calculations. `EULER` is standard. `PINGPONG` influences how FBG calculates its internal step. **Default: `EULER`**.
+    * **`cfg_scale` (float):** **The base Classifier-Free Guidance (CFG) scale that FBG dynamically modifies.** This is the starting point for FBG's adjustments. **Default: `7.0`**. (Updated to match user's example)
+    * **`cfg_start_sigma` (float):** The noise level (sigma) at which regular CFG (and thus FBG's influence over it) begins. **Default: `1.0`** (to cover typical model ranges).
+    * **`cfg_end_sigma` (float):** The noise level (sigma) at which regular CFG ends. **Default: `0.004`** (to cover typical model ranges).
+    * **`fbg_start_sigma` (float):** The noise level (sigma) at which FBG actively calculates and applies its dynamic scale. **Default: `1.0`** (to cover typical model ranges).
+    * **`fbg_end_sigma` (float):** The noise level (sigma) at which FBG ceases its dynamic scale calculation. **Default: `0.006`**. (Updated to match user's example)
+    * **`ancestral_start_sigma` (float):** FBG internal: First sigma for ancestral sampling (for FBG's base sampler). **Default: `1.0`**. (`fbg_eta` must be >0 for this to have effect.)
+    * **`ancestral_end_sigma` (float):** FBG internal: Last sigma for ancestral sampling (for FBG's base sampler). **Default: `0.004`**.
+    * **`max_guidance_scale` (float):** Upper limit for the total guidance scale after FBG and CFG. **Default: `15.0`**. (Updated to match user's example)
+    * **`initial_guidance_scale` (float):** Initial value for FBG's internal guidance scale. **Default: `1.0`**.
+    * **`guidance_max_change` (float):** Limits the percentage change of FBG guidance scale per step. A value like `0.5` means max 50% change. `1000.0` (default) effectively disables limiting. **Default: `0.5`**. (Updated to match user's example)
+    * **`pi` (float):** ($\pi$) from FBG paper. Higher (e.g., `0.95-0.999`) for well-learned models. Lower (e.g., `0.2-0.8`) for general T2I. **Default: `0.5`**. (Updated to match user's example)
+    * **`t_0` (float):** Normalized diffusion time (0-1) where FBG guidance reaches reference. If `0.0`, `temp` and `offset` are used directly. **Default: `0.5`**.
+    * **`t_1` (float):** Normalized diffusion time (0-1) where FBG guidance reaches maximum. If `0.0`, `temp` and `offset` are used directly. **Default: `0.4`**.
+    * **`temp` (float):** Temperature for FBG log posterior update. **Only applies if `t_0` and `t_1` are both `0.0`**. **Default: `0.0`**.
+    * **`offset` (float):** Offset for FBG log posterior update. **Only applies if `t_0` and `t_1` are both `0.0`**. **Default: `0.0`**.
+    * **`initial_value` (float):** Initial value for FBG's internal log posterior estimate. **Default: `0.0`**.
+    * **`fbg_guidance_multiplier` (float):** Multiplier for the FBG guidance component. **Default: `1.0`**.
+* **`fbg_eta` (float):** FBG internal parameter: Noise amount for ancestral sampling within FBG's step. **Default: `0.0`**.
+* **`fbg_s_noise` (float):** FBG internal parameter: Scale for noise within FBG's step. **Default: `1.0`**.
+* **`debug_mode` (boolean):** Enable verbose debug messages in the ComfyUI console. **Default: `true`**. (Updated to match user's example)
+"""
+
         # Full default prompt for APG YAML generation
         self.DEFAULT_APG_PROMPT = """
 You are an advanced generative AI configuration expert, specializing in the Adaptive Projected Gradient (APG) Guider within ComfyUI. Your primary goal is to generate a YAML-formatted set of "rules" that precisely control the diffusion model's guidance throughout the sampling process, shaping the evolution of the latent space from abstract noise into a cohesive creative output. Each rule defines a specific guidance strategy to be applied at different noise levels (sigmas).
@@ -389,12 +514,13 @@ rules:
                 "min_total_seconds": ("INT", {"default": 60, "min": 30, "max": 1800, "tooltip": "The minimum acceptable duration for the generated piece in seconds."}),
                 "max_total_seconds": ("INT", {"default": 300, "min": 60, "max": 3600, "tooltip": "The maximum acceptable duration for the generated piece in seconds."}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff, "tooltip": "The seed for random number generation to ensure reproducibility."}),
+                "sampler_version": (["Original PingPong Sampler", "FBG Integrated PingPong Sampler"], {"default": "FBG Integrated PingPong Sampler", "tooltip": "Select which version of the PingPong Sampler to generate YAML for. The FBG version includes additional dynamic guidance parameters."}),
             },
             "optional": {
                 "prompt_genre_generation": ("STRING", {"multiline": True, "default": "", "tooltip": "Override the genre tags output directly. If provided, the LLM will be skipped for genre generation."}),
                 "prompt_lyrics_decision_and_generation": ("STRING", {"multiline": True, "default": "", "tooltip": "Override the lyrics/script output directly. If provided, the LLM will be skipped for lyrics generation."}),
                 "prompt_duration_generation": ("STRING", {"multiline": True, "default": "", "tooltip": "Override the duration output directly (e.g., '120.5'). If provided, the LLM will be skipped for duration generation."}),
-                "prompt_noise_decay_generation": ("STRING", {"multiline": True, "default": "", "tooltip": "Override the noise decay strength output directly (e.g., '7.5'). If provided, the LLM will be skipped for noise decay generation."}), # New input for direct override
+                "prompt_noise_decay_generation": ("STRING", {"multiline": True, "default": "", "tooltip": "Override the noise decay strength output directly (e.g., '7.5'). If provided, the LLM will be skipped for noise decay generation."}),
                 "prompt_apg_yaml_generation": ("STRING", {"multiline": True,
                     "default": "",
                     "tooltip": "Override the APG YAML parameters directly. If provided, the LLM will be skipped for APG YAML generation."}),
@@ -454,9 +580,9 @@ rules:
 
     def generate_content(self, ollama_api_base_url, ollama_model_name, initial_concept_prompt,
                          tag_count, tag_blend_strength, excluded_tags, force_lyrics_generation,
-                         min_total_seconds, max_total_seconds, seed,
+                         min_total_seconds, max_total_seconds, seed, sampler_version,
                          prompt_genre_generation="", prompt_lyrics_decision_and_generation="",
-                         prompt_duration_generation="", prompt_noise_decay_generation="", # Added new optional input
+                         prompt_duration_generation="", prompt_noise_decay_generation="",
                          prompt_apg_yaml_generation="", prompt_sampler_yaml_generation=""):
         """
         Main function to generate content using the LLM.
@@ -470,9 +596,18 @@ rules:
         apg_yaml_params = ""
         sampler_yaml_params = ""
 
+        # Determine which default sampler YAML and FBG prompt section to use
+        if sampler_version == "FBG Integrated PingPong Sampler":
+            default_sampler_yaml_to_use = self.default_sampler_yaml_fbg
+            fbg_section_to_include = self.FBG_PROMPT_SECTION
+        else: # "Original PingPong Sampler"
+            default_sampler_yaml_to_use = self.default_sampler_yaml_original
+            fbg_section_to_include = ""
+
+
         # --- Stage 1: Genre Generation ---
         print(f"SceneGeniusAutocreator: Initiating Genre Generation for concept: '{initial_concept_prompt}'")
-        if prompt_genre_generation.strip(): # Check if override prompt is provided
+        if prompt_genre_generation.strip():
             genre_tags = prompt_genre_generation.strip()
             print(f"SceneGeniusAutocreator: Genre override detected. Using provided value: '{genre_tags}'")
         else:
@@ -484,34 +619,26 @@ rules:
             else:
                 blend_description = "allow for more divergent or abstract suggestions based on"
 
-            if not prompt_genre_generation: # This condition is now redundant due to the outer if/else, but kept for clarity
-                genre_prompt = f"""
-                    You are a highly creative AI assistant specializing in music and audio aesthetics.
-                    Your task is to generate a single, comma-separated string of exactly {tag_count} descriptive genre tags.
+            genre_prompt = f"""
+                You are a highly creative AI assistant specializing in music and audio aesthetics.
+                Your task is to generate a single, comma-separated string of exactly {tag_count} descriptive genre tags.
 
-                    These tags should {blend_description} the following concept: "{initial_concept_prompt}".
+                These tags should {blend_description} the following concept: "{initial_concept_prompt}".
 
-                    **CRITICAL GUIDANCE FOR TAG GENERATION:**
-                    * **Focus on Real Music Genres:** All tags **must be actual, recognized music genres** (e.g., "electronic," "jazz," "hip-hop," "classical," "rock," "ambient," "synthwave," "lo-fi," "orchestral"). Do not invent genres or use non-music related descriptors as primary tags.
-                    * **Promote Diversity & Avoid Repetition:** Strive for **good variety** among the generated tags. Avoid selecting tags that are overly redundant or extremely similar (e.g., don't just list "deep house, tech house, progressive house" if a broader range is possible). Explore different facets of the initial concept and genre associations to provide a rich and diverse set of descriptors.
-                    * **Descriptive Modifiers (if tag_count > 1):**
-                        * If `{tag_count}` is greater than 1, you may include **one or more descriptive terms** (e.g., "soft female vocals," "energetic beat," "melancholic piano," "driving percussion," "atmospheric soundscape") alongside the music genres.
-                        * **Crucially, if `{tag_count}` is greater than 1, at least one of the tags MUST still be a core music genre.**
-                        * If `{tag_count}` is 1, the tag MUST be a core music genre.
+                **CRITICAL GUIDANCE FOR TAG GENERATION:**
+                * **Focus on Real Music Genres:** All tags **must be actual, recognized music genres** (e.g., "electronic," "jazz," "hip-hop," "classical," "rock," "ambient," "synthwave," "lo-fi," "orchestral"). Do not invent genres or use non-music related descriptors as primary tags.
+                * **Promote Diversity & Avoid Repetition:** Strive for **good variety** among the generated tags. Avoid selecting tags that are overly redundant or extremely similar (e.g., don't just list "deep house, tech house, progressive house" if a broader range is possible). Explore different facets of the initial concept and genre associations to provide a rich and diverse set of descriptors.
+                * **Descriptive Modifiers (if tag_count > 1):**
+                    * If `{tag_count}` is greater than 1, you may include **one or more descriptive terms** (e.g., "soft female vocals," "energetic beat," "melancholic piano," "driving percussion," "atmospheric soundscape") alongside the music genres.
+                    * **Crucially, if `{tag_count}` is greater than 1, at least one of the tags MUST still be a core music genre.**
+                    * If `{tag_count}` is 1, the tag MUST be a core music genre.
 
-                    {"Avoid generating any of these tags: " + excluded_tags + "." if excluded_tags else ""}
-                    The output MUST ONLY be the comma-separated tags. DO NOT include any conversational filler, explanations, or additional text.
-                    Example Output (for tag_count=3): "synthwave, energetic beat, retro-futurism"
-                    Example Output (for tag_count=1): "ambient"
-                    Output:
-                """
-            else:
-                genre_prompt = prompt_genre_generation.format(
-                    initial_concept_prompt=initial_concept_prompt,
-                    tag_count=tag_count,
-                    blend_description=blend_description,
-                    excluded_tags_clause="Avoid generating any of these tags: " + excluded_tags + "." if excluded_tags else ""
-                )
+                {"Avoid generating any of these tags: " + excluded_tags + "." if excluded_tags else ""}
+                The output MUST ONLY be the comma-separated tags. DO NOT include any conversational filler, explanations, or additional text.
+                Example Output (for tag_count=3): "synthwave, energetic beat, retro-futurism"
+                Example Output (for tag_count=1): "ambient"
+                Output:
+            """
 
             genre_payload = {
                 "model": ollama_model_name,
@@ -535,7 +662,6 @@ rules:
                 "please find the genre tags below:",
                 "here's a comma-separated list of genres:",
                 "genre tags:",
-                # Added more general conversational prefixes based on user feedback
                 "is a genre of music and dance that was popular in the late 1970s.",
                 "the disco era was characterized by:",
                 "key elements of the disco sound include:",
@@ -547,70 +673,60 @@ rules:
             for phrase in common_conversational_prefixes:
                 if lower_cleaned_genre_output.startswith(phrase):
                     cleaned_genre_output = cleaned_genre_output[len(phrase):].strip()
-                    break # Stop after finding the first match
-
-            # Remove any leading/trailing newlines or whitespace that might remain
+                    break
             cleaned_genre_output = cleaned_genre_output.strip()
 
-            # Split and clean individual tags
             genre_tags_list = [
                 tag.strip().lower() for tag in cleaned_genre_output.split(',')
-                if tag.strip() # Ensure empty strings are not included
+                if tag.strip()
             ]
             genre_tags = ", ".join(genre_tags_list)
             print(f"SceneGeniusAutocreator: Parsed GENRE_TAGS: '{genre_tags}'")
 
         # --- Stage 2: Lyrics/Script Decision and Generation ---
         print(f"SceneGeniusAutocreator: Initiating Lyrics/Script Generation for genre: '{genre_tags}'")
-        if prompt_lyrics_decision_and_generation.strip(): # Check if override prompt is provided
+        if prompt_lyrics_decision_and_generation.strip():
             lyrics_or_script = prompt_lyrics_decision_and_generation.strip()
             print(f"SceneGeniusAutocreator: Lyrics/Script override detected. Using provided value: '{lyrics_or_script}'")
         else:
-            if not prompt_lyrics_decision_and_generation:
-                lyrics_prompt = f"""
-                    You are a creative writer and concept developer. Your task is to generate lyrics or a script for a creative project, or determine if it should be instrumental.
+            lyrics_prompt = f"""
+                You are a creative writer and concept developer. Your task is to generate lyrics or a script for a creative project, or determine if it should be instrumental.
 
-                    **Instructions:**
-                    1.  **Consider the following project details:**
-                        * **Initial Concept:** "{initial_concept_prompt}" (This is the primary driver of content and narrative.)
-                        * **Generated Genres:** "{genre_tags}" (These tags define the aesthetic, mood, rhythmic feel, and typical lyrical themes associated with those genres. They should influence the *style* of writing, not its explicit subject matter.)
-                    2.  **Decision Logic:**
-                        * If `force_lyrics_generation` is set to `True`, you MUST generate lyrics or a script based on the concept and genres.
-                        * If `force_lyrics_generation` is set to `False`, you have the discretion to decide if an instrumental piece is more appropriate for these genres and concept.
-                    3.  **Genre Influence vs. Content:**
-                        * **Crucially, use the `Generated Genres` to inform the *style, vocabulary, tone, rhythm, and underlying themes* of the lyrics or script.**
-                        * **DO NOT explicitly mention any of the `genre_tags` themselves within the generated lyrics or script.** For example, if "house music" is a genre tag, the lyrics should *feel* like house music but should not say "this is a house music track." The content should be driven by the `Initial Concept`, infused with the `Genre Tags'` essence.
-                    4.  **Output Format:**
-                        * If generating lyrics/script, provide the complete text.
-                        * If determining it should be instrumental, your output must ONLY be the word: `[instrumental]`
-                        * Do not include any conversational filler, explanations, or additional text.
+                **Instructions:**
+                1.  **Consider the following project details:**
+                    * **Initial Concept:** "{initial_concept_prompt}" (This is the primary driver of content and narrative.)
+                    * **Generated Genres:** "{genre_tags}" (These tags define the aesthetic, mood, rhythmic feel, and typical lyrical themes associated with those genres. They should influence the *style* of writing, not its explicit subject matter.)
+                2.  **Decision Logic:**
+                    * If `force_lyrics_generation` is set to `True`, you MUST generate lyrics or a script based on the concept and genres.
+                    * If `force_lyrics_generation` is set to `False`, you have the discretion to decide if an instrumental piece is more appropriate for these genres and concept.
+                3.  **Genre Influence vs. Content:**
+                    * **Crucially, use the `Generated Genres` to inform the *style, vocabulary, tone, rhythm, and underlying themes* of the lyrics or script.**
+                    * **DO NOT explicitly mention any of the `genre_tags` themselves within the generated lyrics or script.** For example, if "house music" is a genre tag, the lyrics should *feel* like house music but should not say "this is a house music track." The content should be driven by the `Initial Concept`, infused with the `Genre Tags'` essence.
+                4.  **Output Format:**
+                    * If generating lyrics/script, provide the complete text.
+                    * If determining it should be instrumental, your output must ONLY be the word: `[instrumental]`
+                    * Do not include any conversational filler, explanations, or additional text.
 
-                    **Example Output Format (Lyrics):**
-                    [Verse 1]
-                    Neon gleam on chrome streets,
-                    Echoes of a forgotten beat.
-                    Synths hum a dystopian tune,
-                    Under a digital moon.
+                **Example Output Format (Lyrics):**
+                [Verse 1]
+                Neon gleam on chrome streets,
+                Echoes of a forgotten beat.
+                Synths hum a dystopian tune,
+                Under a digital moon.
 
-                    **Example Output Format (Instrumental):**
-                    [instrumental]
+                **Example Output Format (Instrumental):**
+                [instrumental]
 
-                    Only output the lyrics or instrumental tag, nothing else.
-                    Only use [verse], [chorus], [bridge], and [instrumental] as structure tags.
+                Only output the lyrics or instrumental tag, nothing else.
+                Only use [verse], [chorus], [bridge], and [instrumental] as structure tags.
 
-                    Genre Tags: "{genre_tags}"
-                    Initial Concept: "{initial_concept_prompt}"
-                    {"The user has requested that you FORCE the generation of lyrics, so do not output [instrumental]." if force_lyrics_generation else ""}
+                Genre Tags: "{genre_tags}"
+                Initial Concept: "{initial_concept_prompt}"
+                {"The user has requested that you FORCE the generation of lyrics, so do not output [instrumental]." if force_lyrics_generation else ""}
 
-                    Consider the creative brief and the genre.
-                    Output:
-                """
-            else:
-                lyrics_prompt = prompt_lyrics_decision_and_generation.format(
-                    genre_tags=genre_tags,
-                    initial_concept_prompt=initial_concept_prompt,
-                    force_lyrics_clause="The user has requested that you FORCE the generation of lyrics, so do not output [instrumental]." if force_lyrics_generation else ""
-                )
+                Consider the creative brief and the genre.
+                Output:
+            """
 
             lyrics_payload = {
                 "model": ollama_model_name,
@@ -652,7 +768,7 @@ rules:
 
         # --- Stage 3: Duration Generation ---
         print(f"SceneGeniusAutocreator: Initiating Duration Generation.")
-        if prompt_duration_generation.strip(): # Check if override prompt is provided
+        if prompt_duration_generation.strip():
             print(f"SceneGeniusAutocreator: Duration override detected. Attempting to parse provided value: '{prompt_duration_generation.strip()}'")
             try:
                 parsed_duration = float(prompt_duration_generation.strip())
@@ -665,28 +781,19 @@ rules:
                 print(f"SceneGeniusAutocreator Error: Could not parse duration from provided override: '{prompt_duration_generation.strip()}'. Defaulting to {float(min_total_seconds)} seconds.")
                 total_seconds = float(min_total_seconds)
         else:
-            if not prompt_duration_generation:
-                duration_prompt = f"""
-                    You are an AI assistant tasked with generating a duration for a creative project.
-                    Based on the following information, provide a single floating-point number representing the total duration in seconds.
+            duration_prompt = f"""
+                You are an AI assistant tasked with generating a duration for a creative project.
+                Based on the following information, provide a single floating-point number representing the total duration in seconds.
 
-                    Initial Concept: "{initial_concept_prompt}"
-                    Generated Genres: "{genre_tags}"
-                    Lyrics/Script: "{lyrics_or_script}"
+                Initial Concept: "{initial_concept_prompt}"
+                Generated Genres: "{genre_tags}"
+                Lyrics/Script: "{lyrics_or_script}"
 
-                    The duration MUST be between {min_total_seconds}.0 and {max_total_seconds}.0 seconds, inclusive.
-                    Ensure your output is ONLY the floating-point number, with no extra text, explanations, or formatting.
-                    Example Output: 180.5
-                    Output:
-                """
-            else:
-                duration_prompt = prompt_duration_generation.format(
-                    initial_concept_prompt=initial_concept_prompt,
-                    genre_tags=genre_tags,
-                    lyrics_or_script=lyrics_or_script,
-                    min_total_seconds=min_total_seconds,
-                    max_total_seconds=max_total_seconds
-                )
+                The duration MUST be between {min_total_seconds}.0 and {max_total_seconds}.0 seconds, inclusive.
+                Ensure your output is ONLY the floating-point number, with no extra text, explanations, or formatting.
+                Example Output: 180.5
+                Output:
+            """
 
             duration_payload = {
                 "model": ollama_model_name,
@@ -701,7 +808,7 @@ rules:
             try:
                 parsed_duration = float(raw_duration_output.strip())
                 if not (float(min_total_seconds) <= parsed_duration <= float(max_total_seconds)):
-                    print(f"SceneGeniusAutocreator Warning: Generated duration {parsed_duration} is outside the allowed range [{min_total_seconds}.0, {max_total_seconds}.0]. Clamping to nearest boundary.")
+                    print(f"SceneGeniusAutocreator Warning: Generated duration {parsed_duration} is outside the allowed range [0.0, 10.0]. Clamping to nearest boundary.")
                     total_seconds = max(float(min_total_seconds), min(parsed_duration, float(max_total_seconds)))
                 else:
                     total_seconds = parsed_duration
@@ -713,7 +820,7 @@ rules:
 
         # --- Stage 4: Noise Decay Strength Generation ---
         print(f"SceneGeniusAutocreator: Initiating Noise Decay Strength Generation.")
-        if prompt_noise_decay_generation.strip(): # Check if override prompt is provided
+        if prompt_noise_decay_generation.strip():
             print(f"SceneGeniusAutocreator: Noise Decay Strength override detected. Attempting to parse provided value: '{prompt_noise_decay_generation.strip()}'")
             try:
                 parsed_noise_decay = float(prompt_noise_decay_generation.strip())
@@ -766,12 +873,11 @@ rules:
 
         # --- Stage 5: APG YAML Parameters Generation ---
         print(f"SceneGeniusAutocreator: Initiating APG YAML Parameters Generation.")
-        if prompt_apg_yaml_generation.strip(): # Check if override prompt is provided
+        if prompt_apg_yaml_generation.strip():
             print(f"SceneGeniusAutocreator: APG YAML override detected. Attempting to parse provided value.")
             apg_data = None
             try:
                 cleaned_apg_yaml = prompt_apg_yaml_generation.strip()
-                # Stripping markdown code block fences and common LLM prefixes if user provided them
                 if cleaned_apg_yaml.startswith("```yaml"):
                     cleaned_apg_yaml = cleaned_apg_yaml[len("```yaml"):].strip()
                 if cleaned_apg_yaml.endswith("```"):
@@ -795,8 +901,7 @@ rules:
                 print(f"SceneGeniusAutocreator Error: An unexpected error occurred during APG YAML override processing: {e}. Using default APG YAML.")
                 apg_yaml_params = self.default_apg_yaml
         else:
-            # If prompt_apg_yaml_generation is empty, use the class-level default prompt
-            actual_apg_prompt = prompt_apg_yaml_generation if prompt_apg_yaml_generation else self.DEFAULT_APG_PROMPT
+            actual_apg_prompt = self.DEFAULT_APG_PROMPT
 
             apg_yaml_prompt_content = actual_apg_prompt.format(
                 initial_concept_prompt=initial_concept_prompt,
@@ -808,7 +913,7 @@ rules:
 
             apg_yaml_payload = {
                 "model": ollama_model_name,
-                "prompt": apg_yaml_prompt_content, # Use the formatted prompt
+                "prompt": apg_yaml_prompt_content,
                 "stream": False,
                 "keep_alive": 0
             }
@@ -816,50 +921,37 @@ rules:
             raw_apg_yaml_output = self._call_ollama_api(api_url_base, apg_yaml_payload)
             print(f"SceneGeniusAutocreator: Raw LLM output for APG YAML: '{raw_apg_yaml_output}'")
 
-            # Process LLM output for APG YAML: clean, attempt to load/dump for formatting, or use default
             apg_data = None
             apg_yaml_params = ""
             try:
                 cleaned_apg_yaml = raw_apg_yaml_output.strip()
 
-                # Robust stripping of markdown code block fences and common LLM prefixes
-                # This handles cases where ```yaml, ```, or "Output:" might wrap the actual YAML
                 if cleaned_apg_yaml.startswith("```yaml"):
                     cleaned_apg_yaml = cleaned_apg_yaml[len("```yaml"):].strip()
                 if cleaned_apg_yaml.endswith("```"):
                     cleaned_apg_yaml = cleaned_apg_yaml[:-len("```")].strip()
                 if cleaned_apg_yaml.lower().startswith("output:"):
                     cleaned_apg_yaml = cleaned_apg_yaml[len("output:"):].strip()
-                if cleaned_apg_yaml.lower().startswith("```"): # Catch cases where ``` is not followed by yaml
+                if cleaned_apg_yaml.lower().startswith("```"):
                     cleaned_apg_yaml = cleaned_apg_yaml[len("```"):].strip()
 
                 print(f"SceneGeniusAutocreator: Cleaned APG YAML string before parsing attempt: \n---\n{cleaned_apg_yaml}\n---")
 
-                # Attempt to load and then dump the YAML to ensure it's valid and consistently formatted
                 apg_data = yaml.safe_load(cleaned_apg_yaml)
 
                 if apg_data is None or not isinstance(apg_data, dict):
-                    # If LLM returned empty/invalid YAML, or not a dictionary (expected top-level for rules)
                     print("SceneGeniusAutocreator Warning: LLM generated empty or non-dictionary YAML for APG. Using default APG YAML.")
                     apg_yaml_params = self.default_apg_yaml
                 else:
-                    # Use CustomDumper for specific list formatting
                     apg_yaml_params = yaml.dump(apg_data, Dumper=CustomDumper, indent=2, sort_keys=False)
 
             except yaml.YAMLError as e:
                 print(f"SceneGeniusAutocreator Error: Could not parse APG YAML from LLM output (YAMLError): {e}. Raw output: '{raw_apg_yaml_output}'. Using default APG YAML.")
-                apg_yaml_params = self.default_apg_yaml # Fallback to default on parse error
+                apg_yaml_params = self.default_apg_yaml
             except Exception as e:
                 print(f"SceneGeniusAutocreator Error: An unexpected error occurred during APG YAML processing: {e}. Raw output: '{raw_apg_yaml_output}'. Using default APG YAML.")
-                apg_yaml_params = self.default_apg_yaml # Fallback to default on any other error
+                apg_yaml_params = self.default_apg_yaml
 
-        # --- Post-processing for 'dims' to force inline formatting ---
-        # This regex looks for 'dims:' followed by any whitespace, then a newline,
-        # then any whitespace, then '- -2', then any whitespace, then a newline,
-        # then any whitespace, then '- -1'.
-        # The 're.M' flag makes '^' and '$' match at the start/end of each line.
-        # The 're.DOTALL' flag allows '.' to match newlines.
-        # It handles variable indentation before 'dims' and before '- -2' and '- -1'.
         apg_yaml_params = re.sub(
             r'(\s*)dims:\s*\n\s*- -2\s*\n\s*- -1',
             r'\1dims: [-2, -1]',
@@ -870,13 +962,12 @@ rules:
 
 
         # --- Stage 6: Sampler YAML Parameters Generation ---
-        print(f"SceneGeniusAutocreator: Initiating Sampler YAML Parameters Generation.")
-        if prompt_sampler_yaml_generation.strip(): # Check if override prompt is provided
+        print(f"SceneGeniusAutocreator: Initiating Sampler YAML Parameters Generation for '{sampler_version}'.")
+        if prompt_sampler_yaml_generation.strip():
             print(f"SceneGeniusAutocreator: Sampler YAML override detected. Attempting to parse provided value.")
             sampler_data = None
             try:
                 cleaned_sampler_yaml = prompt_sampler_yaml_generation.strip()
-                # Stripping markdown code block fences and common LLM prefixes if user provided them
                 if cleaned_sampler_yaml.startswith("```yaml"):
                     cleaned_sampler_yaml = cleaned_sampler_yaml[len("```yaml"):].strip()
                 if cleaned_sampler_yaml.endswith("```"):
@@ -890,25 +981,24 @@ rules:
 
                 if sampler_data is None or not isinstance(sampler_data, dict):
                     print("SceneGeniusAutocreator Warning: Provided Sampler YAML is empty or not a dictionary. Using default Sampler YAML.")
-                    sampler_yaml_params = self.default_sampler_yaml
+                    sampler_yaml_params = default_sampler_yaml_to_use
                 else:
                     sampler_yaml_params = yaml.dump(sampler_data, Dumper=CustomDumper, indent=2, sort_keys=False)
             except yaml.YAMLError as e:
                 print(f"SceneGeniusAutocreator Error: Could not parse Sampler YAML from provided override (YAMLError): {e}. Using default Sampler YAML.")
-                sampler_yaml_params = self.default_sampler_yaml
+                sampler_yaml_params = default_sampler_yaml_to_use
             except Exception as e:
                 print(f"SceneGeniusAutocreator Error: An unexpected error occurred during Sampler YAML override processing: {e}. Using default Sampler YAML.")
-                sampler_yaml_params = self.default_sampler_yaml
+                sampler_yaml_params = default_sampler_yaml_to_use
         else:
-            # If prompt_sampler_yaml_generation is empty, use the class-level default prompt
-            actual_sampler_prompt = prompt_sampler_yaml_generation if prompt_sampler_yaml_generation else self.DEFAULT_SAMPLER_PROMPT
-
-            sampler_yaml_prompt_content = actual_sampler_prompt.format(
+            # Dynamically build the prompt based on selected sampler version
+            sampler_yaml_prompt_content = self.DEFAULT_SAMPLER_PROMPT_BASE.format(
                 initial_concept_prompt=initial_concept_prompt,
                 genre_tags=genre_tags,
                 lyrics_or_script=lyrics_or_script,
                 total_seconds=total_seconds,
-                apg_yaml_params=apg_yaml_params # Pass the generated APG YAML as context
+                apg_yaml_params=apg_yaml_params, # Pass the generated APG YAML as context
+                fbg_section=fbg_section_to_include # Insert the FBG section if applicable
             )
 
             sampler_yaml_payload = {
@@ -921,13 +1011,11 @@ rules:
             raw_sampler_yaml_output = self._call_ollama_api(api_url_base, sampler_yaml_payload)
             print(f"SceneGeniusAutocreator: Raw LLM output for Sampler YAML: '{raw_sampler_yaml_output}'")
 
-            # Process LLM output for Sampler YAML: clean, attempt to load/dump for formatting, or use default
             sampler_data = None
             sampler_yaml_params = ""
             try:
                 cleaned_sampler_yaml = raw_sampler_yaml_output.strip()
 
-                # Robust stripping of markdown code block fences and common LLM prefixes
                 if cleaned_sampler_yaml.startswith("```yaml"):
                     cleaned_sampler_yaml = cleaned_sampler_yaml[len("```yaml"):].strip()
                 if cleaned_sampler_yaml.endswith("```"):
@@ -943,17 +1031,16 @@ rules:
 
                 if sampler_data is None or not isinstance(sampler_data, dict):
                     print("SceneGeniusAutocreator Warning: LLM generated empty or non-dictionary YAML for Sampler. Using default Sampler YAML.")
-                    sampler_yaml_params = self.default_sampler_yaml
+                    sampler_yaml_params = default_sampler_yaml_to_use
                 else:
-                    # Use CustomDumper for specific list formatting
                     sampler_yaml_params = yaml.dump(sampler_data, Dumper=CustomDumper, indent=2, sort_keys=False)
 
             except yaml.YAMLError as e:
                 print(f"SceneGeniusAutocreator Error: Could not parse Sampler YAML from LLM output (YAMLError): {e}. Raw output: '{raw_sampler_yaml_output}'. Using default Sampler YAML.")
-                sampler_yaml_params = self.default_sampler_yaml # Fallback to default on parse error
+                sampler_yaml_params = default_sampler_yaml_to_use
             except Exception as e:
                 print(f"SceneGeniusAutocreator Error: An unexpected error occurred during Sampler YAML processing: {e}. Raw output: '{raw_sampler_yaml_output}'. Using default Sampler YAML.")
-                sampler_yaml_params = self.default_sampler_yaml # Fallback to default on any other error
+                sampler_yaml_params = default_sampler_yaml_to_use
 
             print(f"SceneGeniusAutocreator: Final SAMPLER_YAML_PARAMS output: \n---\n{sampler_yaml_params}\n---")
 
