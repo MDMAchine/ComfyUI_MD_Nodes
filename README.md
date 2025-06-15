@@ -46,7 +46,7 @@ Outputs a tensor of sigmas to control diffusion noise levels with flexible start
 **🔊 [`MASTERING_CHAIN_NODE`](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/mastering_chain_node.md)**
 *‣ v1.2 – Audio mastering for generative sound!*
 
-This ComfyUI custom node is an audio transformation station that accepts spectrogram latents and applies audio-style mastering techniques, making it like "Ableton Live for your tensors." It features Global Gain control to crank it to 11, a Multi-band Equalizer for sculpting frequencies, advanced Compression for dynamic shaping, and a Lookahead Limiter to prevent pesky digital overs. Now with more cowbell and less clipping, putting your sweet audio through the wringer in a good way.
+This ComfyUI custom node is an audio transformation station that applies audio-style mastering techniques, making it like "Ableton Live for your tensors." It features Global Gain control to crank it to 11, a Multi-band Equalizer for sculpting frequencies, advanced Compression for dynamic shaping, and a Lookahead Limiter to prevent pesky digital overs. Now with more cowbell and less clipping, putting your sweet audio through the wringer in a good way.
 
 **🔁 [`PINGPONG_SAMPLER_CUSTOM`](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/PingPong_Sampler_Custom.md)**
 *‣ v0.8.15 – Iterative denoise/re-noise dance!*
