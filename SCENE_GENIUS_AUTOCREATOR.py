@@ -196,10 +196,10 @@ fbg_config:
   max_posterior_scale: 3.0
   initial_value: 0.0
   initial_guidance_scale: 1.0
-  guidance_max_change: 0.5
+  guidance_max_change: 1000.0
   temp: 0.0
   offset: 0.0
-  pi: 0.5
+  pi: 0.25
   t_0: 0.5
   t_1: 0.4
 fbg_eta: 0.0
@@ -299,7 +299,7 @@ fbg_config:
   guidance_max_change: 0.5
   temp: 0.0
   offset: 0.0
-  pi: 0.5
+  pi: 0.25
   t_0: 0.5
   t_1: 0.4
 fbg_eta: 0.0

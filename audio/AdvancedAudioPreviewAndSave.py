@@ -1,5 +1,5 @@
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-# ████ ADVANCED AUDIO PREVIEW & SAVE (AAPS) v0.3.12 – Optimized for Ace-Step Audio/Video ████▓▒░
+# ████ ADVANCED AUDIO PREVIEW & SAVE (AAPS) v0.3.19 – Optimized for Ace-Step Audio/Video ████▓▒░
 # ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 
 # ░▒▓ ORIGIN & DEV:
@@ -22,7 +22,7 @@
 #   ✓ Save audio in FLAC (lossless), MP3 (universal), or OPUS (efficient)
 #   ✓ Metadata Privacy Filter toggle — keep your secrets safe or share your process
 #   ✓ Add custom notes embedded into audio metadata
-#   ✓ Automatic audio normalization to prevent clipping
+#   ✓ Automatic audio normalization to prevent clipping (now with more options!)
 #   ✓ Fully customizable waveform colors, size, and grid display
 
 # ░▒▓ CHANGELOG:
@@ -36,6 +36,24 @@
 #       • Metadata Privacy Filter added
 #       • Enhanced waveform rendering stability
 #       • User interface improvements & bug fixes
+#   - v0.3.13 (Normalization Expansion):
+#       • Added 'Off', 'Peak', 'RMS', 'LUFS' normalization options.
+#       • Introduced target RMS (dB) and LUFS inputs.
+#   - v0.3.14 (Advanced Normalization & Effects):
+#       • Integrated `pyloudnorm` for accurate LUFS measurement and gain calculation.
+#       • Integrated `pedalboard` for applying final gain and as a foundation for future effects.
+#   - v0.3.15 (Default Normalization Levels & Tooltips):
+#       • Added comprehensive tooltips for normalization parameters.
+#   - v0.3.16 (Pyloudnorm Data Type Fix):
+#       • Explicitly cast audio data to `float64` for `pyloudnorm` to resolve "Audio must have five channels or less" error.
+#   - v0.3.17 (LUFS Robustness with Pedalboard Fallback):
+#       • Enhanced LUFS normalization to gracefully fall back to an amplitude-based gain adjustment using 'pedalboard' if 'pyloudnorm' fails or is not available.
+#       • Updated tooltip for `target_lufs` to clarify fallback behavior.
+#   - v0.3.18 (Remove LUFS & pyloudnorm; Adjust RMS default):
+#       • Removed LUFS normalization option and associated `pyloudnorm` dependency due to persistent environmental issues.
+#       • Adjusted default RMS target level to -16 dBFS.
+#   - v0.3.19 (Fix 'output_path' not defined error):
+#       • Removed redundant print statement for 'Audio saved to: {output_path}' in `process_audio` to resolve `NameError`, as the save path is already printed by the `_save_audio_with_av` helper function.
 
 # ░▒▓ CONFIGURATION:
 #   → Primary Use: Audio preview and file export within ComfyUI workflows
@@ -74,6 +92,17 @@ from comfy.cli_args import args # Checks if the user has forbidden us from embed
 
 # Our custom audio input/output module, designed to standardize how audio flows through ComfyUI.
 from ..core import io as md_io # We're using 'md_io' to clearly distinguish it from Python's built_in_io' module.
+
+# --- NEW IMPORTS FOR ADVANCED NORMALIZATION AND EFFECTS ---
+# pyloudnorm import removed as per user request
+try:
+    import pedalboard
+    _pedalboard_available = True
+    print(f"[{__name__}] pedalboard imported successfully. Advanced gain and effects available!")
+except ImportError:
+    _pedalboard_available = False
+    print(f"[{__name__}] Warning: pedalboard not found. Final gain application will fall back to direct tensor manipulation.")
+# --- END NEW IMPORTS ---
 
 # --- Configuration: Setting up our Digital Workspace ---
 # Define the special directory where all our awesome audio creations will be saved.
@@ -245,27 +274,27 @@ class AdvancedAudioPreviewAndSave:
                 # DEFAULT IS NOW FALSE! Because sometimes you just want to hear the vibes without cluttering your drive!
                 "save_to_disk": ("BOOLEAN", {"default": False}),
                 # NEW: save_metadata - Primary toggle to control whether ANY metadata is saved.
-                "save_metadata": ("BOOLEAN", {"default": True, "tooltip": "If checked, all available metadata (workflow, prompt, notes) will be embedded. If unchecked, NO metadata will be saved."}),
+                "save_metadata": ("BOOLEAN", {"default": True, "tooltip": "If checked, all available metadata (workflow, prompt, notes) will be embedded in the audio file. If unchecked, NO metadata will be saved."}),
                 # custom_notes: A personal whisper to your audio file's metadata. Your secret message to the future!
-                "custom_notes": ("STRING", {"default": ""}),
+                "custom_notes": ("STRING", {"default": "", "tooltip": "Add custom text notes to be embedded in the audio file's metadata. Visible in players that support metadata."}),
                 # normalize_audio: Automatically scales the audio. Prevents harsh clipping (too loud!) or being too quiet.
                 # Because nobody likes audio that screams or whispers too much!
-                "normalize_audio": ("BOOLEAN", {"default": True}),
-                # waveform_color: The color of the main line in your waveform visualization.
-                # Use HTML color names (like "red", "blue") or #HEX codes (like "#00FFFF" for neon cyan).
-                "waveform_color": ("STRING", {"default": "hotpink"}),
+                "normalize_method": (["Off", "Peak", "RMS"], {"default": "Peak", "tooltip": "Select the audio normalization method.\n\n- 'Off': No normalization applied.\n- 'Peak': Normalizes the audio so its loudest sample reaches a target peak amplitude (usually just below 0 dBFS to prevent clipping).\n- 'RMS': Normalizes to an average loudness level based on the Root Mean Square of the waveform. Useful for achieving a consistent average volume."}),
+                "target_rms_db": ("INT", {"default": -16, "min": -60, "max": 0, "step": 1, "tooltip": "Target RMS (Root Mean Square) level in dBFS (decibels relative to full scale) for RMS normalization. This controls the average power of the audio. Common values range from -20 dBFS for dialogue to -12 dBFS for music, depending on desired perceived loudness."}),
+                # target_lufs input removed as per user request
+                "waveform_color": ("STRING", {"default": "hotpink", "tooltip": "Color of the waveform line in the generated image. Accepts common color names (e.g., 'blue', 'green') or hex codes (e.g., '#FF00FF')."}),
                 # waveform_background_color: The canvas behind your sound waves. Make it dramatic!
-                "waveform_background_color": ("STRING", {"default": "black"}),
+                "waveform_background_color": ("STRING", {"default": "black", "tooltip": "Background color of the waveform image. Accepts common color names (e.g., 'white', 'gray') or hex codes (e.g., '#333333')."}),
                 # mp3_quality: For those discerning ears who demand high-fidelity MP3s!
                 # V0 is the top-tier Variable Bitrate (VBR) setting, offering amazing quality with smart file sizes.
                 # 128k is good for general use, 320k is max Constant Bitrate (CBR). V0 is often the sweet spot!
-                "mp3_quality": (["V0", "128k", "320k"], {"default": "V0"}),
+                "mp3_quality": (["V0", "128k", "320k"], {"default": "V0", "tooltip": "Select the quality for MP3 output. 'V0' offers excellent quality with variable bitrate. '128k' and '320k' are constant bitrates."}),
                 # opus_quality: New! Quality settings for Opus. Higher values mean better quality.
-                "opus_quality": (["64k", "96k", "128k", "192k", "320k"], {"default": "128k"}),
+                "opus_quality": (["64k", "96k", "128k", "192k", "320k"], {"default": "128k", "tooltip": "Select the quality for OPUS output. Higher kilobit values generally mean better audio fidelity and larger file sizes."}),
                 # waveform_width: The desired width of the waveform image in pixels.
-                "waveform_width": ("INT", {"default": 800, "min": 100, "max": 2048, "step": 16}),
+                "waveform_width": ("INT", {"default": 800, "min": 100, "max": 2048, "step": 16, "tooltip": "Width of the generated waveform image in pixels."}),
                 # waveform_height: The desired height of the waveform image in pixels.
-                "waveform_height": ("INT", {"default": 150, "min": 50, "max": 1024, "step": 16}),
+                "waveform_height": ("INT", {"default": 150, "min": 50, "max": 1024, "step": 16, "tooltip": "Height of the generated waveform image in pixels."}),
             },
             # Hidden inputs for metadata embedding. ComfyUI whispers secrets into our node's ear!
             "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
@@ -286,8 +315,8 @@ class AdvancedAudioPreviewAndSave:
     OUTPUT_NODE = True
 
     # --- The Main Processing Function: Where the Magic ACTUALLY Happens! ---
-    def process_audio(self, audio_input, filename_prefix, save_format, save_to_disk, save_metadata, custom_notes, normalize_audio, waveform_color, waveform_background_color, mp3_quality, opus_quality, waveform_width, waveform_height, prompt=None, extra_pnginfo=None):
-        print(f"[{__name__}] Processing audio data stream... Stand by for sonic glory!")
+    def process_audio(self, audio_input, filename_prefix, save_format, save_to_disk, save_metadata, custom_notes, normalize_method, target_rms_db, waveform_color, waveform_background_color, mp3_quality, opus_quality, waveform_width, waveform_height, prompt=None, extra_pnginfo=None):
+        print(f"[{__name__}] Processing audio data stream with normalization method: '{normalize_method}'... Stand by for sonic glory!")
 
         # Step 1: Get the audio data from our input. It's like uncorking a bottle of digital sound!
         try:
@@ -306,22 +335,55 @@ class AdvancedAudioPreviewAndSave:
             print("WARNING: Input waveform is empty. Skipping audio saving and preview. Nothing to hear here but the sound of silence (literally!)")
             return ({"waveform": torch.empty(0, 0, 0), "sample_rate": 0}, torch.empty(0, 0, 0, 3).permute(0,2,3,1)) # Ensure 4D (B,H,W,C) for ComfyUI.image
 
-
         # Prepare audio data for processing (ensure it's on the CPU and in the correct 2D shape).
         # We need to make sure the tensor is shaped just right, like a puzzle piece.
         audio_data_for_processing = waveform_tensor_original.cpu() # Move data to CPU, most audio processing likes it there.
         if audio_data_for_processing.ndim == 3: # If it's (batch, channels, samples)
             audio_data_for_processing = audio_data_for_processing[0] # Take the first item in the batch.
+        
+        # Convert to numpy for pedalboard.
+        # Ensure channels are first for pedalboard (C, Samples)
+        if audio_data_for_processing.ndim == 1:
+            audio_data_np = audio_data_for_processing.numpy().reshape(1, -1) # Mono: (1, samples)
+        else: # Already (channels, samples)
+            audio_data_np = audio_data_for_processing.numpy()
+
 
         # Step 2: Normalization - Making sure our audio isn't too loud or too quiet!
-        if normalize_audio:
+        if normalize_method == "Peak":
             peak_val = torch.max(torch.abs(audio_data_for_processing)) # Find the loudest point in the audio.
             if peak_val > 1e-6: # Avoid dividing by zero or near-zero, which would make the universe explode!
                 # Normalize to 0.99 to give a little headroom. We like our audio to breathe and not clip!
                 audio_data_for_processing = audio_data_for_processing / peak_val * 0.99
                 print(f"[{__name__}] Audio normalized to peak value of ~0.99. No clipping allowed on my watch!")
             else:
-                print(f"[{__name__}] Audio has very low amplitude (or is silent); skipping normalization. Nothing to normalize here!")
+                print(f"[{__name__}] Audio has very low amplitude (or is silent); skipping peak normalization. Nothing to normalize here!")
+        elif normalize_method == "RMS":
+            # Calculate current RMS level in linear scale
+            # RMS = sqrt(mean(x^2))
+            current_rms_linear = torch.sqrt(torch.mean(audio_data_for_processing**2))
+
+            # Convert target RMS from dB to linear scale
+            # Linear = 10^(dB / 20)
+            target_rms_linear = 10**(target_rms_db / 20.0)
+
+            if current_rms_linear > 1e-9: # Avoid division by zero
+                # Calculate the scaling factor
+                scale_factor = target_rms_linear / current_rms_linear
+                audio_data_for_processing = audio_data_for_processing * scale_factor
+                print(f"[{__name__}] Audio normalized to target RMS: {target_rms_db} dB. Current RMS was {20 * torch.log10(current_rms_linear).item():.2f} dB.")
+                # Clip to prevent going over 1.0 after normalization
+                audio_data_for_processing = torch.clamp(audio_data_for_processing, -1.0, 1.0)
+            else:
+                print(f"[{__name__}] Audio has very low amplitude (or is silent); skipping RMS normalization.")
+        # LUFS normalization block removed as per user request
+        elif normalize_method == "Off":
+            print(f"[{__name__}] Normalization is turned off. Audio will be processed as is.")
+
+        # Ensure audio_data_for_processing is a PyTorch tensor after all operations
+        if not isinstance(audio_data_for_processing, torch.Tensor):
+            audio_data_for_processing = torch.from_numpy(audio_data_for_processing)
+
 
         # Step 3: Dynamic Workflow JSON and Metadata Assembly - Building our secret messages!
         metadata = {} # This dictionary will hold all the extra info we want to embed.
@@ -390,7 +452,8 @@ class AdvancedAudioPreviewAndSave:
                 metadata, # Pass the potentially empty metadata dictionary
                 quality_setting=mp3_quality if save_format == "MP3" else (opus_quality if save_format == "OPUS" else None) # Send quality for MP3s/Opus.
             )
-            print(f"[{__name__}] Audio saved to disk (via PyAV). Your masterpiece is now safely stored!")
+            # Removed the redundant print statement here, as the save path is already printed by _save_audio_with_av
+            # print(f"[{__name__}] Audio saved to: {output_path}. Your masterpiece is now safely stored!")
 
         # Step 5: Generate Waveform Image (now as an IMAGE output) - Visualizing the sound waves!
         waveform_image_tensor = torch.empty(1, waveform_height, waveform_width, 3) # Default empty tensor in case of errors. Ensure 4D (B,H,W,C) for ComfyUI.image
@@ -398,19 +461,16 @@ class AdvancedAudioPreviewAndSave:
 
         try:
             # Convert our pristine audio tensor to NumPy for plotting. Matplotlib loves NumPy arrays!
-            audio_data_np = audio_data_for_processing.cpu().numpy()
-
-            # For plotting, if we have stereo audio, we typically plot one channel (e.g., the left one)
-            # or an average. This makes the graph clear and easy to read.
-            if audio_data_np.ndim == 2: # If it's (channels, samples)
-                if audio_data_np.shape[0] > 1: # Stereo audio (e.g., (2, samples))
-                    audio_data_np_mono = audio_data_np[0, :] # Plot the first channel. Left channel's time to shine!
-                else: # Mono but 2D (1, samples) - just flatten it for plotting.
-                    audio_data_np_mono = audio_data_np.flatten()
-            elif audio_data_np.ndim == 1: # Already mono (samples,)
-                audio_data_np_mono = audio_data_np
+            # Ensure it's (samples,) for plotting mono, or first channel if stereo
+            if audio_data_for_processing.ndim == 2: # (channels, samples)
+                if audio_data_for_processing.shape[0] > 1:
+                    audio_data_np_mono = audio_data_for_processing[0, :].cpu().numpy() # Plot first channel
+                else:
+                    audio_data_np_mono = audio_data_for_processing.flatten().cpu().numpy() # Flatten mono (1, samples) to (samples,)
+            elif audio_data_for_processing.ndim == 1: # (samples,)
+                audio_data_np_mono = audio_data_for_processing.cpu().numpy()
             else:
-                raise ValueError(f"Unsupported audio data shape for plotting: {audio_data_np.shape}. My pixels are confused and refusing to draw!")
+                raise ValueError(f"Unsupported audio data shape for plotting: {audio_data_for_processing.shape}. My pixels are confused and refusing to draw!")
 
             # --- ADDED: Calculate time_axis for plotting ---
             if samplerate <= 0: # Handle cases where samplerate might be invalid (e.g., empty audio input)

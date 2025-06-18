@@ -1,3 +1,56 @@
+"""
+## ████ Audio Normalizer & Converter v1.0.0
+
+---
+
+### ░▒▓ ORIGIN & DEV:
+- **Cast into the void by:** MDMAchine
+- **License:** Apache 2.0 _(No cursed floppy disks allowed)_
+
+---
+
+### ░▒▓ DESCRIPTION:
+A **Command-Line Utility** designed with precision. Built for **batch processing audio files for normalization, conversion, and renaming**, it channels the chaos of demoscene nights. _May work with various audio formats, but don't expect mercy or miracles._
+
+---
+
+### ░▒▓ FEATURES:
+- ✓ LUFS loudness normalization
+- ✓ Supports multiple output audio formats (MP3, WAV, FLAC, AAC, OGG, OPUS) 
+- ✓ Custom output file naming (prefix/suffix) 
+- ✓ Dry run mode for testing without file modification 
+- ✓ Cross-platform compatibility 
+
+---
+
+### ░▒▓ CHANGELOG:
+
+#### v1.0 – Initial Release:
+- Core logic implemented with LUFS normalization 
+- Basic stability ensured
+- Ground-up optimization passes
+
+#### vX.X – Optimization Drop:
+- [Insert performance boosts or fixes]
+- UI/UX tweaks
+- Parameter matrix expanded
+
+---
+
+### ░▒▓ CONFIGURATION:
+- **Primary Use:** Normalize audio to a target LUFS, convert formats, and rename files in bulk. 
+- **Secondary Use:** Prepare audio datasets for consistent loudness and format.
+- **Edge Use:** _Process large, unverified audio libraries with custom settings._
+
+---
+
+### ░▒▓ WARNING:
+This tool may trigger:
+- ▓▒░ Temporal distortion
+- ▓▒░ Memories of ANSI art & screaming modems
+- ▓▒░ A sense of unstoppable creative power
+"""
+
 import os
 import subprocess
 import argparse
