@@ -239,22 +239,6 @@ Delete contents of:
 D:\Ace-Step_Fork\ACE-Step\checkpoints
 ```
 
-### 🔹 Adjust Training Steps
-
-Edit:
-
-```
-D:\Ace-Step_Fork\ACE-Step\trainer_new.py
-```
-
-Search for:
-
-```python
-args.add_argument("--max_steps", type=int, default=2000)
-```
-
-Change `default=2000` to `default=5000` (or desired value), and save.
-
 ### 🔹 Start Training
 
 Run with default steps (2000):
