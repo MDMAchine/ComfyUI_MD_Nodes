@@ -1,3 +1,56 @@
+"""
+## ████ Prompt Tagging Tool v1.0.0
+
+---
+
+### ░▒▓ ORIGIN & DEV:
+- **Cast into the void by:** MDMAchine
+- **License:** Apache 2.0 _(No cursed floppy disks allowed)_
+
+---
+
+### ░▒▓ DESCRIPTION:
+A **Command-Line Utility** designed with precision. Built for **batch adding custom tags to text prompt files**, it channels the chaos of demoscene nights. _May work with other text-based files, but don't expect mercy or miracles._
+
+---
+
+### ░▒▓ FEATURES:
+- ✓ Processes multiple text files
+- ✓ Appends tags efficiently
+- ✓ Handles existing tags to avoid duplicates
+- ✓ Provides clear execution feedback
+- ✓ Debug-ready (logs optional)
+
+---
+
+### ░▒▓ CHANGELOG:
+
+#### v1.0 – Initial Release:
+- Core logic implemented
+- Basic stability ensured
+- Ground-up optimization passes
+
+#### vX.X – Optimization Drop:
+- [Insert performance boosts or fixes]
+- UI/UX tweaks
+- Parameter matrix expanded
+
+---
+
+### ░▒▓ CONFIGURATION:
+- **Primary Use:** Append tags to text files (e.g., `_prompt.txt`) for data management or organization.
+- **Secondary Use:** Automate modification of text-based datasets for various purposes.
+- **Edge Use:** _Process large, unverified text datasets._
+
+---
+
+### ░▒▓ WARNING:
+This tool may trigger:
+- ▓▒░ Temporal distortion
+- ▓▒░ Memories of ANSI art & screaming modems
+- ▓▒░ A sense of unstoppable creative power
+"""
+
 import os
 import argparse
 
