@@ -106,54 +106,34 @@ verbose: true
 
 rules:
   - start_sigma: -1
-    apg_scale: 0
-    cfg: 4
+    apg_scale: 0.0
+    cfg: 5.0
 
   - start_sigma: 0.85
     apg_scale: 5.0
     predict_image: true
-    cfg: 4
+    cfg: 3.7
     mode: pre_alt2
     update_blend_mode: lerp
     dims: [-2, -1]
-    momentum: 0.7
-    norm_threshold: 3.0
-    eta: 0.0
-
-  - start_sigma: 0.70
-    apg_scale: 4.5
-    predict_image: true
-    cfg: 3.9
-    mode: pre_alt2
-    update_blend_mode: lerp
-    dims: [-2, -1]
-    momentum: 0.6
-    norm_threshold: 2.5
+    momentum: 0.65
+    norm_threshold: 3.5
     eta: 0.0
 
   - start_sigma: 0.55
-    apg_scale: 4
+    apg_scale: 4.0
     predict_image: true
-    cfg: 3.8
+    cfg: 2.9
     mode: pure_apg
-    momentum: 0.0
-
-  - start_sigma: 0.40
+  - start_sigma: 0.4
     apg_scale: 3.8
-    predict_image: false
-    cfg: 3.7
-    momentum: 0.0
-
-  - start_sigma: 0.30
-    apg_scale: 3.5
-    predict_image: false
-    cfg: 3.6
-    momentum: 0.0
+    predict_image: true
+    cfg: 2.75
+    mode: pure_apg
 
   - start_sigma: 0.15
-    apg_scale: 0
-    cfg: 3.5
-    momentum: 0.0
+    apg_scale: 0.0
+    cfg: 2.6
 
 """
         # Default Sampler YAML for original PingPongSampler_Custom to use if LLM output is unparseable or invalid
@@ -161,8 +141,8 @@ rules:
 verbose: true
 step_random_mode: block
 step_size: 5
-first_ancestral_step: 14
-last_ancestral_step: 34
+first_ancestral_step: 25
+last_ancestral_step: 40
 start_sigma_index: 0
 end_sigma_index: -1
 enable_clamp_output: false
@@ -174,9 +154,9 @@ step_blend_mode: lerp
         self.default_sampler_yaml_fbg = """
 verbose: true
 step_random_mode: block
-step_size: 4
-first_ancestral_step: 15
-last_ancestral_step: 35
+step_size: 5
+first_ancestral_step: 25
+last_ancestral_step: 40
 enable_clamp_output: false
 start_sigma_index: 0
 end_sigma_index: -1
@@ -184,22 +164,22 @@ blend_mode: lerp
 step_blend_mode: lerp
 fbg_config:
   sampler_mode: EULER
-  cfg_scale: 7.0
+  cfg_scale: 12.0
   cfg_start_sigma: 1.0
   cfg_end_sigma: 0.004
   fbg_start_sigma: 1.0
-  fbg_end_sigma: 0.006
+  fbg_end_sigma: 0.004
   fbg_guidance_multiplier: 1.0
   ancestral_start_sigma: 1.0
   ancestral_end_sigma: 0.004
-  max_guidance_scale: 15.0
-  max_posterior_scale: 3.0
+  max_guidance_scale: 22.0
+  max_posterior_scale: 2.0
   initial_value: 0.0
   initial_guidance_scale: 1.0
-  guidance_max_change: 1000.0
+  guidance_max_change: 1.0
   temp: 0.0
   offset: 0.0
-  pi: 0.25
+  pi: 0.45
   t_0: 0.5
   t_1: 0.4
 fbg_eta: 0.0
@@ -257,6 +237,8 @@ Based on extensive testing and user feedback, certain Ping-Pong Sampler paramete
 
 {fbg_section}
 
+**IMPORTANT: If the FBG section above is present (i.e., you are generating for the FBG Integrated PingPong Sampler), you MUST include the `fbg_config` dictionary and its associated top-level FBG parameters (`fbg_eta`, `fbg_s_noise`, `debug_mode`) in your output. Refer to the structure provided in the FBG section.**
+
 **Your output must ONLY be the valid YAML string, with no conversational filler, explanations, or additional text.**
 
 **Example Output Format (for original PingPong Sampler):**
@@ -274,9 +256,9 @@ step_blend_mode: lerp
 **Example Output Format (for FBG Integrated PingPong Sampler):**
 verbose: true
 step_random_mode: block
-step_size: 4
-first_ancestral_step: 15
-last_ancestral_step: 35
+step_size: 5
+first_ancestral_step: 14
+last_ancestral_step: 34
 enable_clamp_output: false
 start_sigma_index: 0
 end_sigma_index: -1
@@ -284,19 +266,19 @@ blend_mode: lerp
 step_blend_mode: lerp
 fbg_config:
   sampler_mode: EULER
-  cfg_scale: 7.0
+  cfg_scale: 10.0
   cfg_start_sigma: 1.0
   cfg_end_sigma: 0.004
   fbg_start_sigma: 1.0
-  fbg_end_sigma: 0.006
+  fbg_end_sigma: 0.004
   fbg_guidance_multiplier: 1.0
   ancestral_start_sigma: 1.0
   ancestral_end_sigma: 0.004
-  max_guidance_scale: 15.0
-  max_posterior_scale: 3.0
+  max_guidance_scale: 22.0
+  max_posterior_scale: 4.0
   initial_value: 0.0
   initial_guidance_scale: 1.0
-  guidance_max_change: 0.5
+  guidance_max_change: 1.0
   temp: 0.0
   offset: 0.0
   pi: 0.25
@@ -317,27 +299,28 @@ debug_mode: true
 These parameters are for the `fbg_config` dictionary and top-level FBG inputs.
 
 * **`fbg_config` (dictionary):** This nested dictionary holds the core FBG configuration.
-    * **`sampler_mode` (string):** FBG's base sampler mode for internal calculations. `EULER` is standard. `PINGPONG` influences how FBG calculates its internal step. **Default: `EULER`**.
-    * **`cfg_scale` (float):** **The base Classifier-Free Guidance (CFG) scale that FBG dynamically modifies.** This is the starting point for FBG's adjustments. **Default: `7.0`**. (Updated to match user's example)
+    * **`sampler_mode` (string):** FBG's base sampler mode for internal calculations. `EULER` is standard and preferable, but `PINGPONG` can also be used and has shown good results in unique instances.**Default: `EULER`**
+    * **`cfg_scale` (float):** **The base Classifier-Free Guidance (CFG) scale that FBG dynamically modifies.** This is the starting point for FBG's adjustments. **Optimal performance is often seen with higher settings, from `2.0` up to `16.0`, with values "in the middle" like `8.0`through `12.0` being effective.**
     * **`cfg_start_sigma` (float):** The noise level (sigma) at which regular CFG (and thus FBG's influence over it) begins. **Default: `1.0`** (to cover typical model ranges).
     * **`cfg_end_sigma` (float):** The noise level (sigma) at which regular CFG ends. **Default: `0.004`** (to cover typical model ranges).
     * **`fbg_start_sigma` (float):** The noise level (sigma) at which FBG actively calculates and applies its dynamic scale. **Default: `1.0`** (to cover typical model ranges).
-    * **`fbg_end_sigma` (float):** The noise level (sigma) at which FBG ceases its dynamic scale calculation. **Default: `0.006`**. (Updated to match user's example)
+    * **`fbg_end_sigma` (float):** The noise level (sigma) at which FBG ceases its dynamic scale calculation. **Default: `0.004`**.
+    * **`fbg_guidance_multiplier` (float):** Multiplier for the FBG guidance component. **Default: `1.0`**.
     * **`ancestral_start_sigma` (float):** FBG internal: First sigma for ancestral sampling (for FBG's base sampler). **Default: `1.0`**. (`fbg_eta` must be >0 for this to have effect.)
     * **`ancestral_end_sigma` (float):** FBG internal: Last sigma for ancestral sampling (for FBG's base sampler). **Default: `0.004`**.
-    * **`max_guidance_scale` (float):** Upper limit for the total guidance scale after FBG and CFG. **Default: `15.0`**. (Updated to match user's example)
+    * **`max_guidance_scale` (float):** Upper limit for the total guidance scale after FBG and CFG. **A good starting point is `22.0`**.
+    * **`max_posterior_scale` (float):** Limits the maximum posterior scale value. **Values from `3.0` to `7.0` can make an impact, with somewhere around `4.0` usually being ideal.**
+    * **`initial_value` (float):** Initial value for FBG's internal log posterior estimate. **Default: `0.0`**.
     * **`initial_guidance_scale` (float):** Initial value for FBG's internal guidance scale. **Default: `1.0`**.
-    * **`guidance_max_change` (float):** Limits the percentage change of FBG guidance scale per step. A value like `0.5` means max 50% change. `1000.0` (default) effectively disables limiting. **Default: `0.5`**. (Updated to match user's example)
-    * **`pi` (float):** ($\pi$) from FBG paper. Higher (e.g., `0.95-0.999`) for well-learned models. Lower (e.g., `0.2-0.8`) for general T2I. **Default: `0.5`**. (Updated to match user's example)
-    * **`t_0` (float):** Normalized diffusion time (0-1) where FBG guidance reaches reference. If `0.0`, `temp` and `offset` are used directly. **Default: `0.5`**.
-    * **`t_1` (float):** Normalized diffusion time (0-1) where FBG guidance reaches maximum. If `0.0`, `temp` and `offset` are used directly. **Default: `0.4`**.
+    * **`guidance_max_change` (float):** Limits the percentage change of FBG guidance scale per step. A value like `0.5` means max 50% change. **A value of `1.0` has shown good results.**
     * **`temp` (float):** Temperature for FBG log posterior update. **Only applies if `t_0` and `t_1` are both `0.0`**. **Default: `0.0`**.
     * **`offset` (float):** Offset for FBG log posterior update. **Only applies if `t_0` and `t_1` are both `0.0`**. **Default: `0.0`**.
-    * **`initial_value` (float):** Initial value for FBG's internal log posterior estimate. **Default: `0.0`**.
-    * **`fbg_guidance_multiplier` (float):** Multiplier for the FBG guidance component. **Default: `1.0`**.
+    * **`pi` (float):** ($\pi$) from FBG paper. Higher (e.g., `0.95-0.999`) for well-learned models. Lower (e.g., `0.2-0.8`) for general T2I. **A value of `0.25-0.35` has shown good results.**
+    * **`t_0` (float):** Normalized diffusion time (0-1) where FBG guidance reaches reference. If `0.0`, `temp` and `offset` are used directly. **A value of `0.5` has shown good results.**
+    * **`t_1` (float):** Normalized diffusion time (0-1) where FBG guidance reaches maximum. If `0.0`, `temp` and `offset` are used directly. **A value of `0.4` has shown good results.**
 * **`fbg_eta` (float):** FBG internal parameter: Noise amount for ancestral sampling within FBG's step. **Default: `0.0`**.
 * **`fbg_s_noise` (float):** FBG internal parameter: Scale for noise within FBG's step. **Default: `1.0`**.
-* **`debug_mode` (boolean):** Enable verbose debug messages in the ComfyUI console. **Default: `true`**. (Updated to match user's example)
+* **`debug_mode` (boolean):** Enable verbose debug messages in the ComfyUI console. **Default: `true`**.
 """
 
         # Full default prompt for APG YAML generation
@@ -371,12 +354,12 @@ You are an advanced generative AI configuration expert, specializing in the Adap
             * For concepts requiring **softness, ambient qualities, or abstractness** (e.g., 'dreamy', 'lo-fi'), use lower `apg_scale` (e.g., `1.0` to `3.0`).
 * **`cfg` (float):** **The standard Classifier-Free Guidance (CFG) scale for this specific rule's phase.**
     * **Purpose:** Controls how strongly the model adheres to the text prompt versus exploring freely.
-    * **Decision-Making:** The **optimal performance for `cfg` is typically in the `3.0` to `5.0` range.** While `cfg` can be kept consistent across rules, or adjusted **slightly** (e.g., `0.1` to `0.2` increments/decrements as seen in the example) in phases requiring more direct prompt adherence or subtle shifts in generation, **always keep it within the `3.0-5.0` range for best results** to avoid over-guidance or under-guidance artifacts.
+    * **Decision-Making:** The **optimal performance for `cfg` has been observed to be effective in the `2.5` to `4.0` range, especially when paired with FBG.** While `cfg` can be kept consistent across rules, or adjusted **slightly** (e.g., `0.1` to `0.2` increments/decrements as seen in the example) in phases requiring more direct prompt adherence or subtle shifts in generation, **always keep it within the `2.5-4.0` range for best results** to avoid over-guidance or under-guidance artifacts.
 * **`predict_image` (boolean):** **Determines what the model is "predicting" at that step (image content vs. noise).**
     * **Purpose:** Influences how APG guidance is calculated and applied. `true` focuses guidance on the evolving image content, `false` on noise.
     * **Decision-Making:**
         * Generally set to `true` for rules where `apg_scale` is active, especially in early and mid-phases, as this focuses guidance on the evolving image content and often leads to smoother, more coherent results. This is particularly effective when `mode` is `pre_alt2` or `pure_apg` with active `momentum`.
-        * Consider `false` (noise prediction) for later stages (lower sigmas, e.g., `start_sigma` below `0.5` or `0.4`), especially when `apg_scale` is lower and the goal is subtle refinement of noise, or if experimenting with alternative guidance strategies. The example's choice of `false` for `0.40` and `0.30` is a good illustration of this.
+        * **For optimal results, especially when combining with FBG, consider setting `predict_image: true` for the majority of active APG phases (even at lower sigmas down to `0.30` or `0.15`), as this often contributes to better detail preservation and coherence.**
 * **`mode` (string):** **Controls the method of APG application and internal blending.**
     * **Purpose:** Dictates the underlying algorithm for projecting guidance and how momentum is applied.
     * **Decision-Making:**
@@ -404,7 +387,7 @@ You are an advanced generative AI configuration expert, specializing in the Adap
 **Overall Strategy for `rules` Array Construction:**
 1.  **Initialization:** A rule at `start_sigma: -1.0` with `apg_scale: 0.0` and a base `cfg`. This sets up the initial CFG-only phase.
 2.  **Early Sculpting (Higher Sigmas):** Rules at higher sigmas (e.g., `0.85`, `0.70`) should establish core features and coherence. These rules are ideal for activating APG with higher `apg_scale` (e.g., `3.0` to `5.0`), using `mode: pre_alt2` for robust and smooth guidance, and setting `predict_image: true` to focus on image evolution. Ensure active `momentum` (e.g., `0.6` to `0.8`) and `dims: [-2, -1]` for smooth and dimensionally correct application.
-3.  **Mid-Process Refinement (Mid-range Sigmas):** Rules at mid-range sigmas (e.g., `0.55`, `0.40`, `0.30`) should refine details. You can transition `mode` to `pure_apg` here. `apg_scale` might be slightly reduced, and `predict_image` can be `true` or `false` based on whether you want to refine the image or noise prediction at these stages. Continue to consider `momentum` if needed for continued smoothness, and always include `dims: [-2, -1]` when `apg_scale` is active.
+3.  **Mid-Process Refinement (Mid-range Sigmas):** Rules at mid-range sigmas (e.g., `0.55`, `0.40`, `0.30`) should refine details. You can transition `mode` to `pure_apg` here. `apg_scale` might be slightly reduced, and **for optimal results with FBG, continue to use `predict_image: true`** at these stages. Continue to consider `momentum` if needed for continued smoothness, and always include `dims: [-2, -1]` when `apg_scale` is active.
 4.  **Final Cleanup:** A rule at a very low `start_sigma` (e.g., `0.01`) with `apg_scale: 0.0` to ensure a clean, CFG-only finish, allowing the sampler to finalize details without aggressive APG.
 
 **Your output must ONLY be the valid YAML string, with no conversational filler, explanations, or additional text.**
@@ -422,7 +405,7 @@ rules:
   - start_sigma: 0.85
     apg_scale: 5.0
     predict_image: true
-    cfg: 4
+    cfg: 3.0
     mode: pre_alt2
     update_blend_mode: lerp
     dims: [-2, -1]
@@ -433,7 +416,7 @@ rules:
   - start_sigma: 0.70
     apg_scale: 4.5
     predict_image: true
-    cfg: 3.9
+    cfg: 2.9
     mode: pre_alt2
     update_blend_mode: lerp
     dims: [-2, -1]
@@ -442,27 +425,27 @@ rules:
     eta: 0.0
 
   - start_sigma: 0.55
-    apg_scale: 4
+    apg_scale: 4.0
     predict_image: true
-    cfg: 3.8
+    cfg: 2.8
     mode: pure_apg
     momentum: 0.0
 
   - start_sigma: 0.40
     apg_scale: 3.8
-    predict_image: false
-    cfg: 3.7
+    predict_image: true
+    cfg: 2.7
     momentum: 0.0
 
   - start_sigma: 0.30
     apg_scale: 3.5
-    predict_image: false
-    cfg: 3.6
+    predict_image: true
+    cfg: 2.6
     momentum: 0.0
 
   - start_sigma: 0.15
     apg_scale: 0
-    cfg: 3.5
+    cfg: 2.5
     momentum: 0.0
 
 """

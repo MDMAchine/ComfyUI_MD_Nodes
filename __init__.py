@@ -1,3 +1,5 @@
+# C:\Stable Diffusion\ComfyUI\custom_nodes\ComfyUI_MD_Nodes\__init__.py
+
 # Initialize empty dictionaries to collect all mappings
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
@@ -96,8 +98,21 @@ try:
 except Exception as e:
     print(f"WARNING: Could not load mastering_chain_node: {e}")
 
+# --- Add imports for the MD Seed Saver node ---
+try:
+    # Import the new Seed Saver node from the root of the MD_Nodes package
+    from .seed_saver_node import NODE_CLASS_MAPPINGS as SS_CLASS_MAPPINGS
+    from .seed_saver_node import NODE_DISPLAY_NAME_MAPPINGS as SS_DISPLAY_MAPPINGS
+    NODE_CLASS_MAPPINGS.update(SS_CLASS_MAPPINGS)
+    NODE_DISPLAY_NAME_MAPPINGS.update(SS_DISPLAY_MAPPINGS)
+    print("INFO: Successfully loaded MD Seed Saver node.") # Updated print message
+except Exception as e:
+    print(f"WARNING: Could not load MD Seed Saver node: {e}")
+
+
 # Define __all__ to explicitly expose what should be available when the package is imported
 __all__ = [
     "NODE_CLASS_MAPPINGS",
     "NODE_DISPLAY_NAME_MAPPINGS",
+    # You might have other entries here from your existing __all__ list.
 ]

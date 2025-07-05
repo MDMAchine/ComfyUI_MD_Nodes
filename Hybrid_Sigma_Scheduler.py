@@ -1,5 +1,5 @@
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-# ████ Hybrid Sigma Scheduler v0.69.420.1 – Optimized for Ace-Step Audio/Video ████▓▒░
+# ████ Hybrid Sigma Scheduler v0.69.420.2 – Optimized for Ace-Step Audio/Video ████▓▒░
 # ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 
 # ░▒▓ ORIGIN & DEV:
@@ -32,6 +32,10 @@
 #   - v0.69.420.1 (Current Release):
 #       • Refined blending algorithm for ultimate vibe control
 #       • Enhanced compatibility with ComfyUI internal sampling functions
+#   - v0.70 (Proposed Update):
+#       • Added 'model' input for dynamic sigma_min/max retrieval from the loaded model.
+#       • Introduced 'start_at_step' and 'end_at_step' for precise slicing of the generated sigma schedule.
+#       • Clarified 'denoise' parameter role as a passthrough.
 
 # ░▒▓ CONFIGURATION:
 #   → Primary Use: Fine-grained diffusion noise scheduling for generative workflows
@@ -47,17 +51,23 @@
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 
 
-
 import torch
 import comfy.model_management
+# IMPORTANT: get_sigmas_karras from comfy.k_diffusion.sampling does NOT take a 'device' argument directly.
+# It uses .new_zeros() which inherits device from the input tensor.
 from comfy.k_diffusion.sampling import get_sigmas_karras
-import math # Import the math module for math.atan and math.tan_
+import math
 
 # Referenced from https://github.com/AUTOMATIC1111/stable-diffusion-webui/pull/15608
 def kl_optimal_scheduler(n: int, sigma_min: float, sigma_max: float) -> torch.Tensor:
-    adj_idxs = torch.arange(n, dtype=torch.float).div_(n - 1)
+    # Ensure inputs are torch tensors for operations
+    sigma_min_t = torch.tensor(sigma_min, dtype=torch.float32)
+    sigma_max_t = torch.tensor(sigma_max, dtype=torch.float32)
+
+    adj_idxs = torch.arange(n, dtype=torch.float32).div_(n - 1)
     sigmas = adj_idxs.new_zeros(n + 1)
-    sigmas[:-1] = (adj_idxs * math.atan(sigma_min) + (1 - adj_idxs) * math.atan(sigma_max)).tan_()
+    # Using torch.atan and torch.tan_ for tensor operations
+    sigmas[:-1] = (adj_idxs * torch.atan(sigma_min_t) + (1 - adj_idxs) * torch.atan(sigma_max_t)).tan_()
     return sigmas
 
 # Adapted from: https://github.com/genmoai/models/blob/main/src/mochi_preview/infer.py#L41
@@ -95,7 +105,6 @@ def linear_quadratic_schedule_adapted(steps: int, sigma_max: float, threshold_no
         quadratic_steps = steps - linear_steps_actual
         if quadratic_steps > 0:
             # Original calculations from the source
-            # These calculations are safe as linear_steps_actual > 0 and quadratic_steps > 0
             threshold_noise_step_diff = linear_steps_actual - threshold_noise * steps
             quadratic_coef = threshold_noise_step_diff / (linear_steps_actual * quadratic_steps ** 2)
             linear_coef = threshold_noise / linear_steps_actual - 2 * threshold_noise_step_diff / (quadratic_steps ** 2)
@@ -120,8 +129,9 @@ class HybridAdaptiveSigmas:
     def INPUT_TYPES(s):
         return {
             "required": {
-                # Required for Karras functions and device context.
-                "model": ("MODEL",),
+                # --- ADDED: Model input to derive sigma_min/max ---
+                "model": ("MODEL", {"tooltip": "The diffusion model. Used to get inherent sigma_min and sigma_max for scheduling."}),
+                # ----------------------------------------------------
 
                 # How many sigma steps you want. Think of this like "resolution" for noise decay.
                 "steps": ("INT", {
@@ -130,15 +140,14 @@ class HybridAdaptiveSigmas:
                 }),
 
                 # Choose your decay curve style or blending.
-                "mode": (["karras_rho", "adaptive_linear", "blended_curves", "kl_optimal", "linear_quadratic"], { # Added "linear_quadratic"
-                    "tooltip": "🔥 karras_rho = rich, curvy chaos.\\n🧊 adaptive_linear = budget-friendly flatline (generally effective with around 60 steps).\\n💖 blended_curves = mix Karras and Linear.\\n✨ kl_optimal = Based on Theorem 3.1 of 'Align Your Steps' paper, designed for improved sample quality. (Note: This mode uses the model's inherent sigma range, ignoring start_sigma/end_sigma.)\\n📈 linear_quadratic = A schedule with an initial linear phase and a subsequent quadratic phase." # Updated tooltip
+                "mode": (["karras_rho", "adaptive_linear", "blended_curves", "kl_optimal", "linear_quadratic"], {
+                    "tooltip": "🔥 karras_rho = rich, curvy chaos.\\n🧊 adaptive_linear = budget-friendly flatline (generally effective with around 60 steps).\\n💖 blended_curves = mix Karras and Linear.\\n✨ kl_optimal = Based on Theorem 3.1 of 'Align Your Steps' paper, designed for improved sample quality. (Note: This mode uses the model's inherent sigma range, ignoring start_sigma/end_sigma.)\\n📈 linear_quadratic = A schedule with an initial linear phase and a subsequent quadratic phase."
                 }),
 
-                # Passed downstream to samplers; doesn't affect sigmas directly.
-                "denoise": ("FLOAT", {
-                    "default": 1.0, "min": 0.0, "max": 1.0,
-                    "tooltip": "Denoising strength. 1.0 = max effect, 0.0 = placebo."
-                }),
+                # --- ADDED: Parameters for slicing the output sigma schedule ---
+                "start_at_step": ("INT", {"default": 0, "min": 0, "max": 10000, "tooltip": "Start denoising from this step (inclusive, relative to total steps before slicing)."}),
+                "end_at_step": ("INT", {"default": 9999, "min": 0, "max": 10000, "tooltip": "End denoising at this step (exclusive, relative to total steps before slicing). A high value like 9999 means to the very end."}),
+                # ---------------------------------------------------------------
 
                 # Only used if you're running with Karras Fury or Blended mode.
                 "rho": ("FLOAT", {
@@ -152,21 +161,31 @@ class HybridAdaptiveSigmas:
                     "tooltip": "Only for 'blended_curves' mode. Think of it as your DJ slider: 0.0 is pure Karras beats, 1.0 is all Linear chill. Find your perfect mix!"
                 }),
             },
-            "optional": { # Added optional inputs for the new scheduler
-                "start_sigma": ("FLOAT", {
+            "optional": {
+                # --- MOVED AND UPDATED: Denoise parameter for downstream samplers ---
+                "denoise": ("FLOAT", {
+                    "default": 1.0, "min": 0.0, "max": 1.0,
+                    "tooltip": "Denoising strength. Passed downstream to samplers; doesn't affect sigmas directly generated by this node."
+                }),
+                # -------------------------------------------------------------------
+
+                # --- UPDATED: These are now explicit overrides for model's sigma_min/max ---
+                "start_sigma_override": ("FLOAT", {
                     "default": 1.000, "min": 0.0, "max": 20.0, "step": 0.001, "optional": True,
-                    "tooltip": "Optional override for maximum noise. If provided, overrides the model's inherent sigma_max. Set to 1.0 for most EDM models (like SDXL, Hidream) or 14.6 for SD1.5."
+                    "tooltip": "Optional override for the schedule's maximum noise (sigma_max). If provided, this value takes precedence over the model's inherent sigma_max. E.g., 1.0 for SDXL, 14.6 for SD1.5."
                 }),
-                "end_sigma": ("FLOAT", {
+                "end_sigma_override": ("FLOAT", {
                     "default": 0.006, "min": 0.0, "max": 20.0, "step": 0.001, "optional": True,
-                    "tooltip": "Optional override for minimum noise. If provided, overrides the model's inherent sigma_min. Set to 0.006 for most EDM models (like SDXL, Hidream) or 0.02 for SD1.5."
+                    "tooltip": "Optional override for the schedule's minimum noise (sigma_min). If provided, this value takes precedence over the model's inherent sigma_min. E.g., 0.006 for SDXL, 0.02 for SD1.5."
                 }),
+                # -----------------------------------------------------------------------------
+
                 "threshold_noise": ("FLOAT", {
                     "default": 0.025, "min": 0.0, "max": 1.0, "step": 0.001,
                     "tooltip": "Only for 'linear_quadratic' mode. It's the pivot point, where your noise decay decides to stop being a straight-shooter and gets a bit more... quadratic. Think of it as where the curve 'breaks' from a straight line."
                 }),
                 "linear_steps": ("INT", {
-                    "default": None, "min": 0, "max": 200, # Max can be 'steps' or more, but clamping handles
+                    "default": None, "min": 0, "max": 200,
                     "tooltip": "Only for 'linear_quadratic' mode. How many steps should be 'boringly' linear before the curve gets interesting? If left empty, it'll pick half the steps for straight talk."
                 }),
             }
@@ -175,9 +194,12 @@ class HybridAdaptiveSigmas:
     RETURN_TYPES = ("SIGMAS",)
     RETURN_NAMES = ("sigmas",)
     FUNCTION = "generate"
-    CATEGORY = "MD_Nodes/Schedulers"
+    CATEGORY = "MD_Nodes/Schedulers" # Updated Category
 
-    def generate(self, model, steps, mode, denoise, rho, blend_factor, start_sigma=None, end_sigma=None, threshold_noise=None, linear_steps=None):
+    def generate(self, model, steps, mode, rho, blend_factor, start_at_step, end_at_step, # ADDED: start_at_step, end_at_step
+                 denoise=1.0, # MOVED: Now optional
+                 start_sigma_override=None, end_sigma_override=None, # UPDATED NAMES
+                 threshold_noise=None, linear_steps=None):
         try:
             device = comfy.model_management.get_torch_device()
             sigmas = None
@@ -185,44 +207,41 @@ class HybridAdaptiveSigmas:
             actual_sigma_min = None
             actual_sigma_max = None
 
+            # --- UPDATED LOGIC: Determine actual sigma_min/max ---
             # 1. Attempt to get model's inherent sigma range
-            sigma_min_from_model = None
-            sigma_max_from_model = None
             try:
                 model_sampling_obj = model.get_model_object("model_sampling")
-                sigma_min_from_model = model_sampling_obj.sigma_min
-                sigma_max_from_model = model_sampling_obj.sigma_max
-                print(f"DEBUG: Model inherent sigma_min={sigma_min_from_model}, sigma_max={sigma_max_from_model}.")
-
-                # Use model's inherent values as initial candidates
-                actual_sigma_min = sigma_min_from_model
-                actual_sigma_max = sigma_max_from_model
+                actual_sigma_min = model_sampling_obj.sigma_min
+                actual_sigma_max = model_sampling_obj.sigma_max
+                print(f"DEBUG: Model inherent sigma_min={actual_sigma_min}, sigma_max={actual_sigma_max}.")
 
                 # Heuristic: Check for "bad" model values (e.g., identical or very small range)
                 if actual_sigma_min is not None and actual_sigma_max is not None:
-                    if abs(actual_sigma_max - actual_sigma_min) < 1e-5 or actual_sigma_max < 0.1: # Example: if range is too small or max is too low
+                    if abs(actual_sigma_max - actual_sigma_min) < 1e-5 or actual_sigma_max < 0.1:
                         print(f"WARNING: Model reported a very small or unusual sigma range ({actual_sigma_min} to {actual_sigma_max}). This might be incorrect metadata. Will check for manual overrides.")
-                        actual_sigma_min = None # Reset to force fallback/override if no manual input
-                        actual_sigma_max = None # Reset to force fallback/override if no manual input
+                        actual_sigma_min = None # Reset to force fallback/override
+                        actual_sigma_max = None # Reset to force fallback/override
 
             except AttributeError as e:
                 print(f"WARNING: Could not access model.get_model_object('model_sampling').sigma_min/max ({e}). Will check for manual overrides or fall back to common defaults.")
+            except Exception as e: # Catch other potential issues during model access
+                print(f"WARNING: An unexpected error occurred while trying to get model's sigma_min/max: {e}. Will check for manual overrides or fall back to common defaults.")
             
-            # 2. Apply user overrides if provided
-            if start_sigma is not None:
-                actual_sigma_max = start_sigma
-                print(f"DEBUG: User provided start_sigma={start_sigma}. Overriding sigma_max.")
+            # 2. Apply user overrides if provided (start_sigma_override -> sigma_max, end_sigma_override -> sigma_min)
+            if start_sigma_override is not None:
+                actual_sigma_max = start_sigma_override
+                print(f"DEBUG: User provided start_sigma_override={start_sigma_override}. Overriding sigma_max.")
             
-            if end_sigma is not None:
-                actual_sigma_min = end_sigma
-                print(f"DEBUG: User provided end_sigma={end_sigma}. Overriding sigma_min.")
+            if end_sigma_override is not None:
+                actual_sigma_min = end_sigma_override
+                print(f"DEBUG: User provided end_sigma_override={end_sigma_override}. Overriding sigma_min.")
 
             # 3. Apply final fallback if still None (meaning model didn't provide good values AND no user override)
             if actual_sigma_min is None or actual_sigma_max is None:
                 # Fallback to common stable diffusion defaults if no valid range found from model or user override
                 actual_sigma_min = 0.02
                 actual_sigma_max = 14.6120
-                print(f"WARNING: No valid sigma range found (either from model or user override). Falling back to common defaults: sigma_min={actual_sigma_min}, sigma_max={actual_sigma_max}. Results may vary. Consider providing start_sigma/end_sigma manually or using a model with correct metadata.")
+                print(f"WARNING: No valid sigma range found (either from model or user override). Falling back to common defaults: sigma_min={actual_sigma_min}, sigma_max={actual_sigma_max}. Results may vary. Consider providing overrides manually or using a model with correct metadata.")
             
             # Final check to ensure actual_sigma_max is greater than actual_sigma_min
             if actual_sigma_min >= actual_sigma_max:
@@ -233,18 +252,18 @@ class HybridAdaptiveSigmas:
                     actual_sigma_min = actual_sigma_max - 0.1
                 
             print(f"INFO: Final sigma range used: sigma_min={actual_sigma_min}, sigma_max={actual_sigma_max}")
-
+            # -----------------------------------------------------
 
             # Now use actual_sigma_min and actual_sigma_max in all modes
-
             if mode == "karras_rho":
+                # Removed 'device=device' from get_sigmas_karras as it's not a valid parameter for this function.
                 sigmas = get_sigmas_karras(
                     steps,
                     sigma_min=actual_sigma_min,
                     sigma_max=actual_sigma_max,
-                    rho=rho,
-                    device=device
+                    rho=rho
                 )
+                sigmas = sigmas.to(device) # Ensure it's on the correct device after generation
 
             elif mode == "adaptive_linear":
                 current_sigma = actual_sigma_max
@@ -257,13 +276,14 @@ class HybridAdaptiveSigmas:
                 sigmas = torch.tensor(adaptive_sigmas, device=device)
 
             elif mode == "blended_curves":
+                # Removed 'device=device' from get_sigmas_karras here as well.
                 karras_sigmas = get_sigmas_karras(
                     steps,
                     sigma_min=actual_sigma_min,
                     sigma_max=actual_sigma_max,
-                    rho=rho,
-                    device=device
+                    rho=rho
                 )
+                karras_sigmas = karras_sigmas.to(device) # Ensure on device
 
                 linear_current_sigma = actual_sigma_max
                 linear_adaptive_sigmas = [linear_current_sigma]
@@ -276,6 +296,7 @@ class HybridAdaptiveSigmas:
 
                 if karras_sigmas.shape != linear_sigmas.shape:
                     print("Warning: Karras and Linear sigma tensors have different shapes. Blending might not work as expected.")
+                # Ensure blending happens on tensors of the same device
                 sigmas = (1.0 - blend_factor) * karras_sigmas + blend_factor * linear_sigmas
 
             elif mode == "kl_optimal":
@@ -295,7 +316,7 @@ class HybridAdaptiveSigmas:
 
                 sigmas = linear_quadratic_schedule_adapted(
                     steps=steps,
-                    sigma_max=actual_sigma_max,
+                    sigma_max=actual_sigma_max, # Use the determined actual_sigma_max
                     threshold_noise=actual_threshold_noise,
                     linear_steps=actual_linear_steps
                 )
@@ -304,7 +325,28 @@ class HybridAdaptiveSigmas:
                 print(f"DEBUG: linear_quadratic sigmas has NaNs: {torch.isnan(sigmas).any()}")
                 print(f"DEBUG: linear_quadratic sigmas has Infs: {torch.isinf(sigmas).any()}")
 
-            return (sigmas,)
+            # --- NEW LOGIC TO SLICE SIGMAS BASED ON start_at_step AND end_at_step ---
+            if sigmas is not None:
+                # Clamp start_at_step and end_at_step to be within valid bounds
+                # If steps is 20, sigmas will have 21 elements (0 to 20).
+                # Slicing is typically [start_index : end_index (exclusive)]
+                actual_start_idx = max(0, min(start_at_step, sigmas.shape[0] -1))
+                # end_at_step is exclusive, so it can go up to sigmas.shape[0]
+                actual_end_idx = max(actual_start_idx + 1, min(end_at_step, sigmas.shape[0])) # Ensure end_idx is at least start_idx + 1 if possible
+
+                # If the user sets end_at_step to 9999, it should go to the end of the original sigmas.
+                if end_at_step == 9999: # Special case for "go to end" default
+                    actual_end_idx = sigmas.shape[0]
+
+                sliced_sigmas = sigmas[actual_start_idx:actual_end_idx]
+
+                print(f"DEBUG: Original sigmas shape: {sigmas.shape}")
+                print(f"DEBUG: Slicing sigmas from index {actual_start_idx} to {actual_end_idx} (exclusive of end index)")
+                print(f"DEBUG: Sliced sigmas shape: {sliced_sigmas.shape}")
+                return (sliced_sigmas,) # Return the sliced sigmas
+            # -------------------------------------------------------------------------
+
+            return (sigmas,) # Fallback if sigmas was somehow not generated (shouldn't happen with current logic)
 
         except Exception as e:
             import traceback

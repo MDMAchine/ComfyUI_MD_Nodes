@@ -2,10 +2,13 @@
 __pycache__/
 
 # Miscellaneous backups and notes folder inside the package
-misc/
-testing/
+MD_Nodes/misc/
+
+# ComfyUI specific
+.ipynb_checkpoints/
 
 # Ignore common large model/checkpoint files and binaries
+*.json     # (Optional: If you save workflows in the node folder and don't want them in repo)
 *.bin
 *.safetensors
 *.ckpt

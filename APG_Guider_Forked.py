@@ -1,5 +1,5 @@
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-# ████ APG GUIDER (FORKED) v0.1 – Unleashed from the shadows ████▓▒░
+# ████ APG GUIDER (FORKED) v0.1.1 – Unleashed from the shadows ████▓▒░
 # ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 
 # ░▒▓ ORIGIN & DEV:
@@ -22,6 +22,8 @@
 #   ✓ Per-rule momentum, prediction, and mode control
 #   ✓ Built-in debug visibility (verbose output)
 #   ✓ Annotated example config included below
+#   ✓ NEW: Toggle to disable APG and default to standard CFG.
+#   ✓ NEW: Toggle for verbose (debug) output directly from the node.
 
 # ░▒▓ CHANGELOG:
 #   - v0.1 (Initial Fork Release):
@@ -30,6 +32,9 @@
 #       • More robust `dims` parsing in `fixup_param`
 #       • Tooltips added for all parameters
 #       • YAML config example bundled directly in header
+#   - v0.2 (Feature Additions):
+#       • Added `disable_apg` boolean input to completely bypass APG guidance.
+#       • Added `verbose_debug` boolean input for direct control over debug output.
 
 # ░▒▓ CONFIGURATION:
 #   → Primary Use: APG-enhanced guided sampling
@@ -46,54 +51,32 @@
 # verbose: true  # Set to true to see debug messages in ComfyUI console.
 #                # For when you want to feel like a hacker in a movie.
 # rules:
-#   - start_sigma: -1.0
-#     apg_scale: 0.0
-#     cfg: 4.0
-#   - start_sigma: 0.85
-#     apg_scale: 5.0
-#     predict_image: true
-#     mode: pre_alt2
-#     update_blend_mode: lerp
-#     dims: [-2, -1]
-#     momentum: 0.7
-#     norm_threshold: 3.0
-#     eta: 0.0
-#   - start_sigma: 0.70
-#     apg_scale: 4.0
-#     predict_image: true
-#     mode: pre_alt2
-#     update_blend_mode: lerp
-#     dims: [-2, -1]
-#     momentum: 0.6
-#     norm_threshold: 2.5
-#     eta: 0.0
-#   - start_sigma: 0.55
-#     apg_scale: 3.5
-#     predict_image: true
-#     mode: pure_apg
-#     momentum: 0.0
-#   - start_sigma: 0.40
-#     apg_scale: 2.0
-#     predict_image: false
-#     cfg: 4.3
-#     momentum: 0.0
-#   - start_sigma: 0.30
-#     apg_scale: 1.5
-#     predict_image: false
-#     cfg: 4.2
-#     momentum: 0.0
-#   - start_sigma: 0.15
-#     apg_scale: 0.5
-#     cfg: 4.1
-#     momentum: 0.0
-#   - start_sigma: 0.05
-#     apg_scale: 0.1
-#     cfg: 4.0
-#     momentum: 0.0
-#   - start_sigma: 0.01
-#     apg_scale: 0.0
-#     cfg: 4.0
-#     momentum: 0.0
+# - start_sigma: -1.0
+  # apg_scale: 0.0
+  # cfg: 4.0
+# - start_sigma: 0.85
+  # apg_scale: 5.0
+  # predict_image: true
+  # cfg: 3.7
+  # mode: pre_alt2
+  # update_blend_mode: lerp
+  # dims: [-2, -1]
+  # momentum: 0.65
+  # norm_threshold: 3.5
+  # eta: 0.0
+# - start_sigma: 0.55
+  # apg_scale: 4.0
+  # predict_image: true
+  # cfg: 2.9
+  # mode: pure_apg
+# - start_sigma: 0.4
+  # apg_scale: 3.8
+  # predict_image: true
+  # cfg: 2.75
+  # mode: pure_apg
+# - start_sigma: 0.15
+  # apg_scale: 0.0
+  # cfg: 2.6
 
 # ░▒▓ Use at your own risk. May cause your images to transcend mere reality,
 #   or just look a bit different. No refunds for spontaneous enlightenment
@@ -162,8 +145,16 @@ class APGConfig(NamedTuple):
             else:
                 return v
         if k == "update_mode":
-            # Ensure the update_mode string is converted to the Enum member
-            return getattr(UpdateMode, v.strip().upper())
+            # Robustly ensure the update_mode string is converted to the Enum member.
+            # Fallback to UpdateMode.DEFAULT if the string is not a valid enum member.
+            mode_upper = v.strip().upper()
+            mode_enum = UpdateMode.__members__.get(mode_upper)
+            if mode_enum is None:
+                # Log a warning to the console so the user is aware of the invalid input.
+                # This uses tqdm.write, consistent with existing verbose output in the file.
+                tqdm.write(f"⚠️ Warning: Invalid UpdateMode '{v}' detected for parameter '{k}'. Falling back to 'DEFAULT' mode.")
+                return UpdateMode.DEFAULT
+            return mode_enum
         if k == "start_sigma":
             # Convert negative values to infinity as per tooltip
             return math.inf if v < 0 else float(v)
@@ -305,8 +296,8 @@ class APGGuider(CFGGuider):
         self.set_conds(positive, negative)
         self.set_cfg(1.0) # CFG value is set by the rule in predict_noise
         self.apg_rules = tuple(APG(rule_config) for rule_config in rules)
-        self.apg_params = params
-        self.apg_verbose = params.get("verbose", False)
+        # Use the 'verbose' key from params, defaulting to False if not present
+        self.apg_verbose = params.get("verbose", False) 
         if self.apg_verbose:
             tqdm.write(f"* APG rules: {rules}")
 
@@ -344,7 +335,7 @@ class APGGuider(CFGGuider):
         # Reset other APG rules to prevent state leakage
         self.apg_reset(exclude=rule)
         
-        # Check if APG is active for this rule
+        # Check if APG is active for this rule (apg_blend is 0 if disabled or if disable_apg is True)
         matched = rule.apg_blend != 0 and rule.apg_scale != 0
         
         if self.apg_verbose:
@@ -406,6 +397,8 @@ class APGGuiderNode:
                 "model": ("MODEL", {"tooltip": "The diffusion model to which APG guidance will be applied."}),
                 "positive": ("CONDITIONING", {"tooltip": "The positive conditioning (e.g., text prompt embeddings) for guided generation."}),
                 "negative": ("CONDITIONING", {"tooltip": "The negative conditioning (e.g., negative text prompt embeddings) to push generation away from."}),
+                "disable_apg": ("BOOLEAN", {"default": False, "tooltip": "If True, the APG Guider will be completely disabled, and standard CFG (using 'cfg_after' value) will be used instead. This effectively bypasses all APG logic."}),
+                "verbose_debug": ("BOOLEAN", {"default": False, "tooltip": "If True, enables verbose (debug) output to the ComfyUI console, showing detailed APG rule matching and other debug information."}),
                 "apg_scale": ("FLOAT", {"default": 4.5, "min": -1000.0, "max": 1000.0, "step": 0.1, "tooltip": "The main strength of the APG guidance. A value of 1.0 means no APG effect. Higher values increase guidance towards the positive conditioning relative to the negative. If set to 0, APG is effectively off, and CFG is used."}),
                 "cfg_before": ("FLOAT", {"default": 4.0, "min": 1.0, "max": 1000.0, "step": 0.1, "tooltip": "The standard Classifier-Free Guidance (CFG) scale to use for steps *before* APG guidance activates (i.e., when sigma > start_sigma)."}),
                 "cfg_after": ("FLOAT", {"default": 3.0, "min": 1.0, "max": 1000.0, "step": 0.1, "tooltip": "The standard Classifier-Free Guidance (CFG) scale to use for steps *after* APG guidance deactivates (i.e., when sigma < end_sigma, or if APG is completely off)."}),
@@ -434,7 +427,7 @@ class APGGuiderNode:
     @classmethod
     def go(
         cls, *,
-        model, positive, negative, apg_scale, cfg_before, cfg_after, eta,
+        model, positive, negative, disable_apg, verbose_debug, apg_scale, cfg_before, cfg_after, eta,
         norm_threshold, momentum, start_sigma, end_sigma, dims, predict_image,
         mode, yaml_parameters_opt=None,
     ) -> tuple:
@@ -443,22 +436,32 @@ class APGGuiderNode:
         yaml_parameters_opt = yaml_parameters_opt.strip()
         
         params = {}
+        # Set verbose debug based on the new input toggle
+        params["verbose"] = verbose_debug
+
         if yaml_parameters_opt:
             try:
                 loaded_params = yaml.safe_load(yaml_parameters_opt)
                 if loaded_params: # Ensure it's not None if YAML was empty
                     if isinstance(loaded_params, (tuple, list)):
-                        params = {"rules": tuple(loaded_params)}
+                        params["rules"] = tuple(loaded_params)
                     elif isinstance(loaded_params, dict):
-                        params = loaded_params
+                        # Merge loaded_params with existing params, giving precedence to loaded_params
+                        params.update(loaded_params) 
                     else:
                         raise TypeError("Bad format for YAML options: Must be a dict, list, or tuple.")
             except yaml.YAMLError as e:
                 raise ValueError(f"Error parsing YAML parameters: {e}")
 
         rules = tuple(params.pop("rules", ()))
-        if not rules:
-            # If no YAML rules, build a single rule from node inputs
+
+        # If disable_apg is True, override all rules to effectively disable APG
+        if disable_apg:
+            rules = (APGConfig.build(cfg=cfg_after, start_sigma=math.inf, apg_blend=0.0),)
+            if verbose_debug:
+                tqdm.write("APG Guider is disabled. Using standard CFG with 'cfg_after' value.")
+        elif not rules:
+            # If no YAML rules and APG is not disabled, build a single rule from node inputs
             rules = []
             rules.append(APGConfig.build(
                 cfg=cfg_before, # Default CFG for this rule before any overrides
@@ -486,19 +489,20 @@ class APGGuiderNode:
             # Fix: Ensure rules are built correctly and filtered by start_sigma >= 0
             rules = tuple(cfg for cfg in (APGConfig.build(**rule) for rule in rules) if cfg.start_sigma >= 0)
 
-        # Sort rules by start_sigma in ascending order
-        rules = sorted(rules, key=lambda rule: rule.start_sigma)
-        
-        # Ensure there's always a fallback rule that applies at all sigmas (start_sigma=inf)
-        if not rules or rules[-1].start_sigma < math.inf:
-            rules = (*rules, APGConfig.build(cfg=cfg_after, start_sigma=math.inf, apg_blend=0.0))
+        # Sort rules by start_sigma in ascending order (only if APG is not disabled)
+        if not disable_apg:
+            rules = sorted(rules, key=lambda rule: rule.start_sigma)
+            
+            # Ensure there's always a fallback rule that applies at all sigmas (start_sigma=inf)
+            if not rules or rules[-1].start_sigma < math.inf:
+                rules = (*rules, APGConfig.build(cfg=cfg_after, start_sigma=math.inf, apg_blend=0.0))
             
         guider = APGGuider(
             model,
             positive=positive,
             negative=negative,
             rules=rules,
-            params=params,
+            params=params, # Pass the params dictionary which now includes 'verbose'
         )
         return (guider,)
 

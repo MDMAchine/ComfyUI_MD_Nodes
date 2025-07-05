@@ -64,9 +64,6 @@
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 
 
-
-#!/usr/bin/env python3
-
 import torch
 from tqdm.auto import trange
 from comfy import model_sampling
