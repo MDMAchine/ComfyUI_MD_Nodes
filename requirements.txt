@@ -8,10 +8,6 @@ numpy==1.26.4
 pillow==11.0.0
 setuptools==80.8.0
 sympy==1.13.1
-torch==2.7.0+cu128
-torchaudio==2.7.0+cu128
-torchvision==0.22.0+cu128
-triton-windows==3.3.0.post19
 typing_extensions==4.12.2
 wheel==0.45.1
 pedalboard==0.9.17
