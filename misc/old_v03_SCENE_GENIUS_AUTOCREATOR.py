@@ -1,5 +1,5 @@
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-# ████ SCENEGENIUS AUTOCREATOR v0.1.11 – Optimized for Ace-Step Audio/Video ████▓▒░
+# ████ SCENEGENIUS AUTOCREATOR v0.1.6 – Optimized for Ace-Step Audio/Video ████▓▒░
 # ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 
 # ░▒▓ ORIGIN & DEV:
@@ -43,9 +43,6 @@
 #   ✓ **Added validation for Sampler YAML overrides (e.g., FBG config presence).**
 #   ✓ **FIXED: `AttributeError: 'SceneGeniusAutocreator' object has no attribute 'FBG_PROMPT_SECTION'` by reordering prompt definitions.**
 #   ✓ **FIXED: `TypeError: FBGConfig.__new__() got an unexpected keyword argument 'log_posterior_ema_factor'` by clarifying Sampler YAML structure in prompt.**
-#   ✓ **FIXED: `AttributeError: 'SceneGeniusAutocreator' object has no attribute 'NOISE_DECAY_MIN'` by reordering variable definitions in `__init__`.**
-#   ✓ **FIXED: `AttributeError` for various PROMPT_..._BASE by moving all prompt string definitions to the top of `__init__`.**
-#   ✓ **FIXED: `yaml.YAMLError` due to leftover markdown fences by improving `_clean_llm_yaml_output` with regex extraction.**
 
 # ░▒▓ CHANGELOG:
 #   - v0.1.0 (Genesis Build):
@@ -82,17 +79,6 @@
 #   - v0.1.6 (Sampler YAML Structure Fix):
 #       • **FIXED: `TypeError: FBGConfig.__new__() got an unexpected keyword argument 'log_posterior_ema_factor'` by explicitly instructing LLM on correct Sampler YAML structure (top-level vs. nested).**
 #       • Updated `default_sampler_yaml_fbg` to match user's provided 'proper sampler yaml' for `guidance_max_change`, `fbg_offset`, `t_0`, and `t_1`.**
-#   - v0.1.7 (APG YAML Strictness):
-#       • **IMPROVED: `DEFAULT_APG_PROMPT` with highly explicit negative constraints on disallowed parameters to force strict adherence to the desired APG schema.**
-#       • **CLARIFIED: Sampler YAML prompt to indicate example is for structure, not necessarily values.**
-#   - v0.1.8 (Typo Fix):
-#       • **FIXED: `NameError: name 'SceneGenGeniusAutocreator' is not defined` by correcting typo in `NODE_CLASS_MAPPINGS`.**
-#   - v0.1.9 (Initialization Order Fix):
-#       • **FIXED: `AttributeError: 'SceneGeniusAutocreator' object has no attribute 'NOISE_DECAY_MIN'` by moving `NOISE_DECAY_MIN` and `NOISE_DECAY_MAX` definitions earlier in `__init__`.**
-#   - v0.1.10 (All Prompt Definitions Order Fix):
-#       • **FIXED: `AttributeError` for various `PROMPT_..._BASE` by ensuring all prompt string definitions are at the very top of the `__init__` method, before any logic that might depend on them.**
-#   - v0.1.11 (YAML Parsing Robustness):
-#       • **FIXED: `yaml.YAMLError` due to leftover markdown fences by improving `_clean_llm_yaml_output` to use regex for more reliable content extraction.**
 
 # ░▒▓ CONFIGURATION:
 #   → Primary Use: Automated content generation for Ace-Step diffusion projects
@@ -166,12 +152,7 @@ class SceneGeniusAutocreator:
 
     def __init__(self):
         """Initialize default configurations once at class instantiation."""
-        # --- ALL PROMPT DEFINITIONS AND CONSTANTS MOVED TO THE TOP ---
-        self.APG_MIN_CFG = 2.5
-        self.APG_MAX_CFG = 4.0
-        self.NOISE_DECAY_MIN = 0.0
-        self.NOISE_DECAY_MAX = 10.0
-
+        # Default APG YAML
         self.default_apg_yaml = """
 verbose: true
 
@@ -207,6 +188,7 @@ rules:
     cfg: 2.6
 """
 
+        # Default Sampler YAML for original PingPong Sampler
         self.default_sampler_yaml_original = """
 verbose: true
 step_random_mode: block
@@ -220,6 +202,7 @@ blend_mode: lerp
 step_blend_mode: lerp
 """
 
+        # Updated Default Sampler YAML for FBG Integrated PingPong Sampler to match user's example
         self.default_sampler_yaml_fbg = """
 step_random_mode: block
 step_size: 5
@@ -254,16 +237,21 @@ fbg_config:
   max_posterior_scale: 1.0
   initial_value: 0.0
   initial_guidance_scale: 250.0
-  guidance_max_change: 10.5
+  guidance_max_change: 10.5 # Updated from 1.5
   fbg_temp: 0.010
-  fbg_offset: -0.035
+  fbg_offset: -0.035 # Updated from -0.030
   pi: 0.35
-  t_0: 0.60
-  t_1: 0.30
+  t_0: 0.60 # Updated from 0.90
+  t_1: 0.30 # Updated from 0.60
 fbg_eta: 0.5
 fbg_s_noise: 0.7
 """
 
+        # Base prompt for APG and Sampler generation (shared)
+        self.APG_MIN_CFG = 2.5
+        self.APG_MAX_CFG = 4.0
+
+        # --- CORRECTED APG PROMPT ---
         self.DEFAULT_APG_PROMPT = """
 You are an expert diffusion model parameter specialist. Your task is to generate APG YAML.
 
@@ -277,7 +265,7 @@ You are an expert diffusion model parameter specialist. Your task is to generate
 **CRITICAL RULES FOR APG YAML GENERATION:**
 1.  **Output Format:** The output MUST be a valid YAML string.
 2.  **Top-Level Structure:** The YAML MUST contain only `verbose: true` at the top level, followed by a `rules` block.
-3.  **Rules Block Structure:** The `rules` block MUST be a list of mappings (dictionaries). The number of rules should be similar to the example (e.g., 4-6 rules).
+3.  **Rules Block Structure:** The `rules` block MUST be a list of mappings (dictionaries).
 4.  **Allowed Rule Parameters:** Each rule in the `rules` list MUST ONLY contain the following keys:
     * `start_sigma` (float): Must be strictly decreasing across rules.
     * `apg_scale` (float)
@@ -292,12 +280,10 @@ You are an expert diffusion model parameter specialist. Your task is to generate
 5.  **Specific Rule Values:**
     * `apg_scale: 0.0` for the first and last rule.
     * `predict_image: true` for active APG phases.
-6.  **STRICT EXCLUSION - DO NOT INCLUDE THESE PARAMETERS:**
-    * **At the top level (outside `rules`):** `apg_version`, `model_name`, `seed`, `total_duration`, `noise_decay`, `steps`, `cfg`, `apg_scale`.
-    * **Within individual rules (inside `rules` list):** `phase`, `duration`, `end_sigma`, `strength`.
+6.  **No Extra Parameters:** DO NOT include any other top-level parameters (e.g., `apg_version`, `model_name`, `seed`, `total_duration`, `noise_decay`, `steps`, `cfg`, `apg_scale` at the top level). DO NOT include `phase`, `duration`, `end_sigma`, `strength` within the rules.
 7.  **No Extra Text:** Output ONLY the YAML. Do NOT include any conversational filler, explanations, or markdown delimiters (e.g., ```yaml).
 
-**Example of DESIRED APG YAML Structure (Adhere Strictly to this format and only these parameters):**
+**Example of DESIRED APG YAML Structure:**
 ```yaml
 verbose: true
 rules:
@@ -333,6 +319,7 @@ rules:
 ```
 Output:
 """
+        # --- MOVED: FBG_PROMPT_SECTION is now defined BEFORE DEFAULT_SAMPLER_PROMPT_BASE ---
         self.FBG_PROMPT_SECTION = """
 ---
 
@@ -366,6 +353,7 @@ These parameters are for the `fbg_config` dictionary and top-level FBG inputs.
 * **`fbg_s_noise` (float):** FBG internal parameter: Scale for noise within FBG's step. **Default: `1.0`**. A value like `0.7` can introduce more dynamism.
 """
 
+        # --- CORRECTED SAMPLER PROMPT BASE ---
         self.DEFAULT_SAMPLER_PROMPT_BASE = """
 You are an expert diffusion model sampling and parameter configuration specialist. Your task is to generate YAML-formatted parameters for the Ping-Pong Sampler.
 
@@ -407,7 +395,7 @@ For the Original PingPong Sampler, certain parameters (`start_sigma_index`, `end
     * `fbg_eta` (float)
     * `fbg_s_noise` (float)
 
-* **Nested Parameter (`fbg_config` - MUST be a dictionary nested directly under the root):**
+* **Nested Parameter (`fbg_config` - MUST be a dictionary nested under the root):**
     * `fbg_config` (dictionary): This dictionary MUST contain ONLY the following keys:
         * `fbg_sampler_mode` (string)
         * `cfg_scale` (float)
@@ -430,54 +418,14 @@ For the Original PingPong Sampler, certain parameters (`start_sigma_index`, `end
         * `t_1` (float)
 
 **CRITICAL INSTRUCTION:** DO NOT put `log_posterior_ema_factor` or `fbg_eta` or `fbg_s_noise` inside the `fbg_config` block. They are top-level parameters.
-**NOTE:** The example below illustrates the *structure* and *allowed parameters*. The LLM should generate appropriate values based on the creative context.
 
-**Example of DESIRED Sampler YAML Structure:**
-```yaml
-step_random_mode: block
-step_size: 5
-first_ancestral_step: 0
-last_ancestral_step: -1
-enable_clamp_output: false
-start_sigma_index: 0
-end_sigma_index: -1
-blend_mode: slerp
-step_blend_mode: geometric_mean
-debug_mode: 2
-sigma_range_preset: Custom
-conditional_blend_mode: true
-conditional_blend_sigma_threshold: 0.4
-conditional_blend_function_name: slerp
-conditional_blend_on_change: true
-conditional_blend_change_threshold: 0.15
-clamp_noise_norm: false
-max_noise_norm: 0.2
-log_posterior_ema_factor: 0.3
-fbg_eta: 0.5
-fbg_s_noise: 0.7
-fbg_config:
-  fbg_sampler_mode: PINGPONG
-  cfg_scale: 250.0
-  cfg_start_sigma: 1.0
-  cfg_end_sigma: 0.004
-  fbg_start_sigma: 1.0
-  fbg_end_sigma: 0.004
-  fbg_guidance_multiplier: 1.0
-  ancestral_start_sigma: 1.0
-  ancestral_end_sigma: 0.004
-  max_guidance_scale: 350.0
-  max_posterior_scale: 1.0
-  initial_value: 0.0
-  initial_guidance_scale: 250.0
-  guidance_max_change: 10.5
-  fbg_temp: 0.010
-  fbg_offset: -0.035
-  pi: 0.35
-  t_0: 0.60
-  t_1: 0.30
-```
+{fbg_section}
+
+**No Extra Text:** Output ONLY the YAML. Do NOT include any conversational filler, explanations, or markdown delimiters (e.g., ```yaml).
 Output:
 """
+
+        # Corrected: PROMPT_GENRE_GENERATION_BASE no longer contains embedded f-string logic
         self.PROMPT_GENRE_GENERATION_BASE = """
 You are a highly creative AI assistant specializing in music and audio aesthetics.
 Your task is to generate a single, comma-separated string of exactly {tag_count} descriptive genre tags.
@@ -498,6 +446,7 @@ Example Output (for tag_count=3): "synthwave, energetic beat, retro-futurism"
 Example Output (for tag_count=1): "ambient"
 Output:
 """
+        # Corrected: PROMPT_LYRICS_GENERATION_BASE no longer contains embedded f-string logic
         self.PROMPT_LYRICS_GENERATION_BASE = """
 You are a creative writer and concept developer. Your task is to generate lyrics or a script for a creative project, or determine if it should be instrumental.
 
@@ -549,6 +498,8 @@ Ensure your output is ONLY the floating-point number, with no extra text, explan
 Example Output: 180.5
 Output:
 """
+        self.NOISE_DECAY_MIN = 0.0
+        self.NOISE_DECAY_MAX = 10.0
         self.PROMPT_NOISE_DECAY_GENERATION_BASE = """
 You are an AI assistant tasked with generating a noise decay strength for image/video generation.
 Based on the following creative concept, provide a single floating-point number between {min_noise_decay:.1f} and {max_noise_decay:.1f} (inclusive) representing the noise decay strength.
@@ -643,23 +594,14 @@ Output:
         return re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL)
 
     def _clean_llm_yaml_output(self, raw_output: str) -> str:
-        """
-        Removes common LLM markdown and extra text wrappers from YAML output.
-        Uses regex to extract content between markdown fences more reliably.
-        """
-        # Regex to find content between ``` (optional yaml/output) and ```
-        # re.DOTALL allows . to match newlines
-        match = re.search(r'```(?:yaml|output)?\s*(.*?)\s*```', raw_output, re.DOTALL)
-        if match:
-            return match.group(1).strip()
-        
-        # Fallback to older stripping logic if regex doesn't find a match
+        """Removes common LLM markdown and extra text wrappers from YAML output."""
         cleaned = raw_output.strip()
+        # List of prefixes to remove, ordered from most specific to least specific
         prefixes = ["```yaml", "```output", "```", "output:"]
         for prefix in prefixes:
             if cleaned.lower().startswith(prefix):
                 cleaned = cleaned[len(prefix):].strip()
-                break
+                break # Remove only one matching prefix
         if cleaned.endswith("```"):
             cleaned = cleaned[:-3].strip()
         return cleaned

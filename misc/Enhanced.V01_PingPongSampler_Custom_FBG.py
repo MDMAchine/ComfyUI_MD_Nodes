@@ -1,98 +1,3 @@
-# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-# ████ PINGPONGSAMPLER v0.9.9 – Optimized for Ace-Step Audio/Video with FBG and Node Debug! ████▓▒░
-# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-# ░▒▓ ORIGIN & DEV:
-#   • Foundational principles for iterative sampling, including concepts that underpin 'ping-pong sampling'
-#   • Consistency Models by Song et al. (2023)
-#   •      https://arxiv.org/abs/2303.01469  
-#   • The term 'ping-pong sampling' is explicitly introduced and applied in the context of fast text-to-audio
-#   • generation in the paper "Fast Text-to-Audio Generation with Adversarial Post-Training" by Novack et al.
-#   • (2025) from Stability AI
-#   •      https://arxiv.org/abs/2505.08175  
-#   • Original concept for the PingPong Sampler for ace-step diffusion by: Junmin Gong (Ace-Step team)
-#   • ComfyUI adaptation by: blepping (original ComfyUI port with quirks)
-#   • Disassembled & warped by: MD (Machine Damage)
-#   • Critical fixes & re-engineering by: Gemini (Google) based on user feedback
-#   • Feedback Guidance integration by: Gemini (Google) / blepping
-#   •      https://gist.github.com/blepping/d424e8fd27d76845ad27997820a57f6b
-#   • Completionist fixups via: devstral / qwen3 (local heroes)
-#   • License: Apache 2.0 — Sharing is caring, no Voodoo hoarding here
-#   • Original source gist: https://gist.github.com/blepping/b372ef6c5412080af136aad942d9d76c
-
-# ░▒▓ DESCRIPTION:
-#   A sampler node for ComfyUI, now enhanced with Feedback Guidance (FBG) and
-#   a convenient node-level debug toggle. It combines PingPong's unique
-#   ancestral noise mixing strategy, tuned for Ace-Step audio and video
-#   diffusion models, with FBG's dynamic, content-aware guidance scale adjustment.
-#   This means your generations can now benefit from both precise noise control
-#   and adaptive guidance based on the model's "understanding" of the content's needs.
-#   Maintain ancestral noise sync with the original blepping sampler.
-#   May work with image models but results can vary wildly — consider it your
-#   party-ready audio/video workhorse, now with adaptive intelligence.
-#   Warning: May induce flashbacks to 256-byte intros or
-#   compulsive byte-optimization urges. Use responsibly.
-
-# ░▒▓ CHANGELOG HIGHLIGHTS:
-#   - v0.9.0 "Feedback Fusion":
-#       • Integrated Feedback Guidance (FBG) for dynamic guidance scale adjustment.
-#       • FBG parameters (pi, t_0, t_1, fbg_guidance_multiplier, etc.) added as inputs.
-#       • Enhanced debugging capabilities with DEBUG_MODE (global constant).
-#       • Comprehensive docstrings and comments for better understanding.
-#   - v0.9.1 "Interactive Debug":
-#       • Moved DEBUG_MODE from a global constant to a node input boolean.
-#       • Users can now enable/disable debug messages directly from the ComfyUI node.
-#   - v0.9.2 "Syntax Fixes":
-#       • Corrected 'non-default argument follows default argument' error in get_sampler
-#         by providing default values for all FBG parameters. (Initial attempt, required refinement)
-#   - v0.9.3 "Signature Refinement":
-#       • Corrected Python function signature to remove redundant default assignments
-#         for parameters already declared as 'required' in INPUT_TYPES, resolving
-#         '_collections._tuplegetter' object has no attribute 'default' error.
-#   - v0.9.4 "Coexistence Enablement":
-#       • Changed NODE_CLASS_MAPPINGS key to 'PingPongSampler_Custom_FBG' to allow
-#         coexistence with the original 'PingPongSampler_Custom' node.
-#   - v0.9.5 "AttributeError Fix":
-#       • Implemented `go` as a `@staticmethod` within `PingPongSampler` to correctly
-#         interface with ComfyUI's KSAMPLER wrapper.
-#   - v0.9.6 "YAML Key Remap (Attempt 1)":
-#       • Attempted remapping logic in `PingPongSampler.go` to accept `fbg_sampler_mode`
-#         as `sampler_mode` within the `fbg_config` section of YAML input.
-#   - v0.9.7 "Robust YAML Key Fix":
-#       • Implemented a more robust remapping mechanism for FBGConfig parameters
-#         parsed from YAML to ensure correct argument names are passed to FBGConfig.__new__().
-#       • Improved error handling for minimal_log_posterior calculation in PingPongSampler.__init__.
-#       • Added checks for zero divisors in _update_log_posterior.
-#   - v0.9.8 "Sigma Precision":
-#       • Updated `step` values for all sigma-related float inputs in `INPUT_TYPES`
-#         to `0.001` to allow finer precision (e.g., 0.004).
-#   - v0.9.9 "Default Sigma Range Alignment":
-#       • Adjusted default `cfg_start_sigma`, `cfg_end_sigma`, `fbg_start_sigma`, `fbg_end_sigma`,
-#         `ancestral_start_sigma`, and `ancestral_end_sigma` to match common model sigma ranges
-#         (e.g., 1.0 down to 0.004).
-#   - v0.9.9-p1 "Enhancement Pack Drop":
-#       • Debug mode upgraded to verbosity levels (0=Off, 1=Basic, 2=Chatty).
-#       • Added Sigma Range Presets ('High', 'Mid', 'Low', 'All') for quick FBG/CFG scheduling.
-#       • Dynamic seed reporting in debug logs for RNG transparency.
-#       • Conditional blend functions: Switch blend modes based on sigma or step change magnitude.
-#       • Noise Norm Clamping: Stabilize injected noise vectors with L2 norm limits.
-#       • Log Posterior EMA: Smooth FBG's internal state for potentially less jitter.
-#       • Internal code comments expanded for readability and future hacking sessions.
-
-# ░▒▓ CONFIGURATION:
-#   → Primary Use: High-quality audio/video generation with Ace-Step diffusion
-#   → Secondary Use: Experimental visual generation (expect wild results)
-#   → Edge Use: For demoscene veterans and bytecode wizards only
-
-# ░▒▓ WARNING:
-#   This node may trigger:
-#   ▓▒░ Flashbacks to ANSI art and 256-byte intros
-#   ▓▒░ Spontaneous breakdancing or synesthesia
-#   ▓▒░ Urges to reinstall Impulse Tracker
-#   ▓▒░ Extreme focus on byte-level optimization
-#   Consult your nearest demoscene vet if hallucinations persist.
-# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-
-
 import math
 import torch
 from tqdm.auto import trange
@@ -104,11 +9,57 @@ from comfy.k_diffusion.sampling import get_ancestral_step # For ancestral step c
 import numpy as np
 import yaml # YAML for handling optional string inputs
 
-# --- Internal Blend Modes (from original PingPong) ---
+# --- Enhancement 1: More Blend Mode Options ---
+def slerp(a: torch.Tensor, b: torch.Tensor, t: float, eps: float = 1e-8) -> torch.Tensor:
+    """Spherical linear interpolation."""
+    # Normalize vectors
+    a_norm = torch.nn.functional.normalize(a, dim=-1)
+    b_norm = torch.nn.functional.normalize(b, dim=-1)
+
+    # Compute dot product
+    dot = (a_norm * b_norm).sum(dim=-1, keepdim=True)
+    # Clamp dot product to avoid numerical errors
+    dot = torch.clamp(dot, -1.0 + eps, 1.0 - eps)
+
+    # Compute angle
+    theta = torch.acos(dot) * t
+
+    # Compute sine values
+    sin_theta = torch.sin(theta)
+    sin_theta_0 = torch.sin(torch.acos(dot)) # Original angle sine
+
+    # Avoid division by zero
+    safe_sin_theta_0 = torch.where(sin_theta_0.abs() < eps, torch.full_like(sin_theta_0, 1.0), sin_theta_0)
+
+    # Compute weights
+    w_a = torch.cos(theta) / safe_sin_theta_0
+    w_b = sin_theta / safe_sin_theta_0
+
+    # Interpolate
+    return w_a * a + w_b * b
+
+def geometric_mean(a: torch.Tensor, b: torch.Tensor, t: float) -> torch.Tensor:
+    """Geometric mean interpolation (assumes positive tensors)."""
+    # Add small epsilon to prevent log(0)
+    eps = 1e-8
+    a_safe = torch.clamp(a, min=eps)
+    b_safe = torch.clamp(b, min=eps)
+    log_a = torch.log(a_safe)
+    log_b = torch.log(b_safe)
+    return torch.exp((1.0 - t) * log_a + t * log_b)
+
+# --- Internal Blend Modes ---
 _INTERNAL_BLEND_MODES = {
     "lerp": torch.lerp,
     "a_only": lambda a, _b, _t: a, # Returns the first input (a)
-    "b_only": lambda _a, b, _t: b  # Returns the second input (b)
+    "b_only": lambda _a, b, _t: b,  # Returns the second input (b)
+    # --- Enhancement 1: More Blend Mode Options ---
+    "slerp": slerp,
+    "add": lambda a, b, t: a + t * b,
+    "subtract": lambda a, b, t: a - t * b,
+    "multiply": lambda a, b, t: a * (1.0 - t) + a * b * t, # Weighted average towards product
+    "divide": lambda a, b, t: a / (1.0 + t * b + 1e-8), # Add epsilon to divisor
+    "geometric_mean": geometric_mean,
 }
 
 # --- FBG Specific Classes and Functions (Moved from fbg_sampler_node.py) ---
@@ -160,15 +111,10 @@ class PingPongSampler:
     A custom sampler implementing a "ping-pong" ancestral noise mixing strategy,
     now integrated with Feedback Guidance (FBG) for dynamic guidance scale adjustment.
     
-    Enhancements Implemented:
-    1. Debug Verbosity Levels (debug_mode: 0, 1, 2)
-    2. Sigma Range Presets (sigma_range_preset)
-    3. Dynamic Seed Reporting (in debug)
-    4. Conditional Blend Functions (conditional_blend_*)
-    5. Noise Norm Clamping (clamp_noise_norm, max_noise_norm)
-    6. EMA for Log Posterior (log_posterior_ema_factor)
-    10. Expanded Tooltips (in node definition)
-    11. Internal Comments (added throughout)
+    Enhancements:
+    1. More Blend Mode Options
+    2. Additional Noise Injection Strategies
+    3. Adaptive Scheduling based on Posterior Estimates
     """
     # Removed FUNCTION = "go" here, it's now a static method below.
     # CATEGORY and RETURN_TYPES are for the Node wrapper, not the internal sampler.
@@ -194,24 +140,19 @@ class PingPongSampler:
         pingpong_options: Optional[Dict[str, Any]] = None,
         # FBG-specific configuration
         fbg_config: FBGConfig = FBGConfig(),
-        # --- Enhancement 1: Debug Verbosity Levels ---
-        debug_mode: int = 0, # 0: Off, 1: Basic, 2: Verbose
+        # New: Debug mode flag
+        debug_mode: bool = False,
         # FBG specific
         eta: float = 0.0,
         s_noise: float = 1.0,
-        # --- Enhancement 2: Sigma Range Presets ---
-        sigma_range_preset: str = "Custom", # "Custom", "High", "Mid", "Low", "All"
-        # --- Enhancement 4: Conditional Blend Functions ---
-        conditional_blend_mode: bool = False,
-        conditional_blend_sigma_threshold: float = 0.5,
-        conditional_blend_function_name: str = "slerp", # Name from _INTERNAL_BLEND_MODES
-        conditional_blend_on_change: bool = False,
-        conditional_blend_change_threshold: float = 0.1,
-        # --- Enhancement 5: Noise Norm Clamping ---
-        clamp_noise_norm: bool = False,
-        max_noise_norm: float = 1.0,
-        # --- Enhancement 6: EMA for Log Posterior ---
-        log_posterior_ema_factor: float = 0.0, # 0.0 = no EMA, 1.0 = full previous value
+        # --- Enhancement 1: More Blend Mode Options ---
+        # (Handled via blend_function/step_blend_function args)
+        # --- Enhancement 2: Additional Noise Injection Strategies ---
+        noise_injection_strategy: str = "standard", # "standard", "refined", "subtract"
+        # --- Enhancement 3: Adaptive Scheduling based on Posterior Estimates ---
+        adaptive_noise_multiplier_enabled: bool = False,
+        adaptive_noise_multiplier_base: float = 1.0,
+        adaptive_noise_multiplier_sensitivity: float = 1.0,
         **kwargs # Catch any remaining kwargs, though they should be handled by now
     ):
         # --- Core ComfyUI Sampler Inputs ---
@@ -233,12 +174,10 @@ class PingPongSampler:
         # Blend functions
         self.blend_function = blend_function
         self.step_blend_function = step_blend_function
-        # --- Enhancement 1: Debug Verbosity Levels ---
+        # New: Store debug mode
         self.debug_mode = debug_mode
         # Determine the number of total steps available from the sigmas schedule
         num_steps_available = len(sigmas) - 1 if len(sigmas) > 0 else 0
-        if self.debug_mode >= 1:
-            print(f"PingPongSampler: Total steps based on sigmas: {num_steps_available}")
         # Ancestral (ping-pong) operation boundaries (from original PingPong)
         if pingpong_options is None:
             pingpong_options = {}
@@ -250,74 +189,13 @@ class PingPongSampler:
         else:
             self.last_ancestral_step = -1
             
-        # --- Enhancement 2: Sigma Range Presets ---
-        self.sigma_range_preset = sigma_range_preset
-        # Store original config for potential modification
-        self.original_fbg_config = fbg_config
-        self.config = fbg_config # Default to original
-        if self.sigma_range_preset != "Custom" and num_steps_available > 0:
-            # Modify FBG config sigmas based on preset
-            sorted_sigmas_desc = torch.sort(self.sigmas, descending=True).values
-            if self.sigma_range_preset == "High":
-                # Top 25%
-                idx = max(1, num_steps_available // 4)
-                high_sigma = sorted_sigmas_desc[idx].item()
-                self.config = self.config._replace(
-                    cfg_start_sigma=high_sigma,
-                    cfg_end_sigma=self.sigmas[-2].item(), # End at second last sigma
-                    fbg_start_sigma=high_sigma,
-                    fbg_end_sigma=self.sigmas[-2].item()
-                )
-            elif self.sigma_range_preset == "Mid":
-                # Middle 50%
-                idx_start = num_steps_available // 4
-                idx_end = 3 * num_steps_available // 4
-                mid_start_sigma = sorted_sigmas_desc[idx_start].item()
-                mid_end_sigma = sorted_sigmas_desc[idx_end].item()
-                self.config = self.config._replace(
-                    cfg_start_sigma=mid_start_sigma,
-                    cfg_end_sigma=mid_end_sigma,
-                    fbg_start_sigma=mid_start_sigma,
-                    fbg_end_sigma=mid_end_sigma
-                )
-            elif self.sigma_range_preset == "Low":
-                # Bottom 25%
-                idx = 3 * num_steps_available // 4
-                low_sigma = sorted_sigmas_desc[idx].item()
-                self.config = self.config._replace(
-                    cfg_start_sigma=self.sigmas[0].item(), # Start at first sigma
-                    cfg_end_sigma=low_sigma,
-                    fbg_start_sigma=self.sigmas[0].item(),
-                    fbg_end_sigma=low_sigma
-                )
-            elif self.sigma_range_preset == "All":
-                 # Apply to entire range
-                 self.config = self.config._replace(
-                     cfg_start_sigma=self.sigmas[0].item(),
-                     cfg_end_sigma=self.sigmas[-2].item(),
-                     fbg_start_sigma=self.sigmas[0].item(),
-                     fbg_end_sigma=self.sigmas[-2].item()
-                 )
-            if self.debug_mode >= 1:
-                print(f"Applied sigma range preset '{self.sigma_range_preset}'. New config sigmas: "
-                      f"CFG [{self.config.cfg_end_sigma:.4f}, {self.config.cfg_start_sigma:.4f}], "
-                      f"FBG [{self.config.fbg_end_sigma:.4f}, {self.config.fbg_start_sigma:.4f}]")
-
-        # --- Enhancement 4: Conditional Blend Functions ---
-        self.conditional_blend_mode = conditional_blend_mode
-        self.conditional_blend_sigma_threshold = conditional_blend_sigma_threshold
-        self.conditional_blend_function = _INTERNAL_BLEND_MODES.get(conditional_blend_function_name, torch.lerp)
-        self.conditional_blend_on_change = conditional_blend_on_change
-        self.conditional_blend_change_threshold = conditional_blend_change_threshold
+        # --- Enhancement 2: Additional Noise Injection Strategies ---
+        self.noise_injection_strategy = noise_injection_strategy
         
-        # --- Enhancement 5: Noise Norm Clamping ---
-        self.clamp_noise_norm = clamp_noise_norm
-        self.max_noise_norm = max_noise_norm
-        
-        # --- Enhancement 6: EMA for Log Posterior ---
-        self.log_posterior_ema_factor = max(0.0, min(1.0, log_posterior_ema_factor)) # Clamp [0, 1]
-        if self.debug_mode >= 2 and self.log_posterior_ema_factor > 0:
-             print(f"Log Posterior EMA factor enabled: {self.log_posterior_ema_factor:.3f}")
+        # --- Enhancement 3: Adaptive Scheduling based on Posterior Estimates ---
+        self.adaptive_noise_multiplier_enabled = adaptive_noise_multiplier_enabled
+        self.adaptive_noise_multiplier_base = adaptive_noise_multiplier_base
+        self.adaptive_noise_multiplier_sensitivity = adaptive_noise_multiplier_sensitivity
 
         # Detect if model uses ComfyUI CONST sampling (e.g., for Reflow-like noise injection behavior)
         self.is_rf = False
@@ -328,7 +206,7 @@ class PingPongSampler:
             if hasattr(current_model_check, 'model_sampling') and current_model_check.model_sampling is not None:
                 self.is_rf = isinstance(current_model_check.model_sampling, model_sampling.CONST)
         except AttributeError:
-            if self.debug_mode >= 1:
+            if self.debug_mode:
                 print("PingPongSampler Warning: Could not definitively determine model_sampling type, assuming not CONST.")
             self.is_rf = False
         # Default noise sampler: NOW RETURNS RAW, UNCONDITIONED UNIT VARIANCE NOISE
@@ -352,7 +230,7 @@ class PingPongSampler:
                     )
                     self.noise_decay = torch.tensor(decay, device=x.device)
                 except Exception as e:
-                    if self.debug_mode >= 1:
+                    if self.debug_mode:
                         print(f"PingPongSampler Warning: Could not get decay from scheduler: {e}. Using zeros for noise decay.")
                     self.noise_decay = torch.zeros((num_steps_available,), dtype=torch.float32, device=x.device)
             else:
@@ -360,6 +238,7 @@ class PingPongSampler:
         else:
             self.noise_decay = torch.empty((0,), dtype=torch.float32, device=x.device)
         # --- FBG Sampler Specific Initialization ---
+        self.config = fbg_config # Store the FBG configuration
         # Store eta and s_noise which are used for FBG's internal k-diffusion step if it's not EULER
         self.eta = eta
         self.s_noise = s_noise
@@ -373,7 +252,7 @@ class PingPongSampler:
             denominator = (cfg.max_guidance_scale - cfg.cfg_scale)
             if denominator <= 0 or numerator <= 0:
                 self.minimal_log_posterior = float('-inf')
-                if self.debug_mode >= 1:
+                if self.debug_mode:
                     print(f"Warning: FBG minimal_log_posterior calculation for CFG > 1 resulted in non-positive log argument. Setting to -inf. Numerator={numerator}, Denominator={denominator}")
             else:
                 self.minimal_log_posterior = math.log(numerator / denominator)
@@ -382,14 +261,14 @@ class PingPongSampler:
             denominator = (cfg.max_guidance_scale - 1.0)
             if denominator <= 0 or numerator <= 0:
                 self.minimal_log_posterior = float('-inf')
-                if self.debug_mode >= 1:
+                if self.debug_mode:
                     print(f"Warning: FBG minimal_log_posterior calculation for CFG <= 1 resulted in non-positive log argument. Setting to -inf. Numerator={numerator}, Denominator={denominator}")
             else:
                 self.minimal_log_posterior = math.log(numerator / denominator)
         # Initial FBG internal states
         self.log_posterior = x.new_full((x.shape[0],), cfg.initial_value)
         self.guidance_scale = x.new_full((x.shape[0], * (1,) * (x.ndim - 1)), cfg.initial_guidance_scale)
-        if self.debug_mode >= 1:
+        if self.debug_mode:
             print(f"PingPongSampler initialized with FBG config: {self.config}")
             print(f"Minimal log posterior (clamping lower bound): {self.minimal_log_posterior:.4f}")
             print(f"Critical posterior threshold for guidance divergence (1 - pi): {(1.0 - self.config.pi):.4f}")
@@ -410,7 +289,7 @@ class PingPongSampler:
         elif self.step_random_mode == "step":
             return self.seed + step
         else:
-            if self.debug_mode >= 1:
+            if self.debug_mode:
                 print(f"PingPongSampler Warning: Unknown step_random_mode '{self.step_random_mode}'. Using base seed.")
             return self.seed
 
@@ -440,24 +319,24 @@ class PingPongSampler:
         cfg = self.config
         t_0_clamped = max(0.0, min(1.0, cfg.t_0))
         if t_0_clamped == 1.0:
-            if self.debug_mode >= 1:
+            if self.debug_mode:
                 print("Warning: t_0 is 1.0. Offset calculation may be undefined. Returning 0.0.")
             return 0.0
         # Ensure (lambda_ref - 1.0) is not zero or negative for the log term
         if (lambda_ref - 1.0) <= 0:
-            if self.debug_mode >= 1:
+            if self.debug_mode:
                 print("Warning: lambda_ref - 1.0 is <= 0. Offset calculation may be undefined. Returning 0.0 for offset.")
             return 0.0
         # Ensure (1.0 - cfg.pi) is not zero or negative for the log term
         if (1.0 - cfg.pi) <= 0:
-            if self.debug_mode >= 1:
+            if self.debug_mode:
                 print("Warning: (1.0 - pi) is <= 0. Offset calculation may be undefined. Returning 0.0 for offset.")
             return 0.0
         log_term = math.log((1.0 - cfg.pi) * lambda_ref / (lambda_ref - 1.0))
         # Ensure ((1.0 - t_0_clamped) * steps) is not zero
         denominator = (1.0 - t_0_clamped) * steps
         if denominator == 0:
-            if self.debug_mode >= 1:
+            if self.debug_mode:
                 print("Warning: Denominator for offset calculation is zero. Returning 0.0 for offset.")
             return 0.0
         result = (
@@ -483,7 +362,7 @@ class PingPongSampler:
         t_1_clamped = max(0.0, min(1.0, cfg.t_1))
         t1_lower_idx = int(math.floor(t_1_clamped * (steps - 1)))
         if len(sigma_square_tilde) == 0:
-            if self.debug_mode >= 1:
+            if self.debug_mode:
                 print("Warning: sigma_square_tilde is empty. Returning 0.0 for temp.")
             return 0.0
         # Clamp t1_lower_idx to valid range
@@ -491,22 +370,22 @@ class PingPongSampler:
         sst = 0.0 # Default value in case of edge cases
         if len(sigma_square_tilde) == 1:
             sst = sigma_square_tilde[0].item() if isinstance(sigma_square_tilde[0], torch.Tensor) else sigma_square_tilde[0]
-            if self.debug_mode >= 2:
+            if self.debug_mode:
                 print(f"  Only one step, using sst: {sst:.4f}")
         elif t1_lower_idx == len(sigma_square_tilde) - 1:
             sst = sigma_square_tilde[t1_lower_idx].item() if isinstance(sigma_square_tilde[t1_lower_idx], torch.Tensor) else sigma_square_tilde[t1_lower_idx]
-            if self.debug_mode >= 2:
+            if self.debug_mode:
                 print(f"  t_1 clamped to last index. Using sst_t1: {sst:.4f}")
         else: # Interpolate
             sst_t1 = sigma_square_tilde[t1_lower_idx].item() if isinstance(sigma_square_tilde[t1_lower_idx], torch.Tensor) else sigma_square_tilde[t1_lower_idx]
             sst_t1_next = sigma_square_tilde[t1_lower_idx + 1].item() if isinstance(sigma_square_tilde[t1_lower_idx + 1], torch.Tensor) else sigma_square_tilde[t1_lower_idx + 1]
             a = (t_1_clamped * (steps - 1)) - t1_lower_idx
             sst = (sst_t1 * (1 - a) + sst_t1_next * a) # Manual lerp for scalar items
-            if self.debug_mode >= 2:
+            if self.debug_mode:
                 print(f"  Interpolating sst between {sst_t1:.4f} and {sst_t1_next:.4f} with alpha {a:.4f}")
         # Ensure alpha is not zero for division
         if alpha == 0:
-            if self.debug_mode >= 1:
+            if self.debug_mode:
                 print("Warning: Alpha for temp calculation is zero. Returning 0.0 for temp.")
             return 0.0
         temp = (2 * sst / alpha * offset) # No .abs().item() here, let it be float and handle abs in return
@@ -518,13 +397,13 @@ class PingPongSampler:
         if these are specified in the config (i.e., not zero).
         """
         if self.config.t_0 == 0 and self.config.t_1 == 0:
-            if self.debug_mode >= 2:
+            if self.debug_mode:
                 print("t_0 and t_1 are 0. Using manual temp and offset from FBG config.")
             return
         sigmas = self.sigmas
         steps = len(sigmas) - 1
         if steps <= 0:
-            if self.debug_mode >= 1:
+            if self.debug_mode:
                 print("Not enough steps to calculate FBG temp/offset automatically. Keeping defaults.")
             return
         sst = self._get_sigma_square_tilde(sigmas)
@@ -534,7 +413,7 @@ class PingPongSampler:
         kwargs["offset"] = calculated_offset
         kwargs["temp"] = calculated_temp
         self.config = self.config.__class__(**kwargs) # Recreate NamedTuple with updated values
-        if self.debug_mode >= 1:
+        if self.debug_mode:
             print(f"Updated FBGConfig: offset={self.config.offset:.4f}, temp={self.config.temp:.4f}")
 
     def get_dynamic_guidance_scale(
@@ -565,18 +444,18 @@ class PingPongSampler:
             guidance_scale = fbg_component
             # Clamp the FBG component itself before adding CFG, to prevent intermediate explosion
             guidance_scale = guidance_scale.clamp(1.0, config.max_guidance_scale)
-            if self.debug_mode >= 2:
+            if self.debug_mode:
                 print(f"  FBG active (sigma {sigma_item:.3f}). Raw FBG component: {guidance_scale.flatten().detach().tolist()}")
         else:
-            if self.debug_mode >= 2:
+            if self.debug_mode:
                 print(f"  FBG inactive (sigma {sigma_item:.3f} not in [{config.fbg_end_sigma:.3f}, {config.fbg_start_sigma:.3f}]).")
         if using_cfg:
             # Add the Classifier-Free Guidance component.
             guidance_scale += config.cfg_scale - 1.0
-            if self.debug_mode >= 2:
+            if self.debug_mode:
                 print(f"  CFG active (sigma {sigma_item:.3f}). CFG component added: {config.cfg_scale - 1.0:.2f}.")
         else:
-            if self.debug_mode >= 2:
+            if self.debug_mode:
                 print(f"  CFG inactive (sigma {sigma_item:.3f} not in [{config.cfg_end_sigma:.3f}, {config.cfg_start_sigma:.3f}]).")
         # Clamp the combined guidance scale to the overall maximum allowed value.
         guidance_scale = guidance_scale.clamp(1.0, config.max_guidance_scale).view(
@@ -591,7 +470,7 @@ class PingPongSampler:
         )
         guidance_scale_new = guidance_scale_prev + guidance_scale_prev * change_pct
         final_guidance_scale = guidance_scale_new.clamp_(1.0, config.max_guidance_scale)
-        if self.debug_mode >= 2:
+        if self.debug_mode:
             print(f"  Sigma: {sigma_item:.4f}, Prev GS: {guidance_scale_prev.mean().item():.4f}, "
                   f"Calculated GS: {guidance_scale.mean().item():.4f}, "
                   f"Final GS: {final_guidance_scale.mean().item():.4f} (max change: {config.guidance_max_change})")
@@ -631,7 +510,7 @@ class PingPongSampler:
                     if isinstance(override_cfg, torch.Tensor) and override_cfg.numel() == 1:
                         inner_model.cfg = override_cfg.detach().item()
                     elif isinstance(override_cfg, torch.Tensor): # Multi-element tensor, use mean as a fallback
-                        if self.debug_mode >= 1:
+                        if self.debug_mode:
                             print(f"Warning: override_cfg is not scalar ({override_cfg.shape}). Using mean for inner_model.cfg.")
                         inner_model.cfg = override_cfg.mean().detach().item()
                     else: # If it's a simple float/int
@@ -670,31 +549,17 @@ class PingPongSampler:
     ) -> torch.Tensor:
         """
         Updates the FBG log posterior estimate.
-        --- Enhancement 6: EMA for Log Posterior ---
-        This function now supports Exponential Moving Average (EMA) smoothing
-        of the log posterior update. This can help reduce jitter in the
-        posterior estimate, leading to potentially more stable guidance scale
-        adjustments by FBG.
         """
         # Ensure t_curr is not zero to prevent division by zero
         if torch.isclose(t_curr, torch.tensor(0.0)).all():
-            if self.debug_mode >= 1:
+            if self.debug_mode:
                 print("Warning: t_curr is zero in _update_log_posterior. Skipping update.")
-            # --- Enhancement 6: EMA for Log Posterior ---
-            # Even if skipping update, apply EMA to the previous value if factor > 0
-            if self.log_posterior_ema_factor > 0:
-                 ema_result = self.log_posterior_ema_factor * prev_log_posterior + (1 - self.log_posterior_ema_factor) * prev_log_posterior
-                 return ema_result.clamp_(self.minimal_log_posterior, self.config.max_posterior_scale)
             return prev_log_posterior # Return previous value, or handle as error
         t_csq = t_curr**2
         # Ensure t_csq is not zero before division
         if torch.isclose(t_csq, torch.tensor(0.0)).all():
-            if self.debug_mode >= 1:
+            if self.debug_mode:
                 print("Warning: t_csq is zero in _update_log_posterior. Skipping update.")
-            # --- Enhancement 6: EMA for Log Posterior ---
-            if self.log_posterior_ema_factor > 0:
-                 ema_result = self.log_posterior_ema_factor * prev_log_posterior + (1 - self.log_posterior_ema_factor) * prev_log_posterior
-                 return ema_result.clamp_(self.minimal_log_posterior, self.config.max_posterior_scale)
             return prev_log_posterior
         t_ndc = t_next**2 / t_csq
         t_cmn = t_csq - t_next**2
@@ -702,12 +567,8 @@ class PingPongSampler:
         # Ensure sigma_square_tilde_t is not zero for the division below.
         # This can happen if t_cmn is zero (t_curr == t_next), or t_ndc is zero (t_next == 0).
         if torch.isclose(sigma_square_tilde_t, torch.tensor(0.0)).all():
-             if self.debug_mode >= 1:
+             if self.debug_mode:
                 print("Warning: sigma_square_tilde_t is zero in _update_log_posterior. Skipping update.")
-             # --- Enhancement 6: EMA for Log Posterior ---
-             if self.log_posterior_ema_factor > 0:
-                 ema_result = self.log_posterior_ema_factor * prev_log_posterior + (1 - self.log_posterior_ema_factor) * prev_log_posterior
-                 return ema_result.clamp_(self.minimal_log_posterior, self.config.max_posterior_scale)
              return prev_log_posterior
         pred_base = t_ndc * x_curr
         uncond_pred_mean = pred_base + t_cmn / t_csq * uncond
@@ -718,7 +579,7 @@ class PingPongSampler:
         # Check for potential division by zero before applying config.temp / (2 * sigma_square_tilde_t)
         if sigma_square_tilde_t == 0: # Already checked above, but double-safety for this specific line
              result = prev_log_posterior + self.config.offset
-             if self.debug_mode >= 2:
+             if self.debug_mode:
                 print("Warning: sigma_square_tilde_t is zero during log posterior update. Temp term ignored.")
         else:
             result = (
@@ -726,17 +587,9 @@ class PingPongSampler:
                 - self.config.temp / (2 * sigma_square_tilde_t) * diff
                 + self.config.offset
             )
-            
-        # --- Enhancement 6: EMA for Log Posterior ---
-        # Apply EMA smoothing to the raw result
-        if self.log_posterior_ema_factor > 0:
-            smoothed_result = self.log_posterior_ema_factor * prev_log_posterior + (1 - self.log_posterior_ema_factor) * result
-            result = smoothed_result
-            
-        clamped_result = result.clamp_(
+        return result.clamp_(
             self.minimal_log_posterior, self.config.max_posterior_scale
         )
-        return clamped_result
 
     def _do_callback(self, step_idx, current_x, current_sigma, denoised_sample):
         """
@@ -755,7 +608,7 @@ class PingPongSampler:
         """
         Executes the main "ping-pong" sampling loop, integrating FBG's dynamic guidance.
         """
-        if self.debug_mode >= 1:
+        if self.debug_mode:
             print("PingPongSampler.__call__ (sampling loop) started.")
         x_current = self.x.clone()
         num_steps = len(self.sigmas) - 1
@@ -783,11 +636,10 @@ class PingPongSampler:
                 x_current, sigma_current, override_cfg=self.guidance_scale
             )
             self._do_callback(idx, x_current, sigma_current, denoised_sample)
-            if self.debug_mode >= 1:
+            if self.debug_mode:
                 pretty_scales = ", ".join(f"{scale:.02f}" for scale in self.guidance_scale.flatten().detach().tolist())
                 print(f"Step {idx}: Sigma {sigma_item:.3f}, Next {sigma_next_item:.3f}, GS: {pretty_scales}")
-                if self.debug_mode >= 2:
-                    print(f"  Log Posterior mean: {self.log_posterior.mean().item():.4f}")
+                print(f"  Log Posterior mean: {self.log_posterior.mean().item():.4f}")
             # --- FBG: Update Log Posterior for Next Iteration ---
             # This uses x_current (before sampler step), x_next (after sampler step),
             # and the cond/uncond predictions.
@@ -800,59 +652,67 @@ class PingPongSampler:
             if not use_anc:
                 # Non-Ancestral Step (DDIM-like interpolation)
                 blend = sigma_next / sigma_current if sigma_current > 0 else 0.0
-                # --- Enhancement 4: Conditional Blend Functions (on sigma) ---
-                current_blend_function = self.step_blend_function
-                if self.conditional_blend_mode and sigma_item < self.conditional_blend_sigma_threshold:
-                    current_blend_function = self.conditional_blend_function
-                    if self.debug_mode >= 2:
-                        print(f"  Step {idx}: Sigma {sigma_item:.3f} < threshold {self.conditional_blend_sigma_threshold:.3f}. Using conditional blend function.")
-                x_current = current_blend_function(denoised_sample, x_current, blend)
+                x_current = self.step_blend_function(denoised_sample, x_current, blend)
             else:
                 # Ancestral Step Logic: Injecting controlled noise
                 local_seed = self._stepped_seed(idx)
-                # --- Enhancement 3: Dynamic Seed Reporting ---
-                if self.debug_mode >= 1 and local_seed is not None:
-                    print(f"  Step {idx}: Using RNG seed: {local_seed}")
                 if local_seed is not None:
                     torch.manual_seed(local_seed)
                 noise_sample = self.noise_sampler(sigma_current, sigma_next) 
+                # --- Enhancement 2: Additional Noise Injection Strategies ---
+                if self.noise_injection_strategy == "standard":
+                    final_noise_to_add = noise_sample
+                elif self.noise_injection_strategy == "refined":
+                    # Refine noise by subtracting its projection onto the denoised direction
+                    # This aims to inject noise orthogonal to the predicted denoised image
+                    noise_flat = noise_sample.view(noise_sample.shape[0], -1)
+                    denoised_flat = denoised_sample.view(denoised_sample.shape[0], -1)
+                    # Normalize denoised_flat for projection
+                    denoised_norm = torch.norm(denoised_flat, dim=1, keepdim=True)
+                    safe_denoised_norm = torch.where(denoised_norm > 1e-8, denoised_norm, torch.ones_like(denoised_norm))
+                    denoised_unit_flat = denoised_flat / safe_denoised_norm
+                    # Project noise onto denoised direction
+                    proj_coeff = torch.sum(noise_flat * denoised_unit_flat, dim=1, keepdim=True)
+                    noise_parallel = proj_coeff * denoised_unit_flat
+                    # Subtract parallel component to get orthogonal component
+                    refined_noise_flat = noise_flat - noise_parallel
+                    final_noise_to_add = refined_noise_flat.view_as(noise_sample)
+                    if self.debug_mode:
+                         print(f"  Step {idx}: Applied 'refined' noise injection strategy.")
+                elif self.noise_injection_strategy == "subtract":
+                    # Subtract noise instead of adding it
+                    final_noise_to_add = -noise_sample
+                    if self.debug_mode:
+                         print(f"  Step {idx}: Applied 'subtract' noise injection strategy.")
+                else: # Default to standard
+                    final_noise_to_add = noise_sample
+                    if self.debug_mode:
+                         print(f"  Step {idx}: Unknown noise_injection_strategy '{self.noise_injection_strategy}'. Using 'standard'.")
                 
-                # --- Enhancement 5: Noise Norm Clamping ---
-                final_noise_to_add = noise_sample
-                if self.clamp_noise_norm:
-                    noise_norm = torch.norm(final_noise_to_add, p=2, dim=list(range(1, final_noise_to_add.ndim)), keepdim=True)
-                    # Avoid division by zero
-                    safe_noise_norm = torch.where(noise_norm > 1e-8, noise_norm, torch.ones_like(noise_norm))
-                    scale_factor = torch.where(noise_norm > self.max_noise_norm, self.max_noise_norm / safe_noise_norm, torch.ones_like(noise_norm))
-                    final_noise_to_add = final_noise_to_add * scale_factor
-                    if self.debug_mode >= 2:
-                        avg_norm = noise_norm.mean().item()
-                        if avg_norm > self.max_noise_norm:
-                            print(f"  Step {idx}: Clamped noise norm from {avg_norm:.4f} to <= {self.max_noise_norm:.4f}")
+                # --- Enhancement 3: Adaptive Scheduling based on Posterior Estimates ---
+                effective_noise_multiplier = self.adaptive_noise_multiplier_base
+                if self.adaptive_noise_multiplier_enabled:
+                    # Example: Increase noise if log_posterior is low (less confident)
+                    # Sensitivity controls how strongly the posterior affects the multiplier
+                    # Lower log_posterior -> higher multiplier
+                    # Normalize log_posterior for sensitivity control (simple linear mapping example)
+                    # Assume log_posterior typically ranges between minimal_log_posterior and max_posterior_scale
+                    normalized_posterior = (self.log_posterior.mean().item() - self.minimal_log_posterior) / (self.config.max_posterior_scale - self.minimal_log_posterior + 1e-8)
+                    # Invert so low posterior (0) gives high multiplier, high posterior (1) gives low multiplier (e.g., base)
+                    # Clamp normalized_posterior to [0, 1] for safety
+                    normalized_posterior = max(0.0, min(1.0, normalized_posterior))
+                    inverted_posterior = 1.0 - normalized_posterior
+                    # Apply sensitivity: higher sensitivity means larger multiplier change
+                    effective_noise_multiplier = self.adaptive_noise_multiplier_base * (1.0 + self.adaptive_noise_multiplier_sensitivity * inverted_posterior)
+                    if self.debug_mode:
+                        print(f"  Step {idx}: Adaptive noise multiplier: base={self.adaptive_noise_multiplier_base:.3f}, effective={effective_noise_multiplier:.3f} (based on log_posterior={self.log_posterior.mean().item():.4f})")
 
+                final_noise_to_add = final_noise_to_add * effective_noise_multiplier
+                
                 if self.is_rf:
                     x_current = self.step_blend_function(denoised_sample, final_noise_to_add, sigma_next)
                 else:
                     x_current = denoised_sample + final_noise_to_add * sigma_next
-                    
-                # --- Enhancement 4: Conditional Blend Functions (on change) ---
-                # This part is tricky in ancestral steps as the 'change' is the noise itself.
-                # A more meaningful check might be the magnitude of the noise relative to denoised_sample.
-                # Let's define 'change' as the L2 norm of the noise added, normalized by the denoised sample's norm.
-                if self.conditional_blend_on_change:
-                    denoised_norm = torch.norm(denoised_sample, p=2, dim=list(range(1, denoised_sample.ndim)), keepdim=True) + 1e-8
-                    noise_norm = torch.norm(final_noise_to_add * sigma_next, p=2, dim=list(range(1, final_noise_to_add.ndim)), keepdim=True)
-                    relative_change = (noise_norm / denoised_norm).mean().item() # Average across batch/dims
-                    if relative_change > self.conditional_blend_change_threshold:
-                        # Apply a different blend *after* the step? Or blend the result with something?
-                        # Let's blend the final x_current with the denoised_sample using the conditional function.
-                        # Blend factor could be based on how much the change exceeded the threshold.
-                        blend_factor_for_change = min(1.0, (relative_change - self.conditional_blend_change_threshold) / self.conditional_blend_change_threshold)
-                        x_current = self.conditional_blend_function(denoised_sample, x_current, blend_factor_for_change)
-                        if self.debug_mode >= 2:
-                             print(f"  Step {idx}: Relative change {relative_change:.4f} > threshold {self.conditional_blend_change_threshold:.4f}. "
-                                   f"Applying conditional blend with factor {blend_factor_for_change:.3f}.")
-
             # --- FBG: Perform Log Posterior Update with the new x_current (as x_next) ---
             # The x_current here is the x_next for the FBG update.
             # We use x_orig_for_fbg_update as x_curr, and the current x_current as x_next.
@@ -861,21 +721,21 @@ class PingPongSampler:
             )
             # Check for early exit conditions (clamping or sigma_next near zero)
             if self.enable_clamp_output and sigma_next_item < 1e-3:
-                if self.debug_mode >= 1:
+                if self.debug_mode:
                     print(f"Final clamp condition met (sigma_next {sigma_next_item:.6f} < 1e-3). Clamping and breaking.")
                 x_current = torch.clamp(x_current, -1.0, 1.0)
                 break
             if sigma_next_item <= 1e-6:
-                if self.debug_mode >= 1:
+                if self.debug_mode:
                     print(f"Sigma_next {sigma_next_item:.6f} is near zero. Finishing sampling.")
                 x_current = denoised_sample
                 break
         # Final clamping for the very last step if not already handled
         if self.enable_clamp_output and sigma_next_item > 1e-6: # Only clamp if not already broken by small sigma_next
-             if self.debug_mode >= 1:
+             if self.debug_mode:
                  print("Final clamping after loop.")
              x_current = torch.clamp(x_current, -1.0, 1.0)
-        if self.debug_mode >= 1:
+        if self.debug_mode:
             print("PingPongSampler.__call__ (sampling loop) finished.")
         return x_current
 
@@ -903,7 +763,7 @@ class PingPongSampler:
         for key, value in fbg_config_kwargs_raw.items():
             if key in remap_rules:
                 fbg_config_kwargs[remap_rules[key]] = value
-                if kwargs.get("debug_mode", 0) >= 1: # Check debug level safely
+                if kwargs.get("debug_mode", False):
                     print(f"PingPongSampler.go Info: Remapped YAML FBG config key '{key}' to '{remap_rules[key]}'.")
             else:
                 fbg_config_kwargs[key] = value
@@ -912,7 +772,7 @@ class PingPongSampler:
             try:
                 fbg_config_kwargs["sampler_mode"] = getattr(SamplerMode, fbg_config_kwargs["sampler_mode"].upper())
             except AttributeError:
-                if kwargs.get("debug_mode", 0) >= 1:
+                if kwargs.get("debug_mode", False):
                     print(f"PingPongSampler.go Warning: Invalid FBG sampler_mode '{fbg_config_kwargs['sampler_mode']}'. Falling back to default.")
                 # If conversion fails, remove it to let FBGConfig use its default
                 fbg_config_kwargs.pop("sampler_mode", None)
@@ -925,11 +785,6 @@ class PingPongSampler:
         # Use .get with a default to prevent KeyError if these aren't present (e.g., in YAML without these keys)
         blend_function = _INTERNAL_BLEND_MODES.get(kwargs.pop("blend_function_name", "lerp"), torch.lerp)
         step_blend_function = _INTERNAL_BLEND_MODES.get(kwargs.pop("step_blend_function_name", "lerp"), torch.lerp)
-        # --- Enhancement 4: Conditional Blend Functions ---
-        # Extract conditional blend function name and get the function
-        conditional_blend_function_name = kwargs.pop("conditional_blend_function_name", "slerp")
-        conditional_blend_function = _INTERNAL_BLEND_MODES.get(conditional_blend_function_name, torch.lerp)
-        
         # Instantiate PingPongSampler with all required arguments
         # The remaining kwargs should directly map to PingPongSampler.__init__ parameters
         sampler_instance = PingPongSampler(
@@ -944,8 +799,6 @@ class PingPongSampler:
             step_blend_function=step_blend_function,
             fbg_config=fbg_config_instance,
             pingpong_options=pingpong_options_kwargs,
-            # --- Enhancement 4: Conditional Blend Functions ---
-            conditional_blend_function=conditional_blend_function, # Pass the actual function object
             **kwargs # Pass remaining kwargs which should be direct __init__ parameters
         )
         return sampler_instance() # Execute the sampling loop
@@ -955,15 +808,10 @@ class PingPongSamplerNode:
     ComfyUI node wrapper to register PingPongSampler as a custom sampler.
     This class defines the input parameters that will be exposed in the ComfyUI user interface.
     
-    Enhancements Implemented:
-    1. Debug Verbosity Levels (debug_mode: 0, 1, 2)
-    2. Sigma Range Presets (sigma_range_preset)
-    3. Dynamic Seed Reporting (in debug)
-    4. Conditional Blend Functions (conditional_blend_*)
-    5. Noise Norm Clamping (clamp_noise_norm, max_noise_norm)
-    6. EMA for Log Posterior (log_posterior_ema_factor)
-    10. Expanded Tooltips (in node definition)
-    11. Internal Comments (added throughout)
+    Enhancements:
+    1. More Blend Mode Options
+    2. Additional Noise Injection Strategies
+    3. Adaptive Scheduling based on Posterior Estimates
     """
     CATEGORY = "sampling/custom_sampling/samplers"
     RETURN_TYPES = ("SAMPLER",)
@@ -980,7 +828,7 @@ class PingPongSamplerNode:
             "required": {
                 # --- PingPong Sampler Specific Inputs ---
                 "step_random_mode":    (["off", "block", "reset", "step"], {"default": "block", "tooltip": "Controls how the RNG seed varies per sampling step.\n- 'off': Seed is constant. Predictable, but where's the fun in that?\n- 'block': Seed changes every 'step_size' frames. Like a glitch in the matrix, but intentional.\n- 'reset': Seed is reset based on 'step_size' multiplied by the frame index, offering more varied randomness.\n- 'step': Seed changes incrementally by the frame index at each step, providing subtle variations."}),
-                "step_size":           ("INT",    {"default": 4,    "min": 1,        "max": 100, "tooltip": "Used by 'block' and 'reset' step random modes to define the block/reset interval for the seed."}),
+                "step_size":           ("INT",    {"default": 5,    "min": 1,        "max": 100, "tooltip": "Used by 'block' and 'reset' step random modes to define the block/reset interval for the seed."}),
                 "seed":                ("INT",    {"default": 80085,  "min": 0,        "max": 2**32 - 1, "tooltip": "Base random seed. The cosmic initializer. Change it for new universes, keep it for deja vu."}),
                 "first_ancestral_step": ("INT",    {"default": 0, "min": -1, "max": 10000, "tooltip": "The sampler step index (0-based) to begin ancestral\nnoise injection (ping-pong behavior). Use -1 to effectively disable ancestral noise if last_ancestral_step is also -1."}),
                 "last_ancestral_step":  ("INT",    {"default": -1, "min": -1, "max": 10000, "tooltip": "The sampler step index (0-based) to end ancestral\nnoise injection (ping-pong behavior). Use -1 to extend ancestral noise to the end of the sampling process."}),
@@ -990,43 +838,13 @@ class PingPongSamplerNode:
                 "scheduler":           ("SCHEDULER", {"tooltip": "Connect a ComfyUI scheduler node (e.g., KSamplerScheduler) to define the noise decay curve for the sampler. Essential for proper sampling progression. It's the tempo track for your pixels!"}),
                 "blend_mode":          (tuple(_INTERNAL_BLEND_MODES.keys()), {"default": "lerp", "tooltip": "Blend mode to use for blending noise in ancestral steps. Defaults to 'lerp' (linear interpolation). Choose your flavor: 'lerp' (smooth blend), 'a_only' (take noise as is), 'b_only' (take other input as is). Fancy, right?"}),
                 "step_blend_mode":     (tuple(_INTERNAL_BLEND_MODES.keys()), {"default": "lerp", "tooltip": "Blend mode to use for non-ancestral steps (regular denoising progression). Changing this from 'lerp' is generally not recommended unless you're feeling particularly chaotic. Like trying to render Doom on a 386SX with 2MB RAM."}),
+                # --- Enhancement 2: Additional Noise Injection Strategies ---
+                "noise_injection_strategy": (["standard", "refined", "subtract"], {"default": "standard", "tooltip": "Strategy for injecting noise in ancestral steps.\n- 'standard': Add noise directly.\n- 'refined': Add noise orthogonal to the predicted denoised direction.\n- 'subtract': Subtract noise instead of adding it."}),
+                # --- Enhancement 3: Adaptive Scheduling based on Posterior Estimates ---
+                "adaptive_noise_multiplier_enabled": ("BOOLEAN", {"default": False, "tooltip": "If true, modulates the ancestral noise multiplier based on the current FBG log posterior estimate."}),
+                "adaptive_noise_multiplier_base": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.01, "tooltip": "Base multiplier for ancestral noise when adaptive scheduling is enabled or disabled."}),
+                "adaptive_noise_multiplier_sensitivity": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.01, "tooltip": "Controls how strongly the log posterior affects the noise multiplier. Higher values mean larger changes in noise amount based on posterior."}),
                 
-                # --- Enhancement 1: Debug Verbosity Levels ---
-                "debug_mode": (
-                    "INT",
-                    {
-                        "default": 0,
-                        "min": 0,
-                        "max": 2,
-                        "tooltip": "Enable debug messages in the ComfyUI console.\n0: Off\n1: Basic info (steps, seeds, FBG config)\n2: Verbose (detailed internal values, FBG components).",
-                    },
-                ),
-                
-                # --- Enhancement 2: Sigma Range Presets ---
-                "sigma_range_preset": (["Custom", "High", "Mid", "Low", "All"], {
-                    "default": "Custom",
-                    "tooltip": "Quickly set FBG/CFG sigma ranges. Overrides manual sigma inputs if not 'Custom'.\n"
-                               "- 'Custom': Use manual sigma inputs.\n"
-                               "- 'High': Apply FBG/CFG to the first 25% of high-noise steps.\n"
-                               "- 'Mid': Apply FBG/CFG to the middle 50% of steps.\n"
-                               "- 'Low': Apply FBG/CFG to the last 25% of low-noise steps.\n"
-                               "- 'All': Apply FBG/CFG across the entire denoising schedule."
-                }),
-                
-                # --- Enhancement 4: Conditional Blend Functions ---
-                "conditional_blend_mode": ("BOOLEAN", {"default": False, "tooltip": "Enable switching the blend function for non-ancestral steps based on sigma or change."}),
-                "conditional_blend_sigma_threshold": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 100.0, "step": 0.01, "tooltip": "If sigma is below this threshold, use the conditional blend function for non-ancestral steps."}),
-                "conditional_blend_function_name": (tuple(_INTERNAL_BLEND_MODES.keys()), {"default": "slerp", "tooltip": "The blend function to use when the conditional sigma threshold is met."}),
-                "conditional_blend_on_change": ("BOOLEAN", {"default": False, "tooltip": "Enable switching the blend function based on the magnitude of change introduced in the step."}),
-                "conditional_blend_change_threshold": ("FLOAT", {"default": 0.1, "min": 0.0, "max": 10.0, "step": 0.001, "tooltip": "Threshold for relative change (noise_norm/denoised_norm). If exceeded, apply conditional blend."}),
-                
-                # --- Enhancement 5: Noise Norm Clamping ---
-                "clamp_noise_norm": ("BOOLEAN", {"default": False, "tooltip": "If true, clamp the L2 norm of the noise vector injected during ancestral steps."}),
-                "max_noise_norm": ("FLOAT", {"default": 1.0, "min": 0.01, "max": 100.0, "step": 0.01, "tooltip": "Maximum allowed L2 norm for the noise vector when clamping is enabled."}),
-                
-                # --- Enhancement 6: EMA for Log Posterior ---
-                "log_posterior_ema_factor": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "tooltip": "Exponential Moving Average factor for the FBG log posterior update. 0.0 = no smoothing, 1.0 = use only previous value. Values like 0.1-0.3 can smooth jitter."}),
-
                 # --- FBG Specific Inputs ---
                 "fbg_sampler_mode": (
                     tuple(SamplerMode.__members__), # Exposes "EULER", "PINGPONG" as selectable strings for FBG's base sampler
@@ -1236,7 +1054,14 @@ class PingPongSamplerNode:
                         "tooltip": "FBG internal parameter: Scale for noise added during ancestral sampling *within FBG's model prediction step*.",
                     },
                 ),
-               
+                # New Debug Mode Input
+                "debug_mode": (
+                    "BOOLEAN",
+                    {
+                        "default": False,
+                        "tooltip": "Enable verbose debug messages in the ComfyUI console. Useful for troubleshooting FBG and sampler behavior.",
+                    },
+                ),
             },
             "optional": {
                 "yaml_settings_str": ("STRING", {"multiline": True, "default": "", "dynamic_prompt": False, "tooltip": "YAML string to configure sampler parameters. Parameters provided directly via the ComfyUI node's inputs will now be **OVERRIDDEN** by any corresponding values set in the YAML string. If the YAML is empty, node inputs are used. YAML is the boss now, respect its authority!"}),
@@ -1258,21 +1083,12 @@ class PingPongSamplerNode:
         scheduler, # ComfyUI handles its default/None if not connected
         blend_mode: str, # Passed as string, convert to function
         step_blend_mode: str, # Passed as string, convert to function
-        # --- Enhancement 1: Debug Verbosity Levels ---
-        debug_mode: int,
-        # --- Enhancement 2: Sigma Range Presets ---
-        sigma_range_preset: str,
-        # --- Enhancement 4: Conditional Blend Functions ---
-        conditional_blend_mode: bool,
-        conditional_blend_sigma_threshold: float,
-        conditional_blend_function_name: str,
-        conditional_blend_on_change: bool,
-        conditional_blend_change_threshold: float,
-        # --- Enhancement 5: Noise Norm Clamping ---
-        clamp_noise_norm: bool,
-        max_noise_norm: float,
-        # --- Enhancement 6: EMA for Log Posterior ---
-        log_posterior_ema_factor: float,
+        # --- Enhancement 2: Additional Noise Injection Strategies ---
+        noise_injection_strategy: str,
+        # --- Enhancement 3: Adaptive Scheduling based on Posterior Estimates ---
+        adaptive_noise_multiplier_enabled: bool,
+        adaptive_noise_multiplier_base: float,
+        adaptive_noise_multiplier_sensitivity: float,
         
         fbg_sampler_mode: str,
         cfg_scale: float,
@@ -1294,6 +1110,7 @@ class PingPongSamplerNode:
         fbg_guidance_multiplier: float,
         fbg_eta: float,
         fbg_s_noise: float,
+        debug_mode: bool,
         # Only 'optional' parameters should have defaults here.
         yaml_settings_str: str = ""
     ):
@@ -1343,21 +1160,13 @@ class PingPongSamplerNode:
             "fbg_config": fbg_config_instance_from_direct_inputs._asdict(), # Pass FBGConfig as dict to be recreated in go()
             "eta": fbg_eta, 
             "s_noise": fbg_s_noise, 
-            # --- Enhancement 1: Debug Verbosity Levels ---
             "debug_mode": debug_mode,
-            # --- Enhancement 2: Sigma Range Presets ---
-            "sigma_range_preset": sigma_range_preset,
-            # --- Enhancement 4: Conditional Blend Functions ---
-            "conditional_blend_mode": conditional_blend_mode,
-            "conditional_blend_sigma_threshold": conditional_blend_sigma_threshold,
-            "conditional_blend_function_name": conditional_blend_function_name, # Pass string name
-            "conditional_blend_on_change": conditional_blend_on_change,
-            "conditional_blend_change_threshold": conditional_blend_change_threshold,
-            # --- Enhancement 5: Noise Norm Clamping ---
-            "clamp_noise_norm": clamp_noise_norm,
-            "max_noise_norm": max_noise_norm,
-            # --- Enhancement 6: EMA for Log Posterior ---
-            "log_posterior_ema_factor": log_posterior_ema_factor,
+            # --- Enhancement 2: Additional Noise Injection Strategies ---
+            "noise_injection_strategy": noise_injection_strategy,
+            # --- Enhancement 3: Adaptive Scheduling based on Posterior Estimates ---
+            "adaptive_noise_multiplier_enabled": adaptive_noise_multiplier_enabled,
+            "adaptive_noise_multiplier_base": adaptive_noise_multiplier_base,
+            "adaptive_noise_multiplier_sensitivity": adaptive_noise_multiplier_sensitivity,
         }
         # Initialize final_options with direct node inputs first.
         final_options = direct_inputs.copy()
