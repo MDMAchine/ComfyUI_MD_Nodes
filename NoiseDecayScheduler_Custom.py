@@ -1,7 +1,6 @@
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-# ████ NOISE DECAY SCHEDULER v0.3.1 – Released to the Wild ████▓▒░
+# ████ ADVANCED NOISE DECAY SCHEDULER v0.5.2 – Final? Build ████▓▒░
 # ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-
 # ░▒▓ ORIGIN & DEV:
 #   • Crafted in the fumes of dial-up and hot solder smell
 #   • Inspired by: Blepping? | https://github.com/blepping
@@ -34,6 +33,13 @@
 #       • Added `RETURN_NAMES` for UI clarity
 #       • Mapped `NODE_DISPLAY_NAME_MAPPINGS` for consistency
 #       • Documented `decay_power` with useful tooltip
+#   - v0.5.1 "Advanced Features & Refactor":
+#       • Implemented multiple decay algorithms: polynomial, sigmoidal, piecewise, and fourier.
+#       • Added performance features: caching and temporal smoothing.
+#       • Refactored code for better readability and maintainability.
+#   - v0.5.2 "Final Fixes":
+#       • Restored original class name to `NoiseDecayScheduler_Custom` for graph compatibility.
+#       • Fixed critical syntax error in `INPUT_TYPES` to ensure node loads correctly.
 
 # ░▒▓ CONFIGURATION:
 #   → Primary Use: Fine-tuning decay curves in custom schedulers
@@ -49,18 +55,16 @@
 
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 
+import numpy as np
+from typing import List, Tuple, Optional, Any
+import hashlib
 
-
-import numpy as np  # Numerical operations for decay curve
-
-class NoiseDecayScheduler_Custom_V03:
+class NoiseDecayScheduler_Custom:
     """
-    Node wrapper for ComfyUI to output a noise-decay scheduler.
-
-    - INPUT: decay_power (controls curvature of cosine decay)
-    - OUTPUT: scheduler object implementing get_decay(num_steps)
+    Advanced Noise Decay Scheduler with customizable algorithms.
+    This node serves as the main entry point for ComfyUI.
     """
-
+    
     # Node category in ComfyUI UI
     CATEGORY = "schedulers/custom"
 
@@ -74,23 +78,64 @@ class NoiseDecayScheduler_Custom_V03:
     RETURN_NAMES = ("scheduler",)
 
     # Description of the node
-    DESCRIPTION = "Custom noise decay scheduler with cosine curve for PingPongSampler"
+    DESCRIPTION = "Advanced noise decay scheduler with multiple algorithms and performance features."
 
     @classmethod
     def INPUT_TYPES(cls):
         """
         Defines inputs for the node UI.
-        Only a single `decay_power` parameter to shape the decay curve.
+        - algorithm_type: Selects the decay algorithm.
+        - decay_exponent: Controls the steepness for polynomial and sigmoidal decay.
+        - use_caching: Toggles caching of decay curves.
+        - enable_temporal_smoothing: Applies a moving average filter.
+        - custom_piecewise_points: A string of comma-separated floats for piecewise decay.
+        - fourier_frequency: Controls the frequency for Fourier-based decay.
         """
         return {
             "required": {
-                "decay_power": (
+                "algorithm_type": (
+                    ["polynomial", "sigmoidal", "piecewise", "fourier"],
+                    {
+                        "default": "polynomial",
+                        "tooltip": "Select the decay algorithm: polynomial, sigmoidal, piecewise, fourier."
+                    }
+                ),
+                "decay_exponent": (
                     "FLOAT", {
-                        "default": 3.0,     # default exponent for cosine decay
-                        "min": 0.1,         # minimum allowed exponent
-                        "max": 10.0,        # maximum allowed exponent
-                        "step": 0.1,        # UI slider step size
-                        "tooltip": "Controls the curvature of the noise decay curve. Higher values (e.g., 5.0-10.0) result in a steeper decay, making noise reduce more quickly, which can lead to sharper, more detailed results. Lower values (e.g., 0.1-2.0) create a gentler decay, prolonging the influence of noise and potentially leading to softer or more experimental outputs. This parameter directly influences how 'ancestral' noise is faded out during sampling, especially useful with the PingPongSampler."
+                        "default": 2.0,
+                        "min": 0.1,
+                        "max": 10.0,
+                        "step": 0.1,
+                        "tooltip": "Exponent for polynomial decay or sigmoidal curve steepness."
+                    }
+                ),
+                "use_caching": (
+                    "BOOLEAN", {
+                        "default": True,
+                        "tooltip": "Enable caching of computed decay values to avoid redundant calculations."
+                    }
+                ),
+                "enable_temporal_smoothing": (
+                    "BOOLEAN", {
+                        "default": False,
+                        "tooltip": "Apply temporal filtering to smooth noise transitions."
+                    }
+                ),
+            },
+            "optional": {
+                "custom_piecewise_points": (
+                    "STRING", {
+                        "default": "0.0,0.5,1.0",
+                        "tooltip": "Custom piecewise decay points (comma-separated values). Only used with 'piecewise' algorithm."
+                    }
+                ),
+                "fourier_frequency": (
+                    "FLOAT", {
+                        "default": 1.0,
+                        "min": 0.1,
+                        "max": 10.0,
+                        "step": 0.1,
+                        "tooltip": "Frequency for Fourier-based decay. Only used with 'fourier' algorithm."
                     }
                 ),
             }
@@ -98,46 +143,137 @@ class NoiseDecayScheduler_Custom_V03:
 
     class NoiseDecayObject:
         """
-        Scheduler implementation that lazily computes a cosine decay curve.
+        The actual scheduler implementation, which is returned by the node.
+        This class must contain a 'get_decay' method.
         """
-        def __init__(self, decay_power: float):
-            # Store the exponent for shaping the cosine curve
-            self.decay_power = decay_power
+        def __init__(self,
+                     algorithm_type: str,
+                     decay_exponent: float,
+                     use_caching: bool,
+                     enable_temporal_smoothing: bool,
+                     custom_piecewise_points: str,
+                     fourier_frequency: float):
+
+            self.algorithm_type = algorithm_type
+            self.decay_exponent = decay_exponent
+            self.use_caching = use_caching
+            self.enable_temporal_smoothing = enable_temporal_smoothing
+            self.fourier_frequency = fourier_frequency
+            self._cache = {}
+
+            # Parse custom piecewise points
+            try:
+                self.piecewise_points = [float(x.strip()) for x in custom_piecewise_points.split(",")]
+            except (ValueError, TypeError):
+                self.piecewise_points = [0.0, 0.5, 1.0]
+
+        def _generate_cache_key(self, num_steps: int) -> str:
+            """Generate a unique cache key based on all relevant parameters."""
+            params_str = f"{self.algorithm_type}_{self.decay_exponent}_{self.fourier_frequency}_{self.enable_temporal_smoothing}_{num_steps}"
+            if self.algorithm_type == "piecewise":
+                params_str += f"_{','.join(map(str, self.piecewise_points))}"
+            return hashlib.md5(params_str.encode()).hexdigest()
+
+        def _apply_temporal_smoothing(self, decay_array: np.ndarray, window_size: int = 3) -> np.ndarray:
+            """Apply a simple moving average filter for smoothing."""
+            if len(decay_array) <= window_size:
+                return decay_array
+            
+            # Simple moving average smoothing
+            smoothed = np.convolve(decay_array, np.ones(window_size)/window_size, mode='same')
+            return smoothed
+
+        def _compute_polynomial_decay(self, num_steps: int) -> np.ndarray:
+            """Compute polynomial decay."""
+            normalized_steps = np.linspace(0.0, 1.0, num_steps)
+            decay_values = np.power(1.0 - normalized_steps, self.decay_exponent)
+            return decay_values
+
+        def _compute_sigmoidal_decay(self, num_steps: int) -> np.ndarray:
+            """Compute sigmoidal decay."""
+            normalized_steps = np.linspace(0.0, 1.0, num_steps)
+            # Adjust the input range for the sigmoid function for a clearer curve
+            x = (normalized_steps - 0.5) * self.decay_exponent * 4
+            sigmoid = 1 / (1 + np.exp(x))
+            # Normalize to go from a high value to a low value
+            return 1.0 - sigmoid
+
+        def _compute_piecewise_decay(self, num_steps: int) -> np.ndarray:
+            """Compute piecewise decay with custom points."""
+            normalized_steps = np.linspace(0.0, 1.0, num_steps)
+            if len(self.piecewise_points) >= 2:
+                x_points = np.linspace(0, 1, len(self.piecewise_points))
+                y_points = np.array(self.piecewise_points)
+                decay_values = np.interp(normalized_steps, x_points, y_points)
+            else:
+                decay_values = self._compute_polynomial_decay(num_steps)
+            return decay_values
+
+        def _compute_fourier_decay(self, num_steps: int) -> np.ndarray:
+            """Compute Fourier-based decay."""
+            normalized_steps = np.linspace(0.0, 1.0, num_steps)
+            # Create a sine wave and normalize it to go from 1.0 to 0.0
+            decay_values = np.cos(self.fourier_frequency * np.pi * normalized_steps)
+            decay_values = (decay_values + 1) / 2
+            return decay_values
 
         def get_decay(self, num_steps: int) -> np.ndarray:
             """
-            Compute and return a decay array of length `num_steps`.
-
-            Uses:
-              decay[i] = cos( linspace(0, π/2)[i] ) ** decay_power
+            ComfyUI standard method to get the decay schedule.
+            This method computes the decay curve, applies smoothing and caching.
             """
-            # Create linearly spaced angles from 0 to π/2
-            lin = np.linspace(0, np.pi / 2, num_steps)
-            # Raise cosine of each angle to the decay_power
-            return np.cos(lin) ** self.decay_power
+            if self.use_caching:
+                cache_key = self._generate_cache_key(num_steps)
+                if cache_key in self._cache:
+                    return self._cache[cache_key]
 
-    def generate(self, decay_power: float):
+            if self.algorithm_type == "polynomial":
+                decay_values = self._compute_polynomial_decay(num_steps)
+            elif self.algorithm_type == "sigmoidal":
+                decay_values = self._compute_sigmoidal_decay(num_steps)
+            elif self.algorithm_type == "piecewise":
+                decay_values = self._compute_piecewise_decay(num_steps)
+            elif self.algorithm_type == "fourier":
+                decay_values = self._compute_fourier_decay(num_steps)
+            else:
+                # Fallback to polynomial decay if algorithm is not recognized
+                decay_values = self._compute_polynomial_decay(num_steps)
+
+            if self.enable_temporal_smoothing:
+                decay_values = self._apply_temporal_smoothing(decay_values)
+
+            if self.use_caching:
+                self._cache[cache_key] = decay_values
+
+            return decay_values
+
+    def generate(self,
+                 algorithm_type: str,
+                 decay_exponent: float,
+                 use_caching: bool,
+                 enable_temporal_smoothing: bool,
+                 custom_piecewise_points: str,
+                 fourier_frequency: float):
         """
-        Node function: instantiate and return the NoiseDecayObject.
-
-        Args:
-          decay_power: exponent controlling decay steepness
-
-        Returns:
-          Tuple containing the scheduler object
+        Main node function that instantiates and returns the scheduler object.
         """
-        scheduler_obj = self.NoiseDecayObject(decay_power)
+        scheduler_obj = self.NoiseDecayObject(
+            algorithm_type=algorithm_type,
+            decay_exponent=decay_exponent,
+            use_caching=use_caching,
+            enable_temporal_smoothing=enable_temporal_smoothing,
+            custom_piecewise_points=custom_piecewise_points,
+            fourier_frequency=fourier_frequency
+        )
         return (scheduler_obj,)
 
 
 # Register mappings for ComfyUI to discover this node
 NODE_CLASS_MAPPINGS = {
-    "NoiseDecayScheduler_Custom": NoiseDecayScheduler_Custom_V03,
+    "NoiseDecayScheduler_Custom": NoiseDecayScheduler_Custom,
 }
 
 # Friendly display name override in node editor
-# This is usually optional if the class name is descriptive enough,
-# but it's good practice to keep it for explicit control.
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "NoiseDecayScheduler_Custom": "Noise Decay Scheduler (Custom)",
+    "NoiseDecayScheduler_Custom": "Noise Decay Scheduler (Advanced)",
 }
