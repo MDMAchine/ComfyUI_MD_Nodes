@@ -15,7 +15,7 @@
 ┃   ✪ COMFYUI CUSTOM NODE CENTRAL ✪           v0.69.420-BETA - L33T APPROVED      ┃
 ┃   "Latent Space Debauchery & Digital Sorcery Unleashed Since 56k Modem Days!"    ┃
 ┃                                                                                  ┃
-┃   Logged in as: [L33T_USER]              Last Sync: 2025-06-13 23:37 EST         ┃
+┃   Logged in as: [L33T_USER]              Last Sync: 2025-07-31 17:47 EST         ┃
 ┃                                                                                  ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 ````
@@ -54,13 +54,13 @@ This ComfyUI custom node is an audio transformation station that applies audio-s
 A sampler that alternates between denoising and renoising to refine media over time, acting like a finely tuned echo chamber for your latent space. You set how "pingy" (denoise) or "pongy" (re-noise) it gets, allowing for precise control over the iterative refinement process, whether aiming for crisp details or a more ethereal quality. It works beautifully for both image and text-to-audio latents, and allows for advanced configuration via YAML parameters that can override direct node inputs.
 
 **💫 [`PINGPONG_SAMPLER_CUSTOM_FBG`](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/PingPong_Sampler_Custom_FBG.md)**
-*‣ v0.9.9 FBG – Denoise with Feedback Guidance for dynamic control & consistency!*
+*‣ v0.9.9-p1 – Denoise with Feedback Guidance for dynamic control & consistency!*
 
 A powerful evolution of the PingPong Sampler, this version integrates Feedback Guidance (FBG) for intelligent, dynamic adjustment of the guidance scale during denoising. It combines controlled ancestral noise injection with adaptive guidance to achieve both high fidelity and temporal consistency, particularly effective for challenging time-series data like audio and video. FBG adapts the guidance on-the-fly, leading to potentially more efficient sampling and improved results.
 
 
 **🔮 [`SCENE_GENIUS_AUTOCREATOR`](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/SCENE_GENIUS_AUTOCREATOR.md)**
-*‣ v0.1.1 – Automatic scene prompt & input generation for batch jobs, powered by AI creative weapon node!*
+*‣ v0.1.11 – Automatic scene prompt & input generation for batch jobs, powered by AI creative weapon node!*
 
 This multi-stage AI (ollama) creative weapon node for ComfyUI allows you to plug in basic concepts or seeds. Designed to automate Ace-Step diffusion content generation, it produces authentic genres, adaptive lyrics, precise durations, finely tuned Noise Decay, APG and PingPong Sampler YAML configs with ease, making batch experimentation a breeze.
 
@@ -70,7 +70,7 @@ This multi-stage AI (ollama) creative weapon node for ComfyUI allows you to plug
 Peek behind the curtain to see what your model sees. This visualization node decodes 4D latent madness into clean, readable 2D tensor maps, offering multi-mode insight including waveform, spectrum, and RGB channel split visualizations. You can choose your slice, style, and level of cognitive dissonance, making it ideal for debugging, pattern spotting, or simply admiring your AI’s hidden guts.
 
 **📉 [`NOISEDECAY_SCHEDULER`](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/NoiseDecayScheduler_Custom.md)**
-*‣ v0.4.4 – Variable-step decay scheduling with cosine-based curve control*
+*‣ v0.5.2 – Variable-step decay scheduling with cosine-based curve control*
 
 A custom noise decay scheduler inspired by adversarial re-noising research, this node outputs a cosine-based decay curve raised to your decay_power to control steepness. It's great for stylized outputs, consistent animations, and model guidance training. Designed for use with pingpongsampler_custom or anyone seeking to escape aesthetic purgatory, use with PingPong Sampler Custom if you're feeling brave and want to precisely modulate noise like a sad synth player modulates a filter envelope.
 
