@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "comfyui-md-nodes"
-version = "1.3.0"
+version = "1.4.0"
 description = "A wild collection of custom nodes for ComfyUI including schedulers, samplers, audio tools, latent visualizers, and more — built for creative chaos."
 readme = "README.md"
 requires-python = ">=3.9"
