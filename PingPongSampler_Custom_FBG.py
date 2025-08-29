@@ -973,7 +973,7 @@ class PingPongSamplerNodeFBG:
     ComfyUI node wrapper to register PingPongSampler as a custom sampler.
     This class defines the input parameters that will be exposed in the ComfyUI user interface.
     """
-    CATEGORY = "sampling/custom_sampling/samplers"
+    CATEGORY = "MD_Nodes/Samplers"
     RETURN_TYPES = ("SAMPLER",)
     FUNCTION = "get_sampler"
 

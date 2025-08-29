@@ -74,7 +74,7 @@ print(f"[{__name__}] Media output directory: {MEDIA_OUTPUT_DIR}")
 class AdvancedMediaSave:
     # We are an output node, so we don't need to return anything to other nodes.
     OUTPUT_NODE = True
-    CATEGORY = "media/save"
+    CATEGORY = "MD_Nodes/Save"
 
     @classmethod
     def INPUT_TYPES(cls):

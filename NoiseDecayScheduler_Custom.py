@@ -26,7 +26,7 @@ from typing import List, Tuple, Optional, Any
 import hashlib
 
 class NoiseDecayScheduler_Custom:
-    CATEGORY = "schedulers/custom"
+    CATEGORY = "MD_Nodes/Schedulers"
     FUNCTION = "generate"
     RETURN_TYPES = ("SCHEDULER",)
     RETURN_NAMES = ("scheduler",)

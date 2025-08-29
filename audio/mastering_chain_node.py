@@ -206,7 +206,7 @@ class MasteringChainNode:
 
     RETURN_TYPES = ("AUDIO", "IMAGE", "IMAGE")
     FUNCTION = "apply_mastering_chain"
-    CATEGORY = "Audio Mastering"
+    CATEGORY = "MD_Nodes/Audio Processing"
 
     def _db_to_amplitude(self, db):
         """Converts decibels to an amplitude multiplier."""

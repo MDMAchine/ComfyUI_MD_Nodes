@@ -67,7 +67,7 @@ class ACE_LatentVisualizer_v03:
 
     # CATEGORY: This is where you'll find our node in the ComfyUI menu.
     # Look under 'latent/visualization' - we're hiding where the cool kids hang out!
-    CATEGORY = "latent/visualization"
+    CATEGORY = "MD_Nodes/Visualization"
     
     # RETURN_TYPES: What kind of digital treasure does this node spit out?
     # Just one glorious 'IMAGE' tensor, ready for your 'Preview Image' node!

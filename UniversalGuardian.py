@@ -408,7 +408,7 @@ class UniversalGuardian:
                    "final_prompt", "final_quality_metric", "attempt_count", "final_seed", 
                    "preview_image", "quality_report")
     FUNCTION = "execute"
-    CATEGORY = "dynamic/guardian"
+    CATEGORY = "MD_Nodes/Utility"
     
     def _load_clip_model(self, model_name: str, clip_model, clip_processor):
         """Load CLIP model with better error handling"""
