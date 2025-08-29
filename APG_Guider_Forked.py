@@ -374,7 +374,7 @@ class APGGuiderNode:
     A powerful fork of Blepping's original APG Guider, with refined settings.
     """
 
-    CATEGORY = "sampling/custom_sampling/guiders"
+    CATEGORY = "MD_Nodes/Guiders"
     FUNCTION = "go"
     RETURN_TYPES = ("GUIDER",)
     RETURN_NAMES = ("apg_guider",)

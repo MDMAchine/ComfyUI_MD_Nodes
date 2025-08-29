@@ -259,7 +259,7 @@ Output ONLY the number.
 Output:
 """
 
-    CATEGORY = "SceneGenius"
+    CATEGORY = "MD_Nodes/SceneGenius"
 
     @classmethod
     def _get_ollama_models_list(cls):

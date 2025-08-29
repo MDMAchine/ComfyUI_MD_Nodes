@@ -253,7 +253,7 @@ class PingPongSampler:
 
 class PingPongSamplerNode:
     """ComfyUI node wrapper for the enhanced 'Lite+' PingPongSampler."""
-    CATEGORY = "sampling/custom_sampling/samplers"
+    CATEGORY = "MD_Nodes/Samplers"
     RETURN_TYPES = ("SAMPLER",)
     FUNCTION = "get_sampler"
 

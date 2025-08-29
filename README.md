@@ -1,5 +1,5 @@
 ![Synth Approved](https://img.shields.io/badge/VIBES-CHAOTIC_NEUTRAL-ff00ff?style=flat-square&logo=md&logoColor=white)
-![Node Count](https://img.shields.io/badge/NODES-13_MODULES_ACTIVE-00ffff?style=flat-square)
+![Node Count](https://img.shields.io/badge/NODES-12_MODULES_ACTIVE-00ffff?style=flat-square)
 ![L33T MODE](https://img.shields.io/badge/L33T-MODE_ENABLED-red?style=flat-square&logo=hackaday)
 
 ```text
@@ -48,7 +48,7 @@ This node is part of the **MD Nodes** package. All required Python libraries are
 2.  Navigate to your `ComfyUI/custom_nodes/` directory.
 3.  Run the following command to clone the repository:
     ```bash
-    git clone [https://github.com/MDMAchine/ComfyUI_MD_Nodes.git](https://github.com/MDMAchine/ComfyUI_MD_Nodes.git)
+    git clone https://github.com/MDMAchine/ComfyUI_MD_Nodes.git
     ```
 4.  Install the required dependencies by running:
     ```bash

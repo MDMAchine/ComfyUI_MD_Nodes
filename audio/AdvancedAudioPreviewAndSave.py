@@ -235,9 +235,7 @@ def _save_audio_with_av(
 
 # --- Node Class Definition: Where the Magic Happens! ---
 class AdvancedAudioPreviewAndSave:
-    # CATEGORY: This tells ComfyUI where to find our node in the "Add Node" menu.
-    # Look for us under 'audio/output'! We're making sounds and saving them!
-    CATEGORY = "audio/output"
+    CATEGORY = "MD_Nodes/Save"
 
     # INPUT_TYPES: Defines all the inputs our node needs to do its awesome work.
     # Think of these as the ingredients for our digital recipe.
