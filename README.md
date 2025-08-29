@@ -65,7 +65,7 @@ This node is part of the **MD Nodes** package. All required Python libraries are
 This node pack is a living, breathing experiment. It's built on a foundation of chaotic creativity, rapid prototyping, and a healthy dose of digital anarchy. Think of it less as a polished commercial product and more as a tricked-out pirate radio station broadcasting from the fringes of latent space.
 
 * **Embrace the Chaos:** These nodes are designed to be powerful and, at times, unpredictable. They are tools for exploration. Sometimes the best results come from pushing a parameter until something beautiful and unexpected breaks.
-* **Built for Audio, Hacked for Image/Video:** The core samplers and schedulers were born from a deep dive into audio synthesis. They have been adapted and tuned for image and video, but their soul is sonic. This is why they produce unique temporal effects.
+* **Built for Audio, Hacked for Video:** The core samplers and schedulers were born from a deep dive into audio synthesis. They have been adapted and tuned for video, but their soul is sonic. This is why they produce unique temporal effects.
 * **The Bleeding Edge is Sharp:** We prioritize adding new, strange features over maintaining perfect backward compatibility. A workflow that worked last week might need a tweak to work today. This is the price of admission for riding the bleeding edge.
 
 ---
