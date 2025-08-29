@@ -1,32 +1,141 @@
 {
-  "name": "md_nodes",
+  "name": "comfyui-md-nodes",
+  "version": "1.3.0",
+  "author": "MDMAchine",
   "description": "████ MD_Nodes by MDMAchine - The L337est Collection of ComfyUI Unleashed! ████▓▒░\n\nForged in the digital fires, this node pack brings next-level tensor manipulation, advanced image alchemy, and precision audio sorcery to your ComfyUI workflows. Optimized for maximum creative chaos and minimal dependency friction. Expect surgical precision... or beautiful catastrophe, depending on your vibe. This is not your grandpappy's ComfyUI – this is the future, delivered.",
-  "author": "MDMAchine (Pixel Pimp)",
-  "version": "0.1.0",
-  "dependencies": [
-    "PyYAML",
-    "requests",
-    "matplotlib",
-    "soundfile",
-    "scipy",
-    "pedalboard",
-    "numpy",
-    "pillow"
-    // PyTorch and related libraries (torch, torchaudio, torchvision) are
-    // typically provided by the main ComfyUI environment and are not listed here
-    // to prevent conflicts with existing user installations.
-  ],
+  "repository": "https://github.com/MDMAchine/ComfyUI_MD_Nodes",
+  "license": "Apache-2.0",
   "tags": [
     "utility",
     "tensor",
     "image processing",
     "audio",
+    "video",
+    "sampler",
+    "scheduler",
+    "latent",
     "MDMAchine",
     "advanced",
     "demonic_magic",
     "chaos"
   ],
-  "repository": "https://github.com/MDMAchine/ComfyUI_MD_Nodes",
-  "license": "Apache-2.0",
+  "dependencies": [
+    "av",
+    "librosa",
+    "matplotlib",
+    "numpy",
+    "ollama",
+    "opencv-python",
+    "pedalboard",
+    "piexif",
+    "Pillow",
+    "PyYAML",
+    "requests",
+    "scipy",
+    "tqdm",
+    "transformers"
+  ],
+  "files": [
+    "__init__.py",
+    "AdvancedMediaSave.py",
+    "APG_Guider_Forked.py",
+    "Hybrid_Sigma_Scheduler.py",
+    "NoiseDecayScheduler_Custom.py",
+    "PingPongSampler_Custom.py",
+    "PingPongSampler_Custom_FBG.py",
+    "SCENE_GENIUS_AUTOCREATOR.py",
+    "seed_saver_node.py",
+    "UniversalGuardian.py",
+    "audio/AdvancedAudioPreviewAndSave.py",
+    "audio/mastering_chain_node.py",
+    "core/io.py",
+    "latent/ACE_LATENT_VISUALIZER.py"
+  ],
+  "nodes": [
+    {
+      "type": "AdvancedMediaSave",
+      "title": "Advanced Media Save 🖼️",
+      "description": "Processes, previews, and saves images, image batches, and videos from your workflows. Handles everything from single PNGs to animated GIFs and MP4s with embedded metadata.",
+      "category": "media/save",
+      "file_path": "AdvancedMediaSave.py"
+    },
+    {
+      "type": "APGGuiderForked",
+      "title": "APG Guider (Forked)",
+      "description": "Injects Adaptive Projected Gradient (APG) guidance into the sampling pipeline, allowing for advanced control over latent space evolution.",
+      "category": "sampling/custom_sampling/guiders",
+      "file_path": "APG_Guider_Forked.py"
+    },
+    {
+      "type": "HybridAdaptiveSigmas",
+      "title": "Hybrid Sigma Scheduler",
+      "description": "Outputs a tensor of sigmas to control diffusion noise levels with multiple modes, automatic range detection, and precision schedule slicing.",
+      "category": "MD_Nodes/Schedulers",
+      "file_path": "Hybrid_Sigma_Scheduler.py"
+    },
+    {
+      "type": "NoiseDecayScheduler_Custom",
+      "title": "Noise Decay Scheduler (Advanced)",
+      "description": "Advanced noise decay scheduler with multiple algorithms (polynomial, sigmoidal, exponential, etc.) and curve manipulation features for custom samplers.",
+      "category": "schedulers/custom",
+      "file_path": "NoiseDecayScheduler_Custom.py"
+    },
+    {
+      "type": "PingPongSampler_Custom_Lite",
+      "title": "PingPong Sampler (Lite+ V0.8.20)",
+      "description": "A 'lite' but powerful sampler node tuned for Ace-Step models, featuring intuitive 'Noise Behavior' presets to control ancestral noise texture and evolution.",
+      "category": "sampling/custom_sampling/samplers",
+      "file_path": "PingPongSampler_Custom.py"
+    },
+    {
+      "type": "PingPongSampler_Custom_FBG",
+      "title": "PingPong Sampler (Custom FBG)",
+      "description": "An advanced sampler combining PingPong's ancestral noise mixing with Feedback Guidance (FBG) for dynamic, content-aware guidance scale adjustment.",
+      "category": "sampling/custom_sampling/samplers",
+      "file_path": "PingPongSampler_Custom_FBG.py"
+    },
+    {
+      "type": "SceneGeniusAutocreator",
+      "title": "Scene Genius Autocreator",
+      "description": "A multi-stage AI creative weapon node for ComfyUI. It uses a local LLM to automate content generation, producing genres, lyrics, and finely tuned APG + Sampler configs.",
+      "category": "SceneGenius",
+      "file_path": "SCENE_GENIUS_AUTOCREATOR.py"
+    },
+    {
+      "type": "SeedSaver",
+      "title": "MD Seed Saver",
+      "description": "An enhanced ComfyUI node to save, load, delete, and manage generation seeds using individual files, with support for subdirectories and random loading.",
+      "category": "MD_Nodes/Utility",
+      "file_path": "seed_saver_node.py"
+    },
+    {
+      "type": "UniversalGuardian",
+      "title": "Universal Guardian (Enhanced Evaluator & Generator)",
+      "description": "A comprehensive, modality-agnostic AI guardian node. It performs quality evaluation (CLIP, sharpness, etc.) and can regenerate content to meet quality thresholds.",
+      "category": "dynamic/guardian",
+      "file_path": "UniversalGuardian.py"
+    },
+    {
+      "type": "AdvancedAudioPreviewAndSave",
+      "title": "Advanced Audio Preview & Save",
+      "description": "The ultimate audio companion node. Processes, previews, and saves audio in FLAC, MP3, or OPUS, with waveform visualization and smart metadata embedding.",
+      "category": "audio/output",
+      "file_path": "audio/AdvancedAudioPreviewAndSave.py"
+    },
+    {
+      "type": "MasteringChainNode",
+      "title": "Custom Audio Mastering Chain",
+      "description": "An audio mastering chain node for ComfyUI. Features global gain, multi-band EQ, advanced compression, a lookahead limiter, and before/after waveform visualizations.",
+      "category": "Audio Mastering",
+      "file_path": "audio/mastering_chain_node.py"
+    },
+    {
+      "type": "ACE_LatentVisualizer",
+      "title": "ACE Latent Visualizer (Pixel Party!)",
+      "description": "A visualization node offering multi-mode insight into latent tensors—waveform, spectrum, and RGB channel splits—turning abstract data into visible art.",
+      "category": "latent/visualization",
+      "file_path": "latent/ACE_LATENT_VISUALIZER.py"
+    }
+  ],
   "notes": "░▒▓ Deploy this manifest to unleash the full power. Compatibility guaranteed with your spirit. ░▒▓"
 }

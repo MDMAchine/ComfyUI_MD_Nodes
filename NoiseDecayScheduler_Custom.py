@@ -1,5 +1,5 @@
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-# ████ ADVANCED NOISE DECAY SCHEDULER v0.5.2 – Final? Build ████▓▒░
+# ████ ADVANCED NOISE DECAY SCHEDULER v0.6.0 – Enhanced Build ████▓▒░
 # ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 # ░▒▓ ORIGIN & DEV:
 #   • Crafted in the fumes of dial-up and hot solder smell
@@ -7,52 +7,18 @@
 #   • Originally bungled by: MDMAchine
 #   • Made not-suck by: devstral (local l33t)
 #   • License: Apache 2.0 — Because we’re polite anarchists
-
+#
 # ░▒▓ DESCRIPTION:
-#   A ComfyUI scheduler that outputs a cosine-based decay curve,
-#   raised to your almighty `decay_power`. Perfect for:
-#     - pingpongsampler_custom
-#     - Escaping aesthetic purgatory
-#     - Those who say “vibe” unironically
-#   Example usage & details: https://gist.github.com/MDMAchine/7edf8244c7cead4082f4168cdd8b2b23
-
-# ░▒▓ CHANGELOG HIGHLIGHTS:
-#   - v0.1 “OG Release – Jank Included”:
-#       • Required `sigmas` and `decay_power`
-#       • Output as raw tensor in dict (1995-era vibes)
-#   - v0.2 “Object-Oriented Enlightenment”:
-#       • Dropped `sigmas` input; samplers handle it now
-#       • Added `.get_decay(num_steps)` method
-#       • Output: structured `SCHEDULER` object
-#   - v0.3 “ComfyUI-ification Complete”:
-#       • Renamed to `NoiseDecayScheduler_Custom_V03`
-#       • Torch removed—100% NumPy implementation
-#       • Lazy evaluation—no decay math until requested
-#   - v0.3.1 “Refinement & Clarity Pass”:
-#       • Consolidated property definitions
-#       • Added `RETURN_NAMES` for UI clarity
-#       • Mapped `NODE_DISPLAY_NAME_MAPPINGS` for consistency
-#       • Documented `decay_power` with useful tooltip
-#   - v0.5.1 "Advanced Features & Refactor":
-#       • Implemented multiple decay algorithms: polynomial, sigmoidal, piecewise, and fourier.
-#       • Added performance features: caching and temporal smoothing.
-#       • Refactored code for better readability and maintainability.
-#   - v0.5.2 "Final Fixes":
-#       • Restored original class name to `NoiseDecayScheduler_Custom` for graph compatibility.
-#       • Fixed critical syntax error in `INPUT_TYPES` to ensure node loads correctly.
-
-# ░▒▓ CONFIGURATION:
-#   → Primary Use: Fine-tuning decay curves in custom schedulers
-#   → Secondary Use: Enhancing sampler behaviors with smooth decay
-#   → Edge Use: For those chasing that perfect vibe decay
-
-# ░▒▓ WARNING:
-#   This scheduler may trigger:
-#   ▓▒░ Creative hallucinations
-#   ▓▒░ Recursive memes
-#   ▓▒░ Sudden comprehension of “vibe decay”
-#   Remember: clean packets and chaotic intentions required.
-
+#   A ComfyUI scheduler that outputs a customizable decay curve.
+#   Perfect for custom samplers, aesthetic exploration, and fine-tuning
+#   the generative process. Now with more algorithms and curve manipulation!
+#
+# ░▒▓ CHANGELOG HIGHLIGHTS (v0.6.0):
+#   - NEW ALGORITHMS: Added 'exponential' and 'gaussian' decay types.
+#   - ENHANCED CONTROL: Added 'start_value', 'end_value', and 'invert_curve'
+#     for complete control over the curve's range and shape.
+#   - CONFIGURABLE SMOOTHING: 'smoothing_window' is now a user parameter.
+#
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 
 import numpy as np
@@ -60,220 +26,180 @@ from typing import List, Tuple, Optional, Any
 import hashlib
 
 class NoiseDecayScheduler_Custom:
-    """
-    Advanced Noise Decay Scheduler with customizable algorithms.
-    This node serves as the main entry point for ComfyUI.
-    """
-    
-    # Node category in ComfyUI UI
     CATEGORY = "schedulers/custom"
-
-    # Function name for ComfyUI
     FUNCTION = "generate"
-
-    # Output types for the node
     RETURN_TYPES = ("SCHEDULER",)
-
-    # Friendly display name override in node editor
     RETURN_NAMES = ("scheduler",)
-
-    # Description of the node
     DESCRIPTION = "Advanced noise decay scheduler with multiple algorithms and performance features."
 
     @classmethod
     def INPUT_TYPES(cls):
         """
         Defines inputs for the node UI.
-        - algorithm_type: Selects the decay algorithm.
-        - decay_exponent: Controls the steepness for polynomial and sigmoidal decay.
-        - use_caching: Toggles caching of decay curves.
-        - enable_temporal_smoothing: Applies a moving average filter.
-        - custom_piecewise_points: A string of comma-separated floats for piecewise decay.
-        - fourier_frequency: Controls the frequency for Fourier-based decay.
         """
         return {
             "required": {
                 "algorithm_type": (
-                    ["polynomial", "sigmoidal", "piecewise", "fourier"],
-                    {
-                        "default": "polynomial",
-                        "tooltip": "Select the decay algorithm: polynomial, sigmoidal, piecewise, fourier."
-                    }
+                    # ✨ NEW: Added exponential and gaussian algorithms
+                    ["polynomial", "sigmoidal", "piecewise", "fourier", "exponential", "gaussian"],
+                    {"default": "polynomial"}
                 ),
-                "decay_exponent": (
-                    "FLOAT", {
-                        "default": 2.0,
-                        "min": 0.1,
-                        "max": 10.0,
-                        "step": 0.1,
-                        "tooltip": "Exponent for polynomial decay or sigmoidal curve steepness."
-                    }
-                ),
-                "use_caching": (
-                    "BOOLEAN", {
-                        "default": True,
-                        "tooltip": "Enable caching of computed decay values to avoid redundant calculations."
-                    }
-                ),
-                "enable_temporal_smoothing": (
-                    "BOOLEAN", {
-                        "default": False,
-                        "tooltip": "Apply temporal filtering to smooth noise transitions."
-                    }
-                ),
+                "decay_exponent": ("FLOAT", {"default": 2.0, "min": 0.1, "max": 10.0, "step": 0.1, "tooltip": "Exponent/steepness for polynomial, sigmoidal, or exponential decay."}),
+                "start_value": ("FLOAT", {"default": 1.0, "min": -2.0, "max": 2.0, "step": 0.01, "tooltip": "The starting value of the decay curve."}), # ✨ NEW
+                "end_value": ("FLOAT", {"default": 0.0, "min": -2.0, "max": 2.0, "step": 0.01, "tooltip": "The final value of the decay curve."}), # ✨ NEW
+                "invert_curve": ("BOOLEAN", {"default": False, "tooltip": "Invert the curve's shape (e.g., for noise injection)."}), # ✨ NEW
+                "use_caching": ("BOOLEAN", {"default": True, "tooltip": "Enable caching of computed decay values to avoid redundant calculations."}),
+                "enable_temporal_smoothing": ("BOOLEAN", {"default": False, "tooltip": "Apply temporal filtering to smooth noise transitions."}),
             },
             "optional": {
-                "custom_piecewise_points": (
-                    "STRING", {
-                        "default": "0.0,0.5,1.0",
-                        "tooltip": "Custom piecewise decay points (comma-separated values). Only used with 'piecewise' algorithm."
-                    }
-                ),
-                "fourier_frequency": (
-                    "FLOAT", {
-                        "default": 1.0,
-                        "min": 0.1,
-                        "max": 10.0,
-                        "step": 0.1,
-                        "tooltip": "Frequency for Fourier-based decay. Only used with 'fourier' algorithm."
-                    }
-                ),
+                "smoothing_window": ("INT", {"default": 3, "min": 2, "max": 20, "step": 1, "tooltip": "Window size for temporal smoothing."}), # ✨ NEW
+                "custom_piecewise_points": ("STRING", {"default": "1.0,0.5,0.0", "tooltip": "Comma-separated values for 'piecewise' algorithm."}),
+                "fourier_frequency": ("FLOAT", {"default": 1.0, "min": 0.1, "max": 10.0, "step": 0.1, "tooltip": "Frequency for 'fourier' algorithm."}),
             }
         }
 
     class NoiseDecayObject:
         """
         The actual scheduler implementation, which is returned by the node.
-        This class must contain a 'get_decay' method.
         """
-        def __init__(self,
-                     algorithm_type: str,
-                     decay_exponent: float,
-                     use_caching: bool,
-                     enable_temporal_smoothing: bool,
-                     custom_piecewise_points: str,
-                     fourier_frequency: float):
-
-            self.algorithm_type = algorithm_type
-            self.decay_exponent = decay_exponent
-            self.use_caching = use_caching
-            self.enable_temporal_smoothing = enable_temporal_smoothing
-            self.fourier_frequency = fourier_frequency
+        def __init__(self, **kwargs):
+            # Use kwargs to easily handle all parameters
+            self.algorithm_type = kwargs.get("algorithm_type", "polynomial")
+            self.decay_exponent = kwargs.get("decay_exponent", 2.0)
+            self.start_value = kwargs.get("start_value", 1.0)
+            self.end_value = kwargs.get("end_value", 0.0)
+            self.invert_curve = kwargs.get("invert_curve", False)
+            self.use_caching = kwargs.get("use_caching", True)
+            self.enable_temporal_smoothing = kwargs.get("enable_temporal_smoothing", False)
+            self.smoothing_window = kwargs.get("smoothing_window", 3)
+            self.custom_piecewise_points = kwargs.get("custom_piecewise_points", "1.0,0.5,0.0")
+            self.fourier_frequency = kwargs.get("fourier_frequency", 1.0)
             self._cache = {}
 
-            # Parse custom piecewise points
             try:
-                self.piecewise_points = [float(x.strip()) for x in custom_piecewise_points.split(",")]
+                self.piecewise_points = [float(x.strip()) for x in self.custom_piecewise_points.split(",")]
             except (ValueError, TypeError):
-                self.piecewise_points = [0.0, 0.5, 1.0]
+                self.piecewise_points = [1.0, 0.5, 0.0]
 
         def _generate_cache_key(self, num_steps: int) -> str:
             """Generate a unique cache key based on all relevant parameters."""
-            params_str = f"{self.algorithm_type}_{self.decay_exponent}_{self.fourier_frequency}_{self.enable_temporal_smoothing}_{num_steps}"
-            if self.algorithm_type == "piecewise":
-                params_str += f"_{','.join(map(str, self.piecewise_points))}"
+            params = (
+                self.algorithm_type, self.decay_exponent, self.start_value, self.end_value,
+                self.invert_curve, self.enable_temporal_smoothing, self.smoothing_window,
+                self.fourier_frequency, num_steps, ','.join(map(str, self.piecewise_points))
+            )
+            params_str = '_'.join(map(str, params))
             return hashlib.md5(params_str.encode()).hexdigest()
 
-        def _apply_temporal_smoothing(self, decay_array: np.ndarray, window_size: int = 3) -> np.ndarray:
-            """Apply a simple moving average filter for smoothing."""
-            if len(decay_array) <= window_size:
+        def _apply_temporal_smoothing(self, decay_array: np.ndarray) -> np.ndarray:
+            """Apply a simple moving average filter with a configurable window."""
+            if len(decay_array) < self.smoothing_window or self.smoothing_window < 2:
                 return decay_array
             
-            # Simple moving average smoothing
-            smoothed = np.convolve(decay_array, np.ones(window_size)/window_size, mode='same')
-            return smoothed
+            # Use a convolution for an efficient moving average
+            return np.convolve(decay_array, np.ones(self.smoothing_window) / self.smoothing_window, mode='same')
+
+        # --- Base Curve Computations (Normalized from 1.0 to 0.0) ---
 
         def _compute_polynomial_decay(self, num_steps: int) -> np.ndarray:
             """Compute polynomial decay."""
-            normalized_steps = np.linspace(0.0, 1.0, num_steps)
-            decay_values = np.power(1.0 - normalized_steps, self.decay_exponent)
-            return decay_values
+            x = np.linspace(0.0, 1.0, num_steps)
+            return (1.0 - x) ** self.decay_exponent
 
         def _compute_sigmoidal_decay(self, num_steps: int) -> np.ndarray:
             """Compute sigmoidal decay."""
-            normalized_steps = np.linspace(0.0, 1.0, num_steps)
-            # Adjust the input range for the sigmoid function for a clearer curve
-            x = (normalized_steps - 0.5) * self.decay_exponent * 4
-            sigmoid = 1 / (1 + np.exp(x))
-            # Normalize to go from a high value to a low value
-            return 1.0 - sigmoid
+            x = np.linspace(-1.0, 1.0, num_steps) * (self.decay_exponent / 2) * 2.5
+            sigmoid = 1 / (1 + np.exp(-x))
+            # Rescale to ensure it precisely spans 1.0 to 0.0
+            scaled = (sigmoid - sigmoid.min()) / (sigmoid.max() - sigmoid.min())
+            return 1.0 - scaled
 
         def _compute_piecewise_decay(self, num_steps: int) -> np.ndarray:
             """Compute piecewise decay with custom points."""
-            normalized_steps = np.linspace(0.0, 1.0, num_steps)
-            if len(self.piecewise_points) >= 2:
-                x_points = np.linspace(0, 1, len(self.piecewise_points))
-                y_points = np.array(self.piecewise_points)
-                decay_values = np.interp(normalized_steps, x_points, y_points)
-            else:
-                decay_values = self._compute_polynomial_decay(num_steps)
-            return decay_values
+            if len(self.piecewise_points) < 2:
+                return self._compute_polynomial_decay(num_steps)
+            
+            x_points = np.linspace(0, 1, len(self.piecewise_points))
+            y_points = np.array(self.piecewise_points)
+            
+            # The base curve should be normalized 1->0 before final scaling
+            base_curve = np.interp(np.linspace(0, 1, num_steps), x_points, y_points)
+            min_val, max_val = base_curve.min(), base_curve.max()
+            if max_val - min_val > 1e-6: # Avoid division by zero
+                return (base_curve - min_val) / (max_val - min_val)
+            return base_curve
 
         def _compute_fourier_decay(self, num_steps: int) -> np.ndarray:
-            """Compute Fourier-based decay."""
-            normalized_steps = np.linspace(0.0, 1.0, num_steps)
-            # Create a sine wave and normalize it to go from 1.0 to 0.0
-            decay_values = np.cos(self.fourier_frequency * np.pi * normalized_steps)
-            decay_values = (decay_values + 1) / 2
-            return decay_values
+            """Compute Fourier-based (cosine) decay."""
+            x = np.linspace(0.0, 1.0, num_steps)
+            return (np.cos(self.fourier_frequency * np.pi * x) + 1) / 2
+
+        # ✨ NEW: Exponential decay algorithm
+        def _compute_exponential_decay(self, num_steps: int) -> np.ndarray:
+            """Compute exponential decay."""
+            x = np.linspace(0.0, 1.0, num_steps)
+            return np.exp(-self.decay_exponent * x)
+
+        # ✨ NEW: Gaussian (inverted bell curve) decay algorithm
+        def _compute_gaussian_decay(self, num_steps: int) -> np.ndarray:
+            """Compute inverted Gaussian decay."""
+            x = np.linspace(-1.0, 1.0, num_steps)
+            # The exponent controls the 'width' of the bell
+            sigma = 1.0 / (self.decay_exponent * 0.5)
+            # This creates a curve that is low at the ends and 1.0 in the middle
+            bell_curve = np.exp(-(x**2) / (2 * sigma**2))
+            # We invert it to create a decay curve
+            return 1.0 - bell_curve
 
         def get_decay(self, num_steps: int) -> np.ndarray:
             """
             ComfyUI standard method to get the decay schedule.
-            This method computes the decay curve, applies smoothing and caching.
             """
             if self.use_caching:
                 cache_key = self._generate_cache_key(num_steps)
                 if cache_key in self._cache:
                     return self._cache[cache_key]
 
-            if self.algorithm_type == "polynomial":
-                decay_values = self._compute_polynomial_decay(num_steps)
-            elif self.algorithm_type == "sigmoidal":
-                decay_values = self._compute_sigmoidal_decay(num_steps)
-            elif self.algorithm_type == "piecewise":
-                decay_values = self._compute_piecewise_decay(num_steps)
-            elif self.algorithm_type == "fourier":
-                decay_values = self._compute_fourier_decay(num_steps)
-            else:
-                # Fallback to polynomial decay if algorithm is not recognized
-                decay_values = self._compute_polynomial_decay(num_steps)
+            # 1. Select and compute the base decay curve (normalized 1 to 0)
+            decay_algorithms = {
+                "polynomial": self._compute_polynomial_decay,
+                "sigmoidal": self._compute_sigmoidal_decay,
+                "piecewise": self._compute_piecewise_decay,
+                "fourier": self._compute_fourier_decay,
+                "exponential": self._compute_exponential_decay, # ✨ NEW
+                "gaussian": self._compute_gaussian_decay,       # ✨ NEW
+            }
+            compute_func = decay_algorithms.get(self.algorithm_type, self._compute_polynomial_decay)
+            decay_values = compute_func(num_steps)
 
+            # 2. Apply smoothing if enabled
             if self.enable_temporal_smoothing:
                 decay_values = self._apply_temporal_smoothing(decay_values)
+
+            # ✨ NEW: 3. Apply inversion if toggled
+            if self.invert_curve:
+                decay_values = 1.0 - decay_values
+
+            # ✨ NEW: 4. Rescale to the user-defined start and end values
+            decay_values = decay_values * (self.start_value - self.end_value) + self.end_value
 
             if self.use_caching:
                 self._cache[cache_key] = decay_values
 
             return decay_values
 
-    def generate(self,
-                 algorithm_type: str,
-                 decay_exponent: float,
-                 use_caching: bool,
-                 enable_temporal_smoothing: bool,
-                 custom_piecewise_points: str,
-                 fourier_frequency: float):
+    def generate(self, **kwargs):
         """
         Main node function that instantiates and returns the scheduler object.
         """
-        scheduler_obj = self.NoiseDecayObject(
-            algorithm_type=algorithm_type,
-            decay_exponent=decay_exponent,
-            use_caching=use_caching,
-            enable_temporal_smoothing=enable_temporal_smoothing,
-            custom_piecewise_points=custom_piecewise_points,
-            fourier_frequency=fourier_frequency
-        )
+        # Pass all inputs as kwargs for cleaner code
+        scheduler_obj = self.NoiseDecayObject(**kwargs)
         return (scheduler_obj,)
 
 
-# Register mappings for ComfyUI to discover this node
 NODE_CLASS_MAPPINGS = {
     "NoiseDecayScheduler_Custom": NoiseDecayScheduler_Custom,
 }
-
-# Friendly display name override in node editor
 NODE_DISPLAY_NAME_MAPPINGS = {
     "NoiseDecayScheduler_Custom": "Noise Decay Scheduler (Advanced)",
 }

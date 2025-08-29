@@ -1,201 +1,228 @@
-# ACE Latent Visualizer (Pixel Party!) Manual
+# Comprehensive Manual: ACE Latent Visualizer (v0.3.1)
+
+Welcome, latent abyss explorer! This is the complete guide for the **ACE Latent Visualizer v0.3.1**, your personal cartographer for the hidden territories of AI-generated latent spaces. This manual covers everything from installation to advanced visualization techniques.
 
 ---
 
-## 1. Understanding the ACE Latent Visualizer Node
+### **Table of Contents**
 
-The ACE Latent Visualizer is a powerful ComfyUI node designed to give you a "digital magnifying glass" into your latent tensors. Think of latent tensors as the abstract, compressed representation of your data (whether it's audio, images, or video frames) within a diffusion model. This node helps you peel back the layers and see what's actually happening inside these complex data structures.
-
-### What it is
-
-It's a specialized ComfyUI node that takes a LATENT input and transforms its hidden numerical patterns into visible images. Originally conceived for audio diffusion models, it's also highly experimental and potentially useful for understanding image and video generation latents.
-
-### How it Works
-
-At its core, the node performs signal processing and visualization. It takes your multi-dimensional latent data, extracts specific "channels" or dimensions, and then processes this data to generate various plots. These plots are created using matplotlib, a powerful Python plotting library, and then converted into standard image formats (PNG) that ComfyUI can display. The process involves:
-
-1. **Receiving Latent Data**  
-   It takes your LATENT tensor as input.
-
-2. **Data Extraction**  
-   It focuses on the first item in your latent batch and allows you to select specific channels or view all relevant ones.
-
-3. **Signal Processing**  
-   Depending on the chosen visualization mode, it processes the numerical values:
-   - For `waveform`, it treats the channel data as a 1D signal.
-   - For `spectrum`, it performs a Fast Fourier Transform (FFT) to analyze frequencies.
-   - For `rgb_split`, it treats the first three channels as Red, Green, and Blue components.
-
-4. **Plot Generation**  
-   It uses matplotlib to draw the processed data onto a virtual canvas, applying your chosen colors, grid settings, and dimensions.
-
-5. **Image Conversion**  
-   The matplotlib plot is saved into memory as a PNG image, then loaded, resized, and converted into a PyTorch tensor, which ComfyUI expects as an IMAGE output.
-
-### What it Does
-
-The primary purpose of this node is insight and debugging:
-
-- Identify Patterns: See if there are unusual spikes, flatlines, or repetitive structures in your latent data.
-- Detect Anomalies: Spot "rogue" patterns or noise that might be negatively impacting your generated output.
-- Understand Channel Behavior: If your latent has multiple channels (like those from VAEs), you can analyze how individual channels contribute to the overall structure.
-- Visualize "Noise": Observe the characteristics of the "noise" (or lack thereof) introduced during diffusion steps, potentially leading to better understanding of sampling.
+1.  **Introduction**
+    * What is the ACE Latent Visualizer?
+    * Who is this Node For?
+    * Key Features in Version 0.3.1
+2.  **Installation**
+3.  **Core Concepts: Decoding the Latent Space**
+    * The Latent Tensor: An AI's Canvas
+    * The Waveform: A Latent Heartbeat
+    * The Spectrum: Hidden Rhythms
+    * The RGB Split: The Primal Colors
+4.  **Node Setup and Workflow**
+    * How to Use It: A Step-by-Step Guide
+5.  **Parameter Deep Dive**
+    * Primary Controls: Latent & Mode
+    * Plotting Controls: Channel & Display
+    * Visualization Controls: Colors & Style
+    * Multi-Mode Control
+6.  **Practical Recipes & Use Cases**
+    * Recipe 1: Debugging a "Noisy" Latent
+    * Recipe 2: Comparing the Structure of Initial Channels
+    * Recipe 3: Creating Data-Driven Abstract Art
+7.  **Technical Deep Dive**
+    * The Visualization Pipeline
+8.  **Troubleshooting & FAQ**
 
 ---
 
-## 2. How to Use It
+## 1. 🎨 INTRODUCTION
 
-1. **Connect Latent Input**  
-   Drag a connection from the LATENT output of another node (e.g., a VAE Encode node, a Sampler output, or any node providing latent tensors) to the latent input of the ACE Latent Visualizer (Pixel Party!) node.
+### What is the ACE Latent Visualizer?
 
-2. **Select Visualization Mode**  
-   Use the mode dropdown to choose how you want to visualize the latent:
-   - `waveform`: For a classic amplitude-over-time graph.
-   - `spectrum`: To see the frequency components of your latent data.
-   - `rgb_split`: To view the first three channels as separate Red, Green, and Blue component plots.
+The **ACE Latent Visualizer** is a powerful debugging and inspection tool for ComfyUI. It transforms the abstract, numerical data inside a **latent tensor** into a clear, human-readable plot. Think of it as an oscilloscope or a spectrum analyzer for your AI's imagination, turning invisible data blobs into visible art and insightful graphs. It's designed to be the go-to tool for anyone who wants to understand *what* is happening inside their generative workflows.
 
-3. **Toggle All Modes**  
-   If you want to see all available visualizations stacked together (waveform, spectrum, and RGB split if applicable), set `all_modes` to `True`. This is great for a comprehensive overview.
+### Who is this Node For?
 
-4. **Adjust Parameters**  
-   Tweak the various parameters like `channel`, `normalize`, `width`, `height`, `grid`, and the extensive color options to customize your visualization.
+* **AI Developers & Workflow Tinkerers:** Anyone who wants to debug their process, understand why a certain model or LoRA is behaving strangely, or analyze the effect of different samplers.
+* **Prompt Engineers & Artists:** Visual learners who want to "see" the structure of their latent space and how it changes from step to step.
+* **Data Artists & Creative Coders:** Users who want to use the latent data itself as a source for creating unique, data-driven generative art.
+* **The Curious:** Anyone who has ever wondered, "What does an AI's dream actually *look* like before it becomes a picture?"
 
-5. **Connect to Preview**  
-   Connect the IMAGE output of the ACE Latent Visualizer node to a Preview Image node to see the generated visualization.
+### Key Features in Version 0.3.1
 
----
-
-## 3. Detailed Parameter Information
-
-### Required Inputs
-
-- **latent**  
-  - **Type**: LATENT  
-  - **Description**: This is the core input – the latent tensor you want to analyze. Connect the latent output from any node that provides it (e.g., KSampler, VAE Encode, Latent Upscale, etc.).  
-  - **Use & Why**: Without this, the node has no data to visualize! It's the raw material for your latent exploration.
+* **Multi-Mode Visualization:** Instantly switch between **waveform**, **spectrum**, and **rgb_split** views to get a complete picture of your data.
+* **Stacked Multi-Plotting:** View all three modes simultaneously in a single, stacked image for comprehensive analysis at a glance.
+* **Full Customization:** Control everything from the output image dimensions to the color of every line, label, and grid on the plot. Dark mode friendly!
+* **Dynamic Normalization:** Automatically scale the data to fit the view, ensuring even subtle variations are visible.
+* **Lightweight & Efficient:** Uses a server-friendly Matplotlib backend and proper memory management to prevent system slowdown, even in long-running workflows.
 
 ---
 
-### Configuration Parameters
+## 2. 🧰 INSTALLATION: JACK INTO THE MATRIX
 
-- **mode**  
-  - **Type**: Dropdown (`waveform`, `spectrum`, `rgb_split`)  
-  - **Default**: `waveform`  
-  - **Description**: Selects the primary visualization type when `all_modes` is `False`.
+This node is part of the **MD Nodes** package. All required Python libraries are listed in the `requirements.txt` and should be installed automatically.
 
-- **channel**  
-  - **Type**: INT  
-  - **Default**: `0`  
-  - **Min**: `0`  
-  - **Description**: Specifies which channel (dimension) of the latent tensor to visualize for waveform and spectrum modes.
+### Method 1: ComfyUI Manager (Recommended)
 
-- **normalize**  
-  - **Type**: BOOLEAN  
-  - **Default**: `True`  
-  - **Description**: If `True`, the amplitude of the signal (for waveform and rgb_split modes) will be scaled to fit within a 0–1 range.
+1.  Open the **ComfyUI Manager**.
+2.  Click "Install Custom Nodes".
+3.  Search for `MD Nodes` and click "Install".
+4.  The manager will download the package and automatically install its dependencies.
+5.  **Restart ComfyUI.**
 
-- **width**  
-  - **Type**: INT  
-  - **Default**: `512`  
-  - **Min**: `64`, **Max**: `2048`, **Step**: `64`  
-  - **Description**: The desired width of the output image in pixels.
+### Method 2: Manual Installation (Git)
 
-- **height**  
-  - **Type**: INT  
-  - **Default**: `256`  
-  - **Min**: `64`, **Max**: `2048`, **Step**: `64`  
-  - **Description**: The desired height of the output image in pixels.
+1.  Open a terminal or command prompt.
+2.  Navigate to your `ComfyUI/custom_nodes/` directory.
+3.  Run the following command to clone the repository:
+    ```bash
+    git clone [https://github.com/MDMAchine/ComfyUI_MD_Nodes.git](https://github.com/MDMAchine/ComfyUI_MD_Nodes.git)
+    ```
+4.  Install the required dependencies by running:
+    ```bash
+    pip install -r ComfyUI_MD_Nodes/requirements.txt
+    ```
+5.  **Restart ComfyUI.**
 
-- **grid**  
-  - **Type**: BOOLEAN  
-  - **Default**: `True`  
-  - **Description**: If `True`, a grid will be drawn on the plots. If `False`, axes ticks and labels will also be hidden for a cleaner look.
-
-- **all_modes**  
-  - **Type**: BOOLEAN  
-  - **Default**: `True`  
-  - **Description**: If `True`, the node will generate a single output image containing all applicable visualization modes stacked vertically (waveform, spectrum, and RGB split if enough channels are present). If `False`, only the mode selected will be plotted.
+After restarting, the node and all its features should be fully available. Don’t forget, even gods need to reboot.
 
 ---
 
-## 4. Color Customization (New in v0.3.1)
+## 3. 🧠 CORE CONCEPTS: DECODING THE LATENT SPACE
 
-All color parameters accept hexadecimal color codes (e.g., `#RRGGBB`).
+### The Latent Tensor: An AI's Canvas
 
-| Parameter          | Default     | Description                                  |
-|--------------------|-------------|----------------------------------------------|
-| bg_color           | `#0D0D1A`   | Background color for plot area               |
-| waveform_color     | `#00E6E6`   | Color of waveform plot line                  |
-| spectrum_color     | `#FF00A2`   | Color of spectrum plot line                  |
-| rgb_r_color        | `#FF3333`   | Red channel color in `rgb_split` mode        |
-| rgb_g_color        | `#00FF8C`   | Green channel color in `rgb_split` mode      |
-| rgb_b_color        | `#3399FF`   | Blue channel color in `rgb_split` mode       |
-| axis_label_color   | `#A0A0B0`   | Color of axis labels, ticks, and titles      |
-| grid_color         | `#303040`   | Color of grid lines                          |
+Before an AI creates an image, it works with a compressed, multi-dimensional array of numbers called a **latent tensor**. This isn't a picture yet; it's a blueprint containing all the abstract concepts—shapes, textures, colors, subjects—that will eventually form the final image. The Latent Visualizer lets you inspect this blueprint.
 
----
+### The Waveform: A Latent Heartbeat
 
-## 5. In-Depth Nerd Technical Information
+The **waveform** mode flattens a 2D channel of your latent into a single, continuous line.
+* **X-Axis (Latent Pixel Index):** Represents the data points laid out one after another.
+* **Y-Axis (Amplitude):** Represents the numerical value of each data point.
+This view is perfect for seeing the overall dynamic range and general structure of the data in a specific channel.
 
-### Core Dependencies & Setup
+### The Spectrum: Hidden Rhythms
 
-The node leverages several fundamental Python libraries:
+The **spectrum** mode uses a mathematical tool called a Fast Fourier Transform (FFT) to analyze the frequencies within the latent data.
+* **Low Frequencies (left side of the plot):** Correspond to broad, slow-changing features in the image (like a smooth sky).
+* **High Frequencies (right side of the plot):** Correspond to fine details and sharp edges (like fabric texture or grass).
+A "noisy" latent will show a lot of high-frequency energy. This mode is excellent for diagnosing issues with VAEs or spotting unwanted patterns.
 
-- `torch`: The primary framework for handling latent tensors (PyTorch tensors).
-- `matplotlib.pyplot`: The robust plotting library responsible for generating the visualizations.
-- `io`: Specifically `io.BytesIO`, used as an in-memory buffer to handle image data without needing to write to disk.
-- `PIL (Pillow)`: Used for image manipulation tasks like loading from the buffer and resizing.
-- `numpy`: Provides essential numerical operations, especially for flattening tensors and performing FFT.
+### The RGB Split: The Primal Colors
 
-A key initialization step is `plt.switch_backend('Agg')`, which enables non-interactive rendering for headless environments.
+While latent channels don't directly map to Red, Green, and Blue until the VAE decodes them, the first few channels often contain the most important structural and color information. The **rgb_split** mode plots the waveforms of the first three channels together, giving you a sense of their interrelation and combined structure.
 
 ---
 
-### Latent Data Handling
+## 4. 🛠️ NODE SETUP AND WORKFLOW
 
-- **Input Structure**: Expects a `LATENT` input with shape `[Batch, Channels, Height, Width]`.
-- **Batch Selection**: Always processes only the first item in the batch (`x[0]`).
-- **Channel Clamping**: Ensures the selected channel index is within valid bounds to prevent errors.
+### How to Use It: A Step-by-Step Guide
 
----
+1.  **Connect Latent Source:** Connect the `LATENT` output from a KSampler, VAE Encode, or Empty Latent node to the `latent` input of the visualizer.
+2.  **Choose Visualization Mode:** Select `waveform`, `spectrum`, or `rgb_split` from the `mode` dropdown. Alternatively, enable `all_modes` to see everything at once.
+3.  **Select a Channel:** For waveform and spectrum modes, enter a `channel` number to inspect (e.g., `0`, `1`, `2`, `3`). The node will automatically clamp this to a valid number if you go out of bounds.
+4.  **Adjust Parameters:**
+    * Set the desired `width` and `height` of the output image.
+    * Toggle `normalize` for best visibility (usually recommended).
+    * Toggle `grid` for a clean, minimalist look or a detailed analytical view.
+    * Customize the colors to match your theme!
+5.  **Connect Output:** Connect the `IMAGE` output to a **Preview Image** or **Save Image** node.
+6.  **Queue Prompt:** Run the workflow. The output image will display your chosen visualization.
 
-### Visualization Algorithms
 
-#### `get_1d_signal_for_plot(data, normalize_signal)`
-
-- Uses `.detach().cpu().numpy().flatten()` to convert tensor to 1D signal.
-- Handles constant or zero signals by plotting a flat midline at 0.5.
-- Normalizes to `[0, 1]` if enabled.
-
-#### Visualization Modes
-
-- **waveform**:  
-  Plots amplitude of the 1D signal over time.
-
-- **spectrum**:  
-  Uses `np.fft.rfft` and `np.fft.rfftfreq` to convert signal to frequency domain.  
-  Magnitudes are converted to decibels: `20 * np.log10(abs(spectrum) + 1e-8)`.
-
-- **rgb_split**:  
-  Plots first three channels separately using R, G, B colors.
 
 ---
 
-### Image Generation and Output
+## 5. 🔬 PARAMETER DEEP DIVE
 
-- Uses `plt.subplots()` to generate stacked plots with defined width/height and DPI.
-- Applies user-selected colors and toggles axis/grid visibility.
-- Saves plot to a `BytesIO` buffer as PNG using `plt.savefig()`.
-- Converts buffer to PIL image, resizes using `Image.LANCZOS`, then to a PyTorch tensor:
-  - `.float() / 255.0` to normalize image values
-  - `.unsqueeze(0)` to add batch dimension `[1, H, W, C]`
+### Primary Controls: Latent & Mode
+
+* **`latent`** (Required): The latent tensor data stream from an upstream node.
+* **`mode`** (`ENUM`, default: `waveform`): The primary visualization type to display. This is ignored if `all_modes` is enabled.
+
+### Plotting Controls: Channel & Display
+
+* **`channel`** (`INT`, default: `0`): The specific channel of the latent tensor to analyze for `waveform` and `spectrum` modes.
+* **`normalize`** (`BOOLEAN`, default: `True`): If enabled, scales the amplitude of the data to fit a 0-1 range. This maximizes visibility and is highly recommended.
+* **`width`** (`INT`, default: `512`): The width of the output visualization image in pixels.
+* **`height`** (`INT`, default: `256`): The height of the output image. If `all_modes` is on, this height is divided among the plots.
+* **`grid`** (`BOOLEAN`, default: `True`): Toggles the background grid and axis labels. Disabling this creates a clean, artistic look.
+
+### Visualization Controls: Colors & Style
+
+* **`bg_color`** (`STRING`): The background color of the plot. Accepts names (`black`) or hex codes (`#0D0D1A`).
+* **`waveform_color`** (`STRING`): The color of the line in waveform mode.
+* **`spectrum_color`** (`STRING`): The color of the line in spectrum mode.
+* **`rgb_r_color`** / **`rgb_g_color`** / **`rgb_b_color`** (`STRING`): Sets the individual line colors for the `rgb_split` mode.
+* **`axis_label_color`** (`STRING`): The color of the titles, axis labels, and number ticks.
+* **`grid_color`** (`STRING`): The color of the grid lines.
+
+### Multi-Mode Control
+
+* **`all_modes`** (`BOOLEAN`, default: `True`): If enabled, the node ignores the `mode` setting and generates a single image containing all valid visualization types stacked vertically.
 
 ---
 
-## 6. Potential Future Implementations
+## 6. 🚀 PRACTICAL RECIPES & USE CASES
 
-- Custom Y-axis range control for waveform/spectrum.
-- Logarithmic x-axis for spectrum.
-- Support for selecting multiple channels beyond RGB split.
-- New plot types: histograms, 2D heatmaps.
-- Interactive or UI-based visualization tools (pending ComfyUI capabilities).
+### Recipe 1: Debugging a "Noisy" Latent
+
+**Goal:** Check if a VAE or sampler is introducing high-frequency artifacts.
+
+* **`mode`**: `spectrum` (or use `all_modes`)
+* **`channel`**: `0`
+* **`grid`**: `True`
+* **`normalize`**: `True`
+* **Interpretation**: Look at the spectrum plot. If you see a large amount of energy on the far right side of the graph, it indicates high-frequency noise, which can lead to grainy or artifact-heavy final images.
+
+### Recipe 2: Comparing the Structure of Initial Channels
+
+**Goal:** See how the first three latent channels relate to each other.
+
+* **`mode`**: `rgb_split` (or use `all_modes`)
+* **`normalize`**: `True`
+* **`grid`**: `True`
+* **Interpretation**: Observe if the three channels follow similar patterns or if one is significantly different. This can give clues about how the model is encoding primary shapes and color regions.
+
+### Recipe 3: Creating Data-Driven Abstract Art
+
+**Goal:** Generate a minimalist piece of art directly from a latent tensor.
+
+* **`mode`**: `waveform`
+* **`normalize`**: `True`
+* **`grid`**: `False` (This is key! It removes all labels and grid lines.)
+* **`width`**: `1024`
+* **`height`**: `512`
+* **`bg_color`**: `#000000` (black)
+* **`waveform_color`**: `#FFFFFF` (white)
+* **Result**: A clean, abstract representation of the latent data, perfect for saving as an art piece.
+
+---
+
+## 7. 💻 TECHNICAL DEEP DIVE
+
+### The Visualization Pipeline
+
+The node follows a precise, memory-safe process to create the visualization:
+
+1.  **Data Extraction:** It receives the latent tensor and unpacks its dimensions. It performs sanity checks to ensure the requested channel exists.
+2.  **Plotting with Matplotlib:** It uses the `matplotlib` library with the non-GUI `Agg` backend. This allows it to render an image on a server without needing a display.
+3.  **Data Preparation:** The chosen channel's data is flattened into a 1D NumPy array. If normalization is on, its values are mathematically scaled to a `[0, 1]` range.
+4.  **Rendering:** The data is plotted onto a Matplotlib figure. All the custom color and style settings are applied here.
+5.  **In-Memory Saving:** The plot is saved as a PNG image directly into a memory buffer (`io.BytesIO`), avoiding any need to write temporary files to the disk.
+6.  **Memory Cleanup:** This is a crucial step! The node explicitly calls `plt.close(fig)` to release the memory used by the Matplotlib plot. This prevents "memory leaks" that could slow down or crash ComfyUI over many generations.
+7.  **Final Conversion:** The image is loaded from the memory buffer using the Pillow (PIL) library, resized, and converted into a PyTorch tensor in the format ComfyUI expects.
+
+---
+
+## 8. ❓ TROUBLESHOOTING & FAQ
+
+* **"My plot is just a flat line."**
+    * This can happen if the latent tensor channel you're viewing has very little variation or is completely zeroed out. The node is designed to show a flat line in this case. Try viewing a different channel or checking the node that's generating the latent.
+
+* **"The `rgb_split` option is missing or doesn't show a plot."**
+    * The `rgb_split` mode requires the latent tensor to have at least **3 channels**. If your latent has fewer than 3 channels (e.g., from a grayscale model), this option will be automatically skipped, and the node will print a warning in the console.
+
+* **"I selected channel 10 but my latent only has 4 channels."**
+    * The node automatically protects against errors. It will detect that channel 10 is out of bounds, clamp the value to the highest available channel (in this case, 3), and print a warning in the console telling you what it did.
+
+* **"Can I save the visualization directly?"**
+    * Yes! Simply connect the `IMAGE` output of the visualizer to a **Save Image** node.

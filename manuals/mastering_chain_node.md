@@ -1,445 +1,249 @@
-# ComfyUI Mastering Chain Node Manual
+# Comprehensive Manual: Custom Audio Mastering Chain (v1.2a)
 
-This manual provides a comprehensive guide to the ComfyUI Mastering Chain Node, a powerful tool designed to refine and enhance your audio. While primarily built for use with audio diffusion models, its capabilities may extend to other generative tasks involving time-series data, such as video or image processing, though further experimentation would be required.
-
----
-
-## 1. Understanding the Mastering Chain Node
-
-### What is it?
-
-The Mastering Chain Node is a custom component for ComfyUI that acts as a digital audio workstation (DAW) mastering suite in a single node. It's designed to take your raw audio output from other nodes (like audio diffusion models) and apply a series of common audio processing effects to make it sound louder, clearer, and more balanced. Think of it as the final polish before your audio is ready for prime time.
-
-### How it Works
-
-The node processes your audio through a sequential "chain" of effects, much like how professional audio engineers master tracks. These effects are applied in a specific order to achieve optimal results:
-
-* **Global Gain**: First, it applies an overall volume adjustment.
-* **Equalization (EQ)**: Next, it sculpts the frequency content, boosting or cutting specific ranges (e.g., adding clarity to highs, cleaning up muddy lows).
-* **Compression**: Then, it controls the dynamic range of the audio, making quiet parts louder and loud parts quieter, resulting in a more consistent and impactful sound. You can choose between single-band (affecting all frequencies uniformly) or multi-band (affecting different frequency ranges independently) compression.
-* **Limiting**: Finally, a "brickwall" limiter is used to prevent the audio from exceeding a certain maximum level, ensuring no harsh digital clipping occurs and maximizing overall loudness without distortion.
-
-Throughout this process, the node internally converts the audio data into a format suitable for digital signal processing (DSP), applies the chosen effects, and then converts it back for ComfyUI. It also generates visual representations of your audio before and after processing, allowing you to see the impact of your mastering settings.
-
-### What it Does
-
-* **Enhances Audio Quality**: Makes your audio sound more professional, balanced, and loud.
-* **Prevents Clipping**: Ensures your audio doesn't exceed 0 dBFS (decibels full scale), preventing digital distortion.
-* **Provides Control**: Offers detailed parameters for fine-tuning each mastering stage.
-* **Visual Feedback**: Generates waveform images to visually compare the original and processed audio.
-* **Supports Mono and Stereo**: Handles both single-channel (mono) and two-channel (stereo) audio seamlessly.
-
-### How to Use It
-
-1.  **Connect Audio Input**: Drag a connection from the `AUDIO` output of your audio source node (e.g., an audio diffusion model) to the `audio` input of the Mastering Chain Node.
-2.  **Set Sample Rate**: Ensure the `sample_rate` input matches the sample rate of your input audio. This is crucial for correct DSP operation.
-3.  **Adjust Parameters**: Use the various sliders and dropdowns in the node's properties panel to configure the Global Gain, EQ, Compression, and Limiter settings to your desired sound. Experimentation is key!
-4.  **Connect Outputs**:
-    * The `AUDIO` output provides the fully processed audio.
-    * The first `IMAGE` output provides a waveform visualization of the audio before processing.
-    * The second `IMAGE` output provides a waveform visualization of the audio after processing.
-    You can connect these `IMAGE` outputs to a `Preview Image` node in ComfyUI to view them.
+Welcome to the complete guide for the **Custom Audio Mastering Chain** node, a professional-grade audio finishing toolkit for ComfyUI. This manual details every feature, from basic gain staging to advanced multiband compression, empowering you to sculpt and polish your generated audio with precision.
 
 ---
 
-## 2. Detailed Information about the Parameters
-
-The Mastering Chain Node offers a comprehensive set of controls to shape your audio. Here's a breakdown of each parameter, its purpose, and how to use it.
-
-### Core Inputs
-
-* **audio**
-    * **Type**: `AUDIO`
-    * **Description**: The input audio waveform. This should come from another audio-generating node.
-
-* **sample_rate**
-    * **Type**: `INT`
-    * **Range**: `8000 Hz` to `192000 Hz` (default: `44100 Hz`).
-    * **What it does**: Specifies the number of samples per second in your audio (e.g., 44100 Hz for CD quality).
-    * **Use & Why**: This must accurately match the sample rate of your input audio. All internal digital signal processing (DSP) calculations, like filter frequencies and time-based effects (attack/release times), rely on this value. Incorrect `sample_rate` will lead to incorrect or distorted audio.
-
-### Global Gain
-
-* **master_gain_db**
-    * **Type**: `FLOAT`
-    * **Range**: `-20.0 dB` to `20.0 dB` (default: `0.0 dB`).
-    * **What it does**: Applies a static volume increase or decrease to the entire audio signal, expressed in decibels (dB).
-    * **Use & Why**: Use this as a foundational level adjustment. If your audio is consistently too quiet or too loud before any other processing, this is the place to make a broad change. Positive values boost, negative values cut.
-
-### Equalization (EQ)
-
-* **enable_eq**
-    * **Type**: `BOOLEAN`
-    * **Default**: `True`.
-    * **What it does**: A master switch to enable or bypass the entire Equalizer section.
-    * **Use & Why**: If you don't need any frequency adjustments, or want to hear the effect of other mastering stages in isolation, set this to `False`.
-
-#### High-Shelf EQ
-
-* **eq_high_shelf_gain_db**
-    * **Type**: `FLOAT`
-    * **Range**: `-12.0 dB` to `12.0 dB` (default: `1.5 dB`).
-    * **What it does**: Boosts or cuts all frequencies above the `eq_high_shelf_freq`.
-    * **Use & Why**: Used to add "air" and clarity to the high end (positive gain) or to tame harshness and sibilance (negative gain).
-
-* **eq_high_shelf_freq**
-    * **Type**: `FLOAT`
-    * **Range**: `1000.0 Hz` to `20000.0 Hz` (default: `12000.0 Hz`).
-    * **What it does**: The "corner" frequency where the high-shelf filter begins to have its effect.
-    * **Use & Why**: Determines where the high-end shaping starts. A higher frequency affects only the very top end, while a lower frequency will impact more of the upper mids.
-
-* **eq_high_shelf_q**
-    * **Type**: `FLOAT`
-    * **Range**: `0.1` to `5.0` (default: `0.707`).
-    * **What it does**: Q factor for the high-shelf filter.
-    * **Use & Why**: Note: This parameter is exposed but fixed internally at `0.707` for standard, predictable shelf behavior. While you can adjust it in the UI, its effective value remains constant for stability and predictable audio characteristics. `0.707` represents a gentle slope.
-
-#### Low-Shelf EQ
-
-* **enable_low_shelf_eq**
-    * **Type**: `BOOLEAN`
-    * **Default**: `True`.
-    * **What it does**: Enables or bypasses the Low-Shelf Equalizer.
-    * **Use & Why**: Allows you to isolate the effect of this specific filter.
-
-* **eq_low_shelf_gain_db**
-    * **Type**: `FLOAT`
-    * **Range**: `-12.0 dB` to `12.0 dB` (default: `-5.0 dB`).
-    * **What it does**: Boosts or cuts all frequencies below the `eq_low_shelf_freq`.
-    * **Use & Why**: Used to add warmth and weight to the low end (positive gain) or to reduce muddiness and rumble (negative gain).
-
-* **eq_low_shelf_freq**
-    * **Type**: `FLOAT`
-    * **Range**: `20.0 Hz` to `500.0 Hz` (default: `55.0 Hz`).
-    * **What it does**: The "corner" frequency where the low-shelf filter begins to have its effect.
-    * **Use & Why**: Determines where the low-end shaping starts. A lower frequency impacts only the very bottom end, while a higher frequency will affect more of the lower mids.
-
-* **eq_low_shelf_q**
-    * **Type**: `FLOAT`
-    * **Range**: `0.1` to `5.0` (default: `0.707`).
-    * **What it does**: Q factor for the low-shelf filter.
-    * **Use & Why**: Note: Similar to the high-shelf Q, this parameter is exposed but fixed internally at `0.707` for standard, predictable shelf behavior. While you can adjust it in the UI, its effective value remains constant.
-
-#### Parametric EQ Band 1
-
-* **enable_param_eq1**
-    * **Type**: `BOOLEAN`
-    * **Default**: `True`.
-    * **What it does**: Enables or bypasses Parametric EQ Band 1.
-    * **Use & Why**: Allows you to isolate the effect of this specific filter.
-
-* **param_eq1_gain_db**
-    * **Type**: `FLOAT`
-    * **Range**: `-20.0 dB` to `20.0 dB` (default: `-8.0 dB`).
-    * **What it does**: Boosts or cuts frequencies around the `param_eq1_freq`.
-    * **Use & Why**: Useful for targeted cuts (negative gain) to remove resonant frequencies or boosts (positive gain) to highlight specific elements. Default is a cut at 77Hz, often used to clean up sub-bass.
-
-* **param_eq1_freq**
-    * **Type**: `FLOAT`
-    * **Range**: `20.0 Hz` to `20000.0 Hz` (default: `77.0 Hz`).
-    * **What it does**: The center frequency of the EQ band.
-    * **Use & Why**: Determines where the boost or cut occurs.
-
-* **param_eq1_q**
-    * **Type**: `FLOAT`
-    * **Range**: `0.1` to `20.0` (default: `9.0`).
-    * **What it does**: The "Q" (Quality factor) determines the width of the EQ band. A higher Q means a narrower, more precise adjustment. A lower Q means a wider, broader adjustment.
-    * **Use & Why**: For targeted cuts (like removing hum or resonance), use a high Q. For broader tonal shaping, use a lower Q. Default is `9.0`, which is quite narrow, good for surgical cuts.
-
-#### Parametric EQ Band 2
-
-* **enable_param_eq2**
-    * **Type**: `BOOLEAN`
-    * **Default**: `True`.
-    * **What it does**: Enables or bypasses Parametric EQ Band 2.
-    * **Use & Why**: Allows you to isolate the effect of this specific filter.
-
-* **param_eq2_gain_db**
-    * **Type**: `FLOAT`
-    * **Range**: `-20.0 dB` to `20.0 dB` (default: `3.5 dB`).
-    * **What it does**: Boosts or cuts frequencies around the `param_eq2_freq`.
-    * **Use & Why**: Similar to Band 1, but for a second, independent frequency adjustment. Default is a boost at 130Hz, often used to add punch to bass and drums.
-
-* **param_eq2_freq**
-    * **Type**: `FLOAT`
-    * **Range**: `20.0 Hz` to `20000.0 Hz` (default: `130.0 Hz`).
-    * **What it does**: The center frequency of the second EQ band.
-    * **Use & Why**: Determines where the second boost or cut occurs.
-
-* **param_eq2_q**
-    * **Type**: `FLOAT`
-    * **Range**: `0.1` to `20.0` (default: `1.5`).
-    * **What it does**: The Q factor for the second EQ band.
-    * **Use & Why**: Controls the width of the second EQ band. Default is `1.5`, which is a fairly broad boost.
-
-### Compression
-
-* **enable_comp**
-    * **Type**: `BOOLEAN`
-    * **Default**: `True`.
-    * **What it does**: A master switch to enable or bypass the entire Compressor section.
-    * **Use & Why**: If you don't need dynamic range control, or want to hear the effect of other mastering stages in isolation, set this to `False`.
-
-* **comp_type**
-    * **Type**: Dropdown (`"Single-Band"`, `"Multiband"`)
-    * **Default**: `"Single-Band"`.
-    * **What it does**: Selects between a single-band compressor (applies compression to the whole frequency spectrum) or a 3-band multiband compressor (splits audio into low, mid, and high bands and compresses each independently).
-    * **Use & Why**:
-        * **Single-Band**: Simpler, often used for general dynamic glue or overall loudness.
-        * **Multiband**: Offers much finer control over different frequency ranges. For example, you can compress bass heavily without squashing the vocals in the mid-range. This is more complex but more powerful for professional mastering.
-
-#### Single-Band Compressor Parameters (Active when `comp_type` is "Single-Band")
-
-* **comp_threshold_db**
-    * **Type**: `FLOAT`
-    * **Range**: `-60.0 dB` to `0.0 dB` (default: `-14.0 dB`).
-    * **What it does**: The input level (in dB) above which compression begins.
-    * **Use & Why**: Signals exceeding this level will be reduced. A lower (more negative) threshold means more of the signal will be compressed, leading to more "loudness."
-
-* **comp_ratio**
-    * **Type**: `FLOAT`
-    * **Range**: `1.0` to `20.0` (default: `1.5`).
-    * **What it does**: The ratio of input level change to output level change once the signal is above the threshold (e.g., 4:1 means that for every 4dB the input signal goes over the threshold, the output will only increase by 1dB).
-    * **Use & Why**: Higher ratios result in more aggressive compression and a flatter dynamic range. Lower ratios are more subtle.
-
-* **comp_attack_ms**
-    * **Type**: `FLOAT`
-    * **Range**: `1.0 ms` to `500.0 ms` (default: `25.0 ms`).
-    * **What it does**: The time (in milliseconds) it takes for the compressor to reach full gain reduction after the signal crosses the threshold.
-    * **Use & Why**: A fast attack preserves initial transients (like drum hits) less, making them sound less punchy but more controlled. A slow attack allows transients to pass through before compression kicks in, preserving punch.
-
-* **comp_release_ms**
-    * **Type**: `FLOAT`
-    * **Range**: `10.0 ms` to `2000.0 ms` (default: `300.0 ms`).
-    * **What it does**: The time (in milliseconds) it takes for the compressor to return to unity gain (no compression) after the signal falls below the threshold.
-    * **Use & Why**: A fast release can sound "pumped" or "breathing" with the music, sometimes desirable for effect. A slow release can create a more transparent, sustained sound.
-
-* **comp_makeup_gain_db**
-    * **Type**: `FLOAT`
-    * **Range**: `0.0 dB` to `12.0 dB` (default: `6.0 dB`).
-    * **What it does**: Adds gain after the compression stage to compensate for the volume reduction caused by compression.
-    * **Use & Why**: Compression reduces the overall loudness. Makeup gain allows you to bring the level back up, often making the audio sound louder and denser.
-
-#### Multiband Compressor Parameters (Active when `comp_type` is "Multiband")
-
-* **low_band_comp_threshold_db**
-    * **Type**: `FLOAT`
-    * **Range**: `-60.0 dB` to `0.0 dB` (default: `-12.0 dB`).
-    * **What it does**: Threshold for the low-frequency band.
-    * **Use & Why**: Allows independent compression of the bass and sub-bass frequencies. Useful for tightening up muddy lows or adding punch to the kick drum without affecting other elements.
-
-* **low_band_comp_ratio**
-    * **Type**: `FLOAT`
-    * **Range**: `1.0` to `20.0` (default: `2.0`).
-    * **What it does**: Ratio for the low-frequency band.
-
-* **low_band_comp_attack_ms**
-    * **Type**: `FLOAT`
-    * **Range**: `1.0 ms` to `500.0 ms` (default: `10.0 ms`).
-    * **What it does**: Attack time for the low-frequency band.
-
-* **low_band_comp_release_ms**
-    * **Type**: `FLOAT`
-    * **Range**: `10.0 ms` to `2000.0 ms` (default: `200.0 ms`).
-    * **What it does**: Release time for the low-frequency band.
-
-* **low_band_comp_makeup_gain_db**
-    * **Type**: `FLOAT`
-    * **Range**: `0.0 dB` to `12.0 dB` (default: `4.0 dB`).
-    * **What it does**: Makeup gain for the low-frequency band.
-
-* **mid_band_comp_threshold_db**
-    * **Type**: `FLOAT`
-    * **Range**: `-60.0 dB` to `0.0 dB` (default: `-14.0 dB`).
-    * **What it does**: Threshold for the mid-frequency band.
-    * **Use & Why**: Controls dynamics in the vocal and instrument range. Can be used to bring out details or control harshness.
-
-* **mid_band_comp_ratio**
-    * **Type**: `FLOAT`
-    * **Range**: `1.0` to `20.0` (default: `1.5`).
-
-* **mid_band_comp_attack_ms**
-    * **Type**: `FLOAT`
-    * **Range**: `1.0 ms` to `500.0 ms` (default: `25.0 ms`).
-
-* **mid_band_comp_release_ms**
-    * **Type**: `FLOAT`
-    * **Range**: `10.0 ms` to `2000.0 ms` (default: `300.0 ms`).
-
-* **mid_band_comp_makeup_gain_db**
-    * **Type**: `FLOAT`
-    * **Range**: `0.0 dB` to `12.0 dB` (default: `3.0 dB`).
-
-* **high_band_comp_threshold_db**
-    * **Type**: `FLOAT`
-    * **Range**: `-60.0 dB` to `0.0 dB` (default: `-16.0 dB`).
-    * **What it does**: Threshold for the high-frequency band.
-    * **Use & Why**: Manages dynamics in the high-end, controlling sibilance or adding sparkle.
-
-* **high_band_comp_ratio**
-    * **Type**: `FLOAT`
-    * **Range**: `1.0` to `20.0` (default: `1.8`).
-
-* **high_band_comp_attack_ms**
-    * **Type**: `FLOAT`
-    * **Range**: `1.0 ms` to `500.0 ms` (default: `5.0 ms`).
-
-* **high_band_comp_release_ms**
-    * **Type**: `FLOAT`
-    * **Range**: `10.0 ms` to `2000.0 ms` (default: `400.0 ms`).
-
-* **high_band_comp_makeup_gain_db**
-    * **Type**: `FLOAT`
-    * **Range**: `0.0 dB` to `12.0 dB` (default: `2.0 dB`).
-
-* **low_mid_crossover_freq**
-    * **Type**: `FLOAT`
-    * **Range**: `20.0 Hz` to `1000.0 Hz` (default: `250.0 Hz`).
-    * **What it does**: Defines the crossover frequency between the low and mid bands in multiband compression.
-    * **Use & Why**: Determines where the low-frequency compression stops and mid-frequency compression begins.
-
-* **mid_high_crossover_freq**
-    * **Type**: `FLOAT`
-    * **Range**: `1000.0 Hz` to `10000.0 Hz` (default: `2500.0 Hz`).
-    * **What it does**: Defines the crossover frequency between the mid and high bands.
-    * **Use & Why**: Determines where the mid-frequency compression stops and high-frequency compression begins.
-
-### Limiter
-
-* **enable_limiter**
-    * **Type**: `BOOLEAN`
-    * **Default**: `True`.
-    * **What it does**: Enables or bypasses the Limiter section.
-    * **Use & Why**: The limiter is crucial for preventing digital clipping and maximizing loudness. Only disable if you have other limiting stages in your workflow.
-
-* **limiter_ceiling_amplitude**
-    * **Type**: `FLOAT`
-    * **Range**: `0.1` to `1.0` (default: `0.98`).
-    * **What it does**: Sets the maximum allowed peak amplitude for the audio, where `1.0` is 0 dBFS (full scale).
-    * **Use & Why**: This is your "brickwall." No audio signal will exceed this level. Setting it slightly below `1.0` (e.g., `0.98` or `-0.1 dBFS`) is common practice to leave a tiny bit of "headroom" for digital-to-analog conversion.
-
-* **limiter_release_ms**
-    * **Type**: `FLOAT`
-    * **Range**: `10.0 ms` to `2000.0 ms` (default: `200.0 ms`).
-    * **What it does**: The time (in milliseconds) it takes for the limiter to release its gain reduction after the signal drops below the ceiling.
-    * **Use & Why**: A faster release can make the limiter more reactive but might introduce pumping artifacts. A slower release is more transparent but might hold down the audio longer than necessary.
-
-* **limiter_lookahead_ms**
-    * **Type**: `FLOAT`
-    * **Range**: `0.0 ms` to `50.0 ms` (default: `5.0 ms`).
-    * **What it does**: The time (in milliseconds) the limiter "looks ahead" into the audio signal to detect upcoming peaks.
-    * **Use & Why**: Essential for "brickwall" limiting. By knowing peaks are coming, the limiter can apply gain reduction *before* the peak hits, preventing overshoots and distortion. A `0.0` lookahead means no lookahead, which can lead to minor overshoots.
-
-### Visualization Parameters
-
-* **waveform_height**
-    * **Type**: `INT`
-    * **Range**: `64` to `2048` (default: `256`).
-    * **What it does**: Sets the height of the generated waveform image in pixels.
-    * **Use & Why**: Affects the visual resolution of the waveform plots. Higher values mean more detail, but larger image files.
-
-* **waveform_width**
-    * **Type**: `INT`
-    * **Range**: `256` to `4096` (default: `1024`).
-    * **What it does**: Sets the width of the generated waveform image in pixels.
-    * **Use & Why**: Similar to height, affects visual resolution and file size.
-
-* **plot_color_primary**
-    * **Type**: `COLOR` (RGB hex string, e.g., `#FFFFFF` for white)
-    * **Default**: `#00FF00` (green).
-    * **What it does**: Defines the primary color for the waveform plot line.
-    * **Use & Why**: Customize the appearance of your plots.
-
-* **plot_color_background**
-    * **Type**: `COLOR` (RGB hex string)
-    * **Default**: `#000000` (black).
-    * **What it does**: Defines the background color of the waveform plot.
-
-* **plot_color_grid**
-    * **Type**: `COLOR` (RGB hex string)
-    * **Default**: `#888888` (dark gray).
-    * **What it does**: Defines the color of the grid lines on the plot.
-
-* **plot_color_text**
-    * **Type**: `COLOR` (RGB hex string)
-    * **Default**: `#FFFFFF` (white).
-    * **What it does**: Defines the color of any text (like axis labels, though mostly hidden) on the plot.
-
-* **plot_grid**
-    * **Type**: `BOOLEAN`
-    * **Default**: `True`.
-    * **What it does**: Toggles the visibility of grid lines on the plot.
-    * **Use & Why**: Grid lines can help with visual alignment and reading values.
-
-* **plot_axis**
-    * **Type**: `BOOLEAN`
-    * **Default**: `False`.
-    * **What it does**: Toggles the visibility of the X and Y axes on the plot.
-    * **Use & Why**: Often set to `False` for cleaner, minimalist waveform visualizations where only the signal matters.
+### **Table of Contents**
+
+1.  **Introduction**
+    * What is the Mastering Chain Node?
+    * Who is this Node For?
+    * Key Features in Version 1.2a
+2.  **Installation**
+3.  **Core Concepts: The Art of Mastering**
+    * The Mastering Chain: Order Matters
+    * Equalization (EQ): Sculpting the Tone
+    * Dynamic Range Compression: Controlling the Power
+    * The Lookahead Limiter: The Final Safety Net
+4.  **Node Setup and Workflow**
+    * How to Use It: A Step-by-Step Guide
+5.  **Parameter Deep Dive**
+    * Primary & Global Controls
+    * Equalizer Controls (Shelves & Parametric)
+    * Compressor Controls (Single-Band & Multiband)
+    * Limiter Controls
+6.  **Practical Recipes & Use Cases**
+    * Recipe 1: Gentle Mastering for a Full Music Track
+    * Recipe 2: Surgical Fix for a Boomy Kick Drum
+    * Recipe 3: Adding Clarity and "Air" to Vocals or Synths
+7.  **Technical Deep Dive**
+    * The Order of Operations
+8.  **Troubleshooting & FAQ**
 
 ---
 
-## 3. In-Depth Technical Information
+## 1. Introduction
 
-This section provides a deeper dive into the algorithms and internal workings of the Mastering Chain Node.
+### What is the Mastering Chain Node?
 
-### Digital Signal Processing (DSP) Core
+The **Custom Audio Mastering Chain** is an all-in-one audio finalization node that brings the essential tools of a professional mastering studio into your ComfyUI workflow. It's designed to be the last step in your audio generation process, taking a raw sound and transforming it into a polished, balanced, and loud final product. It provides sequential processing for gain, equalization, compression, and limiting in a single, powerful interface.
 
-The node extensively uses `numpy` for efficient numerical operations and `scipy.signal` for digital filter design and application.
+### Who is this Node For?
 
-* **Audio Data Format**: Audio is typically represented as `torch.Tensor` within ComfyUI. The node converts this to `numpy.ndarray` (float32) for DSP operations and then back to `torch.Tensor` for output.
-* **Mono Conversion**: For stereo inputs, processing (especially for EQ and Compression) is often done on a mono sum of the channels (`(left + right) / 2`) to ensure consistent dynamic and tonal shaping across the stereo field. The gain changes are then applied back to the original stereo channels.
+* **AI Musicians & Producers:** Anyone generating full music tracks who needs to make them sound cohesive, loud, and commercially competitive.
+* **Sound Designers:** Creators who need to shape the frequency content and dynamic impact of sound effects to fit a specific context.
+* **Video and Animation Creators:** Users who need to process dialogue or background music to ensure clarity and consistent volume.
+* **Experimental Audio Artists:** Anyone looking for a powerful tool to radically reshape and color their sounds.
 
-### Global Gain Implementation
+### Key Features in Version 1.2a
 
-Simple multiplication of the audio signal by a linear gain factor derived from the `master_gain_db` parameter.
+* **Complete Processing Chain:** Four essential mastering stages (Gain, EQ, Compression, Limiter) in one node.
+* **Advanced Multi-Band EQ:** A high-shelf, a low-shelf, and four fully parametric bands for precise tonal sculpting.
+* **Dual-Mode Compression:** Choose between a straightforward **Single-Band** compressor or a powerful **3-Band Multiband** compressor for transparent dynamic control.
+* **High-Quality Crossovers:** Multiband mode uses Linkwitz-Riley filters to split audio with minimal phase distortion, preserving audio integrity.
+* **Lookahead Peak Limiter:** A "brickwall" limiter that prevents digital clipping and maximizes loudness without audible distortion.
+* **Instant Visual Feedback:** Get immediate "before" and "after" waveform visualizations to see the impact of your processing.
 
-`linear_gain = 10^(master_gain_db / 20)`
+---
 
-### Equalization (EQ) Implementation
+## 2. 🧰 INSTALLATION: JACK INTO THE MATRIX
 
-The EQ section uses `scipy.signal.iirfilter` to design biquadratic (second-order) IIR filters.
+This node is part of the **MD Nodes** package. All required Python libraries, including `pedalboard` for the limiter, are listed in the `requirements.txt` and should be installed automatically.
 
-* **High-Shelf and Low-Shelf Filters**: These are implemented as `highshelf` and `lowshelf` filters, respectively. The `Q` factor for these is internally fixed to `0.707` (approximately 1/√2), which corresponds to a "Butterworth" or maximally flat response, preventing undesirable peaks or dips near the shelf frequency.
-* **Parametric EQ (Peaking Filters)**: These are implemented as `peak` filters, allowing a boost or cut at a specific center frequency (`param_eq_freq`) with a variable bandwidth controlled by the `param_eq_q` factor. A higher `Q` makes the band narrower and more selective.
+### Method 1: ComfyUI Manager (Recommended)
 
-All filters are applied using `scipy.signal.lfilter`, which is a causal (real-time capable) IIR filter. To achieve phase-linear (and thus more transparent) processing, the filters are applied forward and backward (`filtfilt`), effectively doubling the filter order and removing phase distortion.
+1.  Open the **ComfyUI Manager**.
+2.  Click "Install Custom Nodes".
+3.  Search for `MD Nodes` and click "Install".
+4.  The manager will download the package and automatically install its dependencies.
+5.  **Restart ComfyUI.**
 
-### Compression Implementation
+### Method 2: Manual Installation (Git)
 
-Both single-band and multiband compressors are implemented as feed-forward RMS compressors.
+1.  Open a terminal or command prompt.
+2.  Navigate to your `ComfyUI/custom_nodes/` directory.
+3.  Run the following command to clone the repository:
+    ```bash
+    git clone [https://github.com/MDMAchine/ComfyUI_MD_Nodes.git](https://github.com/MDMAchine/ComfyUI_MD_Nodes.git)
+    ```
+4.  Install the required dependencies by running:
+    ```bash
+    pip install -r ComfyUI_MD_Nodes/requirements.txt
+    ```
+5.  **Restart ComfyUI.**
 
-* **RMS Detection**: The `envelope` function calculates the Root Mean Square (RMS) level of the audio signal over a short window, providing a smoothed representation of loudness.
-* **Gain Reduction Calculation**: Based on the detected RMS level, `comp_threshold_db`, and `comp_ratio`, the required gain reduction is calculated.
-* **Attack and Release**:
-    * **Attack**: When the signal exceeds the threshold, the gain reduction quickly increases based on the `comp_attack_ms` parameter. This determines how fast the compressor "clamps down."
-    * **Release**: When the signal falls below the threshold, the gain reduction smoothly decreases back to unity gain based on the `comp_release_ms` parameter. This determines how fast the compressor "lets go."
-    * These attack and release curves are typically exponential, using coefficients derived from the `ms` values and `sample_rate`.
-* **Makeup Gain**: Applied after compression to restore overall loudness.
+After restarting, the node and all its features should be fully available. Don’t forget, even gods need to reboot.
 
-### Multiband Crossover Filters
+---
 
-For multiband compression, `scipy.signal.butter` is used to design Butterworth filters for frequency splitting:
+## 3. Core Concepts: The Art of Mastering
 
-* **Low-Pass Filter**: For the low band.
-* **Band-Pass Filter**: For the mid band (using two cutoff frequencies).
-* **High-Pass Filter**: For the high band.
+### The Mastering Chain: Order Matters
 
-These filters sum to a "perfect reconstruction" system (or close to it), ensuring that when the bands are recombined, the original frequency response is largely preserved, preventing phase issues or gaps.
+A mastering chain is a sequence of audio processors. The order is critical because each stage affects the input to the next. This node uses a classic, proven order: **Gain → EQ → Compression → Limiter**. This ensures you can balance the initial level, shape the tone, control the dynamics, and finally, maximize the loudness without distortion.
 
-### Limiter Implementation
+### Equalization (EQ): Sculpting the Tone
 
-The limiter is a "brickwall" peak limiter with a lookahead.
+EQ is the art of adjusting the volume of specific frequencies to change the character of a sound. Think of it as a highly advanced tone control.
+* **Shelf Filters (Low & High):** These are broad-stroke tools. A **low-shelf** turns down (or up) all the bass frequencies below a certain point, while a **high-shelf** does the same for the treble. They are great for general brightening or warming.
+* **Parametric Filters:** These are surgical tools. They target a very specific frequency and can create a narrow "peak" or "dip." This is perfect for fixing problems, like cutting a muddy frequency in a bassline or boosting the "snap" of a snare drum.
 
-* **Lookahead Buffer**: The audio is buffered by a certain number of samples (calculated from `limiter_lookahead_ms` and `sample_rate`). This allows the limiter to "see" upcoming peaks.
-* **Peak Detection**: For each sample, the limiter examines a window of audio (current_sample + lookahead_samples) to find the maximum absolute peak.
-* **Instantaneous Attack**: If a peak is detected that would exceed the `limiter_ceiling_amplitude`, the gain reduction is applied immediately (a "brickwall" action). The `current_gain_reduction_factor` is set to the minimum of its current value and the `desired_gain_reduction_factor` for the detected peak, ensuring the ceiling is never breached.
-* **Exponential Release**: After the peak passes, the gain reduction smoothly decays back to unity gain (no reduction) using an exponential release coefficient, similar to the compressor's release stage.
+### Dynamic Range Compression: Controlling the Power
 
-### Waveform Plotting
+Dynamic range is the difference between the quietest and loudest parts of your audio. Compression reduces this range, making the overall volume more consistent.
+* **Single-Band Compressor:** This is the classic approach. It listens to the entire audio signal and turns the volume down whenever it gets too loud. It's simple and effective for adding "glue" to a mix.
+* **Multiband Compressor:** This is a more advanced and transparent tool. It splits the audio into frequency bands (in this case, Low, Mid, and High) and compresses each one independently. This allows you to control the dynamics of the bass without affecting the crispness of the cymbals, leading to a much cleaner and more powerful result.
 
-* **Matplotlib**: `matplotlib.pyplot` is used to generate waveform plots.
-* **Mono Mix**: For stereo audio, channels are averaged to create a mono mix for a single waveform visualization.
-* **Image Conversion**: The plot is saved to an in-memory `BytesIO` buffer as a PNG, then opened with `PIL.Image`, converted to RGB, and finally transformed into a `NumPy` array (`float32`) normalized to 0-1, and then into a `PyTorch` tensor with a batch dimension (`1, height, width, channels`) for ComfyUI's `IMAGE` output.
+### The Lookahead Limiter: The Final Safety Net
 
-This node leverages robust scientific computing libraries (`numpy`, `scipy`) and standard DSP algorithms to provide a powerful and flexible audio mastering solution within the ComfyUI environment.
+After EQ and compression have shaped your sound, the limiter's job is to make it loud without distortion. It's a "brickwall" that prevents the audio signal from ever crossing the maximum digital level (0 dBFS). By using **lookahead**, it can see peaks coming a few milliseconds in advance and smoothly turn them down, which is far more transparent than simply clipping them off.
+
+---
+
+## 4. Node Setup and Workflow
+
+### How to Use It: A Step-by-Step Guide
+
+1.  **Connect Audio Source:** Connect the `AUDIO` output from your audio generation or loading node to the `audio` input of the Mastering Chain Node.
+2.  **Set Initial Gain:** Use `master_gain_db` to set a good starting level. You want the loudest parts to be active but not constantly hitting the maximum.
+3.  **Enable and Configure EQ:** Check `enable_eq`. Use the shelf and parametric bands to shape the tone. Small boosts and cuts often work best.
+4.  **Enable and Configure Compression:**
+    * Check `enable_comp` and choose your `comp_type` (`Single-Band` or `Multiband`).
+    * Set the `threshold` to determine when the compressor starts working.
+    * Adjust the `ratio`, `attack`, and `release` to control how the compression sounds.
+    * Use `makeup_gain` to restore any volume lost during compression.
+5.  **Enable and Configure Limiter:** Check `enable_limiter`. Set the `limiter_ceiling_db` to just below zero (e.g., -0.1) to prevent any possibility of clipping.
+6.  **Connect Outputs:**
+    * The `AUDIO` output provides the fully processed audio stream, ready to be saved or previewed.
+    * The two `IMAGE` outputs show the waveform *before* and *after* processing. Connect these to "Preview Image" nodes to see the effects of your work.
+7.  **Queue Prompt:** Run the workflow. The output images will give you immediate feedback on how the dynamics have changed.
+
+---
+
+## 5. Parameter Deep Dive
+
+### Primary & Global Controls
+
+* **`audio`** (Required): The input audio waveform.
+* **`sample_rate`** (`INT`): The sample rate of the input audio (e.g., 44100).
+* **`master_gain_db`** (`FLOAT`): The overall volume adjustment applied *before* all other processing.
+
+### Equalizer Controls (Shelves & Parametric)
+
+* **`enable_eq`** (`BOOLEAN`): Master switch for the entire EQ section.
+* **Low-Shelf:**
+    * `enable_low_shelf_eq`: Toggles the low-shelf filter.
+    * `eq_low_shelf_gain_db`: Boosts or cuts the bass frequencies.
+    * `eq_low_shelf_freq`: Sets the corner frequency where the shelf begins.
+* **High-Shelf:**
+    * `eq_high_shelf_gain_db`: Boosts or cuts the treble frequencies.
+    * `eq_high_shelf_freq`: Sets the corner frequency where the shelf begins.
+* **Parametric Bands (1-4):**
+    * `enable_param_eqX`: Toggles the specific parametric band.
+    * `param_eqX_gain_db`: Boosts or cuts the targeted frequency.
+    * `param_eqX_freq`: The center frequency of the band.
+    * `param_eqX_q`: The "Q factor" or bandwidth. A high Q is very narrow and surgical; a low Q is broad.
+
+### Compressor Controls (Single-Band & Multiband)
+
+* **`enable_comp`** (`BOOLEAN`): Master switch for the entire compression section.
+* **`comp_type`** (`ENUM`): Selects `Single-Band` or `Multiband` operation.
+
+* **Single-Band Parameters:**
+    * `comp_threshold_db`: The volume level (in dB) above which compression is applied.
+    * `comp_ratio`: The amount of compression. A 4:1 ratio means for every 4dB the signal goes over the threshold, the output only rises by 1dB.
+    * `comp_attack_ms`: How quickly the compressor reacts (in milliseconds).
+    * `comp_release_ms`: How quickly the compressor stops reacting.
+    * `comp_makeup_gain_db`: A final gain stage to compensate for volume lost during compression.
+    * `comp_soft_knee_db`: Creates a smoother transition into compression.
+
+* **Multiband Parameters:**
+    * `mb_crossover_low_mid_hz` / `mb_crossover_mid_high_hz`: These set the frequencies that divide the audio into Low, Mid, and High bands.
+    * Each band (Low, Mid, High) has its own independent set of `threshold`, `ratio`, `attack`, `release`, `makeup_gain`, and `soft_knee` controls.
+
+### Limiter Controls
+
+* **`enable_limiter`** (`BOOLEAN`): Toggles the final limiter stage.
+* **`limiter_ceiling_db`** (`FLOAT`): The absolute maximum output level. Set this to -0.1 or -0.3 to prevent inter-sample peaks on consumer devices.
+* **`limiter_lookahead_ms`** (`FLOAT`): How far ahead (in ms) the limiter "looks" to anticipate peaks for cleaner processing.
+* **`limiter_release_ms`** (`FLOAT`): How quickly the limiter recovers after reducing a peak.
+
+---
+
+## 6. Practical Recipes & Use Cases
+
+### Recipe 1: Gentle Mastering for a Full Music Track
+
+Goal: Add punch, clarity, and competitive loudness to a finished song without sounding over-processed.
+
+* **`master_gain_db`**: `-3.0` (to create headroom before compression).
+* **EQ:**
+    * **Low-Shelf:** `enable`, `gain=-1dB`, `freq=100Hz` (to gently tighten the low end).
+    * **High-Shelf:** `gain=+1.5dB`, `freq=12000Hz` (to add some "air").
+* **Compressor (`Multiband`):**
+    * **Low Band:** `threshold=-20dB`, `ratio=3:1`, `attack=50ms`, `release=400ms` (to control the bass).
+    * **Mid Band:** `threshold=-18dB`, `ratio=2:1`, `attack=25ms`, `release=200ms` (gentle glue for the main instruments).
+    * **High Band:** `threshold=-15dB`, `ratio=1.5:1`, `attack=10ms`, `release=120ms` (to lightly tame cymbals).
+* **Limiter:** `enable`, `ceiling=-0.1dB`, `lookahead=2.0ms`.
+
+### Recipe 2: Surgical Fix for a Boomy Kick Drum
+
+Goal: Reduce the "mud" from a kick drum around 150Hz without losing its low-end punch.
+
+* **EQ:**
+    * **Parametric EQ 1:** `enable`, `gain=-4.0dB`, `freq=150Hz`, `q=5.0` (a sharp cut to remove the unwanted resonance).
+    * **Parametric EQ 2:** `enable`, `gain=+2.0dB`, `freq=60Hz`, `q=2.0` (a broad boost to restore the deep punch).
+* **Compressor (`Single-Band`):** `enable`, `threshold=-10dB`, `ratio=4:1`, `attack=10ms`, `release=100ms` (to even out the kick's dynamics).
+* **Limiter:** `enable`.
+
+### Recipe 3: Adding Clarity and "Air" to Vocals or Synths
+
+Goal: Make a lead instrument or vocal cut through the mix and sound brighter.
+
+* **EQ:**
+    * **Parametric EQ 1:** `enable`, `gain=-2.0dB`, `freq=300Hz`, `q=1.5` (to remove any boxiness).
+    * **Parametric EQ 2:** `enable`, `gain=+2.5dB`, `freq=5000Hz`, `q=2.0` (to boost presence and clarity).
+    * **High-Shelf:** `gain=+2.0dB`, `freq=10000Hz` (to add sparkle and air).
+* **Compressor (`Single-Band`):** Use very light settings (`ratio=2:1`) just to even out the level slightly.
+* **Limiter:** `enable`.
+
+---
+
+## 7. Technical Deep Dive
+
+### The Order of Operations
+
+Understanding the signal flow is crucial. The audio passes through the enabled modules in this fixed sequence:
+
+1.  **Global Gain:** Sets the initial level for the entire chain.
+2.  **Equalizer:** The audio is tonally shaped *before* dynamic processing. This is standard practice, as it allows you to control which frequencies trigger the compressor.
+3.  **Compressor:** The dynamics of the EQ'd signal are controlled.
+4.  **Limiter:** The final processed signal is brought up to its maximum loudness without clipping.
+
+The "Before" waveform is captured right at the input, and the "After" waveform is captured at the final output, showing the cumulative effect of all enabled stages.
+
+---
+
+## 8. Troubleshooting & FAQ
+
+* **"My audio sounds distorted."**
+    * This is likely digital clipping. The most important fix is to **enable the limiter** and set its ceiling to -0.1dB. Also, check your `master_gain_db` and compressor `makeup_gain_db` settings; you may be sending too much level into the next stage.
+* **"The sound is 'pumping' or 'breathing' unnaturally."**
+    * This is a classic sign of over-compression. Try using a lower `ratio`, a slower `attack` time, or a faster `release` time on your compressor. If using a single-band compressor on a full mix, the bass might be triggering the compression for the whole track; this is a perfect reason to switch to `Multiband` mode.
+* **"My audio sounds thin after I used the EQ."**
+    * You might have cut too much in the low or mid-range frequencies. EQ is powerful, and small changes go a long way. Try reducing the amount of your cuts (e.g., -2dB instead of -6dB) or using a lower Q value for a broader, more natural shape.
+* **"The compressor isn't doing anything."**
+    * The compressor only acts on signals that go *above* the `threshold`. If your input audio is too quiet, it may never cross the threshold. Try lowering the `threshold` value or increasing the `master_gain_db` before the compressor stage.
+* **"What's the real advantage of Multiband compression?"**
+    * It gives you independent dynamic control over different parts of the sound. It lets you clamp down on a boomy bass guitar without making the vocals sound squashed, or de-ess a vocal (reduce sibilance) without affecting the midrange warmth. It's a more transparent and powerful approach for complex audio like a full music track.

@@ -1,199 +1,220 @@
-# SceneGenius Autocreator Node Manual V0.1
+# Comprehensive Manual: Scene Genius Autocreator (v0.2.6)
+
+Welcome to the complete guide for the **Scene Genius Autocreator (v0.2.6)**, your AI co-pilot for creative content generation in ComfyUI. This manual provides everything you need to know, from basic setup to advanced YAML hacking and technical details.
 
 ---
 
-## 1. What is the SceneGenius Autocreator Node?
+### **Table of Contents**
 
-The SceneGenius Autocreator is a powerful ComfyUI node designed to streamline your creative content generation process by acting as an "AI SysOp." While it was originally developed for use with audio diffusion models like Ace-Step, its capabilities hold significant promise for enhancing video and image generation workflows as well, though further testing and modifications to the code is recommended for these applications.
-
-At its core, this node integrates with local Large Language Models (LLMs), specifically via Ollama, to intelligently produce a wide array of creative outputs based on a single conceptual prompt. Think of it as a multi-stage AI creative assistant that automates complex tasks and parameter tuning for your generative art projects.
-
-### How it Works
-
-The SceneGenius Autocreator operates through a sophisticated multi-stage process, orchestrating various AI subroutines to generate cohesive and contextually relevant outputs:
-
-1.  **Concept Interpretation**: It takes your primary input, the `initial_concept_prompt`, and uses a local LLM to understand your overarching creative vision.
-2.  **Creative Generation**: Based on this concept, the LLM dynamically generates several key elements:
-    * **Authentic & Varied Genres**: It goes beyond simple keywords to produce realistic music genres and diverse combinations (e.g., "Gabba Cyber-Grindcore with a hint of Industrial Noise").
-    * **Lyrics or Script**: It can author detailed lyrics or scripts. Alternatively, if your creative concept suggests an instrumental piece, it will intelligently decide to output an `[instrumental]` tag instead, demonstrating an "art of suggestion."
-    * **Precise Durations**: It calculates an optimal total duration in seconds for your generated content.
-    * **Diffusion Parameters (YAML)**: This is a critical feature where the LLM dynamically configures parameters for two crucial diffusion components:
-        * **Adaptive Projected Gradient (APG) Guider**: It forges finely tuned YAML parameters for APG, aiming for precise guidance for your diffusion model, which helps achieve clean visuals and audio without unwanted artifacts.
-        * **Ping-Pong Sampler**: It configures YAML parameters specifically optimized for models like Ace-Step, aiming for tight, high-quality visual or audio output.
-    * **Noise Decay Adjustment**: It dynamically adjusts a `noise_decay_strength` parameter, allowing you to fine-tune the "cleanliness" or "grit" of the final output, from pixel-perfect clarity to a desired retro noise effect.
-3.  **Output**: The node then provides all these generated elements as structured outputs, ready to be seamlessly fed into downstream ComfyUI nodes for your diffusion workflow.
-
-### What it Does (Key Features)
-
-* **Local LLM Integration**: Connects seamlessly with local Ollama instances for powerful, offline AI generation, ensuring privacy and control over your models.
-* **Multi-Stage Generation**: Orchestrates a complex creative pipeline from an initial concept to final diffusion parameter configuration, automating tasks that would typically require extensive manual input and expertise.
-* **Context-Aware Creativity**: The LLM maintains context across its internal processes, remembering previous generations to ensure a coherent creative narrative and consistent, thematically aligned outputs.
-* **Dynamic Content Creation**: Generates diverse genres, intelligent lyrics/scripts (or instrumental tags), and precise durations, effectively acting as a creative co-pilot.
-* **Automated Diffusion Parameter Generation**: Synthesizes Adaptive Projected Gradient (APG) and Ping-Pong Sampler YAML configurations tailored to the creative concept, saving significant time in manual parameter tuning.
-* **Robust Error Handling & YAML Override**: Includes built-in fallbacks if the LLM output is unparseable or malformed, and provides options for manual YAML overrides for advanced users seeking ultimate control or fine-tuning.
-
-### How to Use It
-
-The SceneGenius Autocreator node is typically the initial step in your ComfyUI workflow when you want to leverage AI for creative content and parameter generation.
-
-1.  **Add the Node**: In your ComfyUI workflow, right-click on the canvas, navigate to `Add Node`, find and select `SceneGeniusAutocreator`.
-2.  **Connect to Ollama**:
-    * **Prerequisite**: Ensure you have Ollama installed and running locally on your system, with your desired LLM model downloaded (e.g., `llama3:8b-instruct-q8_0`).
-    * **`ollama_api_url`**: Input the full URL where your Ollama server is accessible. For a default local setup, this is typically `http://localhost:11434`.
-    * **`ollama_model_name`**: Specify the exact name of the Ollama model you wish to use for generation (e.g., `llama3:8b-instruct-q8_0`). The node will attempt to fetch a list of available models from your Ollama instance and use a default if it cannot connect or find the specified model.
-3.  **Provide the Initial Concept**:
-    * **`initial_concept_prompt`**: Enter your creative vision or idea here. This is the core textual input that guides the LLM in generating all subsequent outputs (genres, lyrics, duration, and diffusion parameters). Be as descriptive or concise as you like; the LLM is designed to interpret a wide range of inputs.
-4.  **Optional Parameters (for fine-tuning)**:
-    * **`force_instrumental`**: `BOOLEAN` (Default: `False`). If set to `True`, the LLM will always generate an `[instrumental]` tag for the lyrics/script output, regardless of the `initial_concept_prompt`. Useful when you specifically want instrumental pieces.
-    * **`min_duration_seconds`**: `INT` (Default: `15`). Sets the minimum allowed duration for the generated content.
-    * **`max_duration_seconds`**: `INT` (Default: `45`). Sets the maximum allowed duration for the generated content.
-    * **`llm_temperature`**: `FLOAT` (Default: `0.7`). Controls the randomness of the LLM's output.
-        * Higher values (e.g., `1.0`+) lead to more diverse and creative (but potentially less coherent) outputs.
-        * Lower values (e.g., `0.1`-`0.5`) make the output more focused and deterministic.
-    * **`yaml_parameters_opt`**: `STRING` (Optional). This is a powerful advanced feature. You can paste a YAML string here that contains custom diffusion parameters for APG and Ping-Pong Sampler. If provided, these values will override the LLM's dynamically generated diffusion parameters, giving you ultimate control. This is useful for:
-        * Applying specific, pre-tested diffusion settings.
-        * Troubleshooting or isolating issues.
-        * Using custom parameters that the LLM might not generate.
-5.  **Connect Outputs**: The node provides several outputs that you can connect to downstream nodes:
-    * **`genres`**: The generated music genres or descriptive tags.
-    * **`lyrics_or_script`**: The generated lyrics, script, or `[instrumental]` tag.
-    * **`duration_seconds`**: The calculated optimal duration in seconds.
-    * **`apg_guider_params`**: YAML string containing parameters for the APG Guider node.
-    * **`pingpong_sampler_params`**: YAML string containing parameters for the PingPong Sampler node.
-    * **`noise_decay_strength`**: The dynamically adjusted noise decay strength.
+1.  **Introduction**
+    * What is the Scene Genius Autocreator?
+    * Who is this Node For?
+    * Key Features in Version 0.2.6
+2.  **Installation**
+3.  **Core Concepts: The Generative Pipeline**
+    * Stage 1: Genre Synthesis
+    * Stage 2: Lyrical Conception
+    * Stage 3 & 4: Temporal & Aesthetic Tuning (Duration & Noise)
+    * Stage 5 & 6: Generating the DNA (APG & Sampler YAML)
+4.  **Node Setup and Workflow**
+    * How to Use It: A Step-by-Step Guide
+5.  **Parameter Deep Dive**
+    * Primary Controls: LLM & Concept
+    * Creative Controls: Genre, Lyrics, & Duration
+    * Advanced Controls: Sampler & Overrides
+6.  **Practical Recipes & Use Cases**
+    * Recipe 1: Fully Automated Audio Concept Generation
+    * Recipe 2: Batch Processing with a Fixed Vibe
+    * Recipe 3: Manual Override for Surgical Control
+7.  **Technical Deep Dive**
+    * The Order of Operations
+    * Working with YAML Overrides
+8.  **Troubleshooting & FAQ**
 
 ---
 
-## 2. Detailed Parameter Information
+## 1. Introduction
 
-This section provides a more in-depth look at each parameter of the SceneGenius Autocreator node.
+### What is the Scene Genius Autocreator?
 
-### Core Input
+The **Scene Genius Autocreator** is a multi-stage AI "weapon" node that automates the entire creative front-end of a generation workflow. It uses a local Large Language Model (LLM) via Ollama to intelligently generate all the necessary parameters—from high-level concepts like genre and lyrics down to the intricate YAML configurations for advanced samplers like the `APG Guider` and `PingPong Sampler`. It's designed to be the "brain" of your workflow, turning a simple idea into a fully-defined, ready-to-render set of instructions.
 
-* **`initial_concept_prompt`**
-    * **Type**: `STRING`
-    * **Description**: The foundational text input that describes your creative idea, theme, or desired outcome. This prompt guides the entire multi-stage generation process of the LLM.
-    * **Use & Why**: This is where you convey your artistic vision. It should be descriptive enough for the LLM to understand and expand upon. The quality and specificity of this prompt directly influence the relevance and creativity of all generated outputs (genres, lyrics, duration, and diffusion parameters).
+### Who is this Node For?
 
-### Ollama Connection Parameters
+* **AI Musicians & Artists:** Anyone who wants to rapidly prototype ideas without manually tweaking dozens of parameters for every new generation.
+* **Batch Job Enthusiasts:** Users who run large batches and want each generation to have unique, context-aware settings based on a changing seed or concept.
+* **Creative Explorers:** Anyone who wants to be surprised by the AI's interpretation of a concept and discover unexpected creative directions.
+* **Power Users:** Those who want a robust, automated base configuration that they can then manually override for fine-tuning.
 
-* **`ollama_api_url`**
-    * **Type**: `STRING`
-    * **Default**: `http://localhost:11434`
-    * **Description**: The network address (URL) where your local Ollama server is running and accessible.
-    * **Use & Why**: Essential for the node to communicate with the Ollama instance to perform LLM inference. Ensure this URL points to your running Ollama server.
-* **`ollama_model_name`**
-    * **Type**: `STRING`
-    * **Default**: `llama3:8b-instruct-q8_0`
-    * **Description**: The exact name of the Large Language Model hosted on your Ollama server that you want the node to use for generating content.
-    * **Use & Why**: Specifies which LLM model the node should load and use for creative generation. It's crucial that this name matches a model you have downloaded and made available via Ollama.
+### Key Features in Version 0.2.6
 
-### Output Control Parameters
-
-* **`force_instrumental`**
-    * **Type**: `BOOLEAN`
-    * **Default**: `False`
-    * **Description**: If set to `True`, the LLM will bypass its internal logic for generating lyrics/scripts and will always output the `[instrumental]` tag for the `lyrics_or_script` output.
-    * **Use & Why**: Provides a direct override when you are certain you want an instrumental piece, preventing the LLM from attempting to generate lyrical content.
-* **`min_duration_seconds`**
-    * **Type**: `INT`
-    * **Default**: `15`
-    * **Range**: `1` to `3600` (1 hour)
-    * **Description**: The minimum desired duration, in seconds, for the generated content. The LLM will try to adhere to this lower bound when calculating the `duration_seconds` output.
-    * **Use & Why**: Helps to constrain the LLM's duration predictions, ensuring the generated content meets minimum length requirements for your project.
-* **`max_duration_seconds`**
-    * **Type**: `INT`
-    * **Default**: `45`
-    * **Range**: `1` to `3600` (1 hour)
-    * **Description**: The maximum desired duration, in seconds, for the generated content. The LLM will try to adhere to this upper bound when calculating the `duration_seconds` output.
-    * **Use & Why**: Helps to constrain the LLM's duration predictions, ensuring the generated content does not exceed a desired maximum length, which is important for managing generation times and resource usage.
-* **`llm_temperature`**
-    * **Type**: `FLOAT`
-    * **Default**: `0.7`
-    * **Range**: `0.0` to `2.0`
-    * **Step Size**: `0.01`
-    * **Description**: Controls the "creativity" or randomness of the LLM's responses. A higher temperature makes the LLM's output more varied and unpredictable, while a lower temperature makes it more deterministic and focused.
-    * **Use & Why**: Adjust this to fine-tune the exploratory nature of the LLM. For more stable, predictable genres and lyrics, use a lower temperature. For more experimental, surprising, or "out-of-the-box" ideas, increase the temperature.
-
-### Advanced Override Parameter
-
-* **`yaml_parameters_opt`**
-    * **Type**: `STRING` (Multi-line text input)
-    * **Default**: `(empty string)`
-    * **Description**: An optional input where you can provide a YAML formatted string containing specific diffusion parameters for the APG Guider and Ping-Pong Sampler. If this input is populated with valid YAML, it will override the parameters dynamically generated by the LLM.
-    * **Use & Why**: This provides an escape hatch and advanced control. If you have a known set of optimal diffusion parameters or wish to test specific configurations, you can hardcode them here. The YAML structure should follow the expected format for APG Guider and Ping-Pong Sampler configurations.
+* **Full Automation Pipeline:** Generates genre, lyrics, duration, noise decay, APG YAML, and Sampler YAML from a single prompt.
+* **Local LLM Integration:** Leverages the power of your own machine via Ollama for privacy and control.
+* **Intelligent Sampler Support:** Dynamically generates correct YAML for both the "Lite+" and "FBG" versions of the PingPong Sampler.
+* **Robust Error Handling:** Features intelligent fallbacks to known-good default configurations if the LLM fails or produces invalid output.
+* **Strict Prompt Engineering:** Heavily reinforced prompts prevent the LLM from hallucinating invalid parameters, ensuring stable and reliable YAML generation.
+* **Full Override Capability:** Every stage of the generation can be manually overridden with your own text inputs for surgical control.
 
 ---
 
-## 3. Detailed Technical Information
+## 2. 🧰 INSTALLATION: JACK INTO THE MATRIX
 
-This section delves into the internal workings and architecture of the SceneGenius Autocreator node.
+This node is part of the **MD Nodes** package. All required Python libraries, including `ollama` and `PyYAML`, are listed in the `requirements.txt`.
 
-### Core Architecture
+### Method 1: ComfyUI Manager (Recommended)
 
-The node's `generate` method orchestrates a sequence of internal steps, each designed to leverage the connected Ollama LLM for specific creative and technical tasks.
+1.  Open the **ComfyUI Manager**.
+2.  Click "Install Custom Nodes".
+3.  Search for `MD Nodes` and click "Install".
+4.  The manager will download the package and automatically install its dependencies.
+5.  **Restart ComfyUI.**
 
-1.  **Ollama Client Initialization**:
-    * It first attempts to establish a connection with the Ollama server using the provided `ollama_api_url`.
-    * It then verifies if the specified `ollama_model_name` is available on the server. If not, or if connection fails, it attempts to use a fallback default model (`llama3:8b-instruct-q8_0`). This ensures robustness.
+### Method 2: Manual Installation (Git)
 
-2.  **Schema and Prompt Loading**:
-    * The node loads predefined `system_prompt`, `user_prompt`, and `json_schema` from internal static definitions. These are crucial for guiding the LLM to produce structured, relevant JSON outputs. The JSON schema enforces the expected format for genres, lyrics, duration, and the nested diffusion parameters.
+1.  Open a terminal or command prompt.
+2.  Navigate to your `ComfyUI/custom_nodes/` directory.
+3.  Run the following command to clone the repository:
+    ```bash
+    git clone [https://github.com/MDMAchine/ComfyUI_MD_Nodes.git](https://github.com/MDMAchine/ComfyUI_MD_Nodes.git)
+    ```
+4.  Install the required dependencies by running:
+    ```bash
+    pip install -r ComfyUI_MD_Nodes/requirements.txt
+    ```
+5.  **Restart ComfyUI.**
 
-3.  **LLM Inference Loop**:
-    * The core of the creative generation is an iterative loop that attempts to get a valid JSON response from the LLM.
-    * **`try-except` block**: This robust error handling mechanism is critical. If the LLM generates malformed JSON, or if there's any other error during the parsing, it catches the exception.
-    * **Retries**: In case of a parsing error, it instructs the LLM to "try again" with a refined prompt, emphasizing the need for valid JSON. This helps to improve the reliability of the LLM's structured output.
-    * **Temperature Adjustment**: If the LLM repeatedly fails to produce valid JSON, the node dynamically lowers the `llm_temperature` to encourage more deterministic and predictable (and thus, more likely to be valid) outputs.
-
-4.  **Content Extraction and Conversion**:
-    * Once a valid JSON response is received, the node extracts the `genres`, `lyrics_or_script` (handling the `force_instrumental` override), `duration_seconds`, `apg_guider_params`, `pingpong_sampler_params`, and `noise_decay_strength`.
-    * **YAML Conversion**: The `apg_guider_params` and `pingpong_sampler_params` are converted into YAML strings.
-
-### Internal Logic and Best Practices
-
-* **Robustness via Fallbacks and Retries**: The primary design philosophy behind this node is resilience. By incorporating default Ollama URLs/models, `try-except` blocks around LLM calls, and a retry mechanism with temperature annealing, the node is designed to handle common LLM eccentricities (like generating invalid JSON) gracefully. This makes it more suitable for production ComfyUI workflows where stability is paramount.
-* **Structured Output Enforcement**: The use of a `json_schema` in the LLM prompt is a powerful technique to coerce the LLM into producing a specific, parseable data structure. This is crucial for automating the configuration of downstream nodes.
-* **Dynamic Parameter Generation**: The node intelligently generates diffusion parameters (`apg_guider_params`, `pingpong_sampler_params`, `noise_decay_strength`) based on the creative prompt. This automates a complex, often manual, tuning process, making advanced diffusion models more accessible.
-* **YAML Override Logic**: The `yaml_parameters_opt` input is a strategic design choice. It allows advanced users to bypass the LLM's parameter generation for diffusion components, providing a critical level of control and enabling integration with external parameter libraries or pre-tuned configurations.
-* **Context Management**: While not explicitly shown in the `generate` method's signature, the LLM's ability to maintain context over a conversation is leveraged (implicitly via the system/user prompt structure) to ensure coherence between the creative concept and the generated technical parameters.
+After restarting, the node and all its features should be fully available. Don’t forget, even gods need to reboot.
 
 ---
 
-## 4. Error Handling and Graceful Degradation
+## 3. Core Concepts: The Generative Pipeline
 
-The SceneGenius Autocreator node is built with robustness in mind, featuring several layers of error handling and graceful degradation to ensure a stable user experience.
+The Scene Genius operates in a sequential, six-stage pipeline. The output of each stage becomes part of the creative context for the next, creating a coherent and context-aware set of parameters.
 
-### LLM Communication Errors
+### Stage 1: Genre Synthesis
+The node takes your `initial_concept_prompt` and asks the LLM to brainstorm a set of descriptive genre tags. This sets the overall mood and aesthetic.
 
-* **Connection Issues**: If the node cannot connect to the Ollama API at the specified `ollama_api_url`, it will log an error message to the ComfyUI console, indicating a network problem or an incorrect URL. It will then attempt to proceed with fallback parameters if available.
-* **Model Not Found**: If the `ollama_model_name` specified by the user is not found on the connected Ollama server, the node will log a warning and attempt to use a default fallback model (`llama3:8b-instruct-q8_0`). This prevents a complete failure due to a misspelled or unavailable model.
+### Stage 2: Lyrical Conception
+Using the concept and the newly generated genres, the LLM either writes lyrics/script or decides the piece should be instrumental. The genres inform the *style* of the writing, not the literal content.
 
-### LLM Output Parsing Errors
+### Stage 3 & 4: Temporal & Aesthetic Tuning (Duration & Noise)
+The LLM now has a full creative brief (concept, genres, lyrics). It uses this to determine an appropriate duration in seconds and a `noise_decay_strength` for the Noise Decay Scheduler, which influences the final texture.
 
-* **Invalid JSON**: The most common issue with LLM integration is when the model fails to produce syntactically correct JSON, despite being prompted with a schema. The node has a robust `try-except` block to catch `json.JSONDecodeError`.
-    * **Retries**: Upon detecting invalid JSON, the node attempts to retry the LLM call, providing an explicit instruction to the LLM to correct its output and adhere to the JSON format.
-    * **Temperature Adjustment**: If repeated retries (up to a predefined limit) still result in invalid JSON, the node will incrementally lower the `llm_temperature`. This makes the LLM's output more deterministic and increases the likelihood of generating valid JSON.
-* **Missing Fields**: If the LLM generates valid JSON but omits crucial fields defined in the schema (e.g., `genres`, `duration_seconds`), the node is designed to handle these gracefully. It will log a warning and attempt to use sensible defaults or empty strings for the missing data.
-* **Schema Validation Errors**: While not explicitly coded with a full JSON schema validator for runtime, the internal structure of the prompting encourages adherence to the expected types and ranges. Deviations are primarily handled by the parsing and data conversion steps.
-
-### Fallback Parameters
-
-* **Default Values**: If the LLM fails to produce valid diffusion parameters (e.g., `apg_guider_params`, `pingpong_sampler_params`) or if the `yaml_parameters_opt` input is empty or malformed, the node has internal default YAML configurations for these parameters. This means your diffusion workflow can still proceed, albeit with less tailored settings.
-* **Error Logging**: All errors and warnings are logged to the ComfyUI console. This provides users with crucial feedback for debugging and understanding why certain outputs might not be as expected.
-
-### Overall Resilience
-
-The extensive implementation of `try-except` blocks around all LLM API calls and YAML parsing operations, coupled with the pre-defined default YAML fallbacks, makes the node highly resilient. It can gracefully handle network issues, Ollama failures, or unpredictable LLM output formats. This "fail-safe" design is paramount for stable integration into dynamic ComfyUI workflows, preventing a single LLM hiccup from crashing the entire generation process.
+### Stage 5 & 6: Generating the DNA (APG & Sampler YAML)
+This is the final and most complex step. The LLM receives the entire creative package and generates the highly-structured YAML configurations required by the `APG Guider` and the selected `PingPong Sampler`. The prompts are heavily reinforced to ensure the output is technically correct and optimized for audio generation.
 
 ---
 
-## 5. Modularity and Extensibility
+## 4. Node Setup and Workflow
 
-### Separation of Concerns
+### How to Use It: A Step-by-Step Guide
 
-By relying on YAML for the configuration of diffusion parameters, the node maintains a clear separation between the AI's creative output (genres, lyrics) and the diffusion model's technical parameters. This modularity simplifies future updates, allows for easy swapping out of diffusion models, or enables the implementation of new parameter generation stages in subsequent versions, fostering long-term adaptability.
+1.  **Place the Node:** Add a `Scene Genius Autocreator` node to your workflow. It should be placed early, as its outputs will feed many other nodes.
+2.  **Configure the LLM:**
+    * Ensure your Ollama server is running.
+    * Select your desired `ollama_model_name` from the dropdown. Smaller, faster models are often sufficient.
+3.  **Define Your Concept:** Write your core creative idea in the `initial_concept_prompt` field. This is the most important input!
+4.  **Set Creative Constraints:** Adjust `tag_count`, `min/max_total_seconds`, and other parameters to guide the generation.
+5.  **Select Sampler Version:** Choose which PingPong Sampler you are using in your workflow (`Original` or `FBG Integrated`). This is crucial for generating the correct YAML.
+6.  **Connect the Outputs:**
+    * Connect `APG_YAML_PARAMS` to the `yaml_parameters_opt` input of your `APGGuiderForked` node.
+    * Connect `SAMPLER_YAML_PARAMS` to the `yaml_settings_str` input of the corresponding `PingPongSampler` node.
+    * Connect `NOISE_DECAY_STRENGTH` to the `decay_exponent` of a `NoiseDecayScheduler_Custom` node.
+    * Connect `TOTAL_SECONDS` to any nodes that require a duration.
+    * The other outputs (`GENRE_TAGS`, `LYRICS_OR_SCRIPT`, `SEED`) can be connected to text display nodes for review.
+7.  **Queue Prompt:** Run the workflow. The Scene Genius will call the LLM for each stage and output the complete set of parameters.
 
-### "Code-as-Creative-Director" Philosophy
+---
 
-This node embodies a "code-as-creative-director" philosophy, leveraging LLMs to automate complex parameter generation and creative decision-making. This empowers users to focus on high-level concepts and artistic direction rather than intricate manual tuning, acting as a sophisticated bridge between abstract creative intent and the concrete, technical requirements of advanced diffusion models.
+## 5. Parameter Deep Dive
+
+### Primary Controls: LLM & Concept
+
+* **`ollama_api_base_url`**: The URL of your running Ollama instance. The default is usually correct.
+* **`ollama_model_name`**: The specific model Ollama should use for generation.
+* **`initial_concept_prompt`**: The seed of your creative idea. Be descriptive!
+* **`seed`**: The master seed for reproducibility.
+
+### Creative Controls: Genre, Lyrics, & Duration
+
+* **`tag_count`**: How many genre tags to generate.
+* **`excluded_tags`**: A comma-separated list of tags to forbid the LLM from using.
+* **`force_lyrics_generation`**: If `True`, forces the LLM to write lyrics even if it thinks instrumental is better.
+* **`min_total_seconds` / `max_total_seconds`**: The allowed range for the generated duration.
+
+### Advanced Controls: Sampler & Overrides
+
+* **`sampler_version`**: **Crucial.** Must match the sampler node you are using in your workflow to ensure the correct YAML is generated.
+* **`prompt_*_generation`**: These optional text inputs allow you to **override** any stage of the pipeline. If you fill in `prompt_apg_yaml_generation`, for example, the node will use your text and skip calling the LLM for that stage.
+* **`test_mode`**: If `True`, skips all LLM calls and returns pre-filled dummy data. Useful for quickly testing workflow connections without waiting for the AI.
+
+---
+
+## 6. Practical Recipes & Use Cases
+
+### Recipe 1: Fully Automated Audio Concept Generation
+
+Goal: Turn a single sentence into a complete, ready-to-render set of audio parameters.
+
+* **`initial_concept_prompt`**: "A melancholic piano melody in a rainy, futuristic city."
+* **`sampler_version`**: `FBG Integrated PingPong Sampler`
+* Leave all `prompt_*` overrides empty.
+* Connect all outputs to their respective nodes (`APGGuiderForked`, `PingPongSampler_Custom_FBG`, `NoiseDecayScheduler_Custom`, etc.).
+* **Result:** A fully-formed set of parameters, from genre to intricate sampler settings, all derived from your initial concept.
+
+### Recipe 2: Batch Processing with a Fixed Vibe
+
+Goal: Generate 10 variations of a track, keeping the sampler settings consistent but letting the AI generate new lyrics and genres for each.
+
+* **`initial_concept_prompt`**: "An energetic synthwave track with a driving beat."
+* **`prompt_sampler_yaml_generation`**: Paste in your known-good, hand-tuned sampler YAML here.
+* **`prompt_apg_yaml_generation`**: Paste in your known-good APG YAML here.
+* Set your KSampler to increment the seed on each run.
+* **Result:** The APG and Sampler settings will remain identical for every generation, but the LLM will still generate new genres and lyrics for each seed, providing creative variation within a stable technical framework.
+
+### Recipe 3: Manual Override for Surgical Control
+
+Goal: You like the generated genres and lyrics, but want to manually set the duration and noise decay.
+
+* Run the workflow once to generate the genres and lyrics.
+* Copy the `GENRE_TAGS` and `LYRICS_OR_SCRIPT` outputs into the `prompt_genre_generation` and `prompt_lyrics_decision_and_generation` override fields.
+* Fill in `prompt_duration_generation` with a specific number (e.g., `90.5`).
+* Fill in `prompt_noise_decay_generation` with a specific number (e.g., `2.5`).
+* **Result:** The node will now use your exact manual values for the overridden stages, while still generating the YAML configs based on that context.
+
+---
+
+## 7. Technical Deep Dive
+
+### The Order of Operations
+
+The node executes its internal pipeline in a strict sequence. This is important because the output of one stage is used as context for the next.
+
+1.  **Genre Generation** (uses `initial_concept_prompt`)
+2.  **Lyrics Generation** (uses `initial_concept_prompt`, `genre_tags`)
+3.  **Duration Generation** (uses `initial_concept_prompt`, `genre_tags`, `lyrics_or_script`)
+4.  **Noise Decay Generation** (uses all of the above)
+5.  **APG YAML Generation** (uses all of the above)
+6.  **Sampler YAML Generation** (uses all of the above)
+
+Any manual override intercepts this chain, providing the data for that stage and all subsequent stages.
+
+### Working with YAML Overrides
+
+When you provide a YAML override, the node will perform a basic cleaning step to remove common LLM artifacts like markdown code fences (```yaml ... ```). However, it still expects the content to be valid YAML. If parsing fails, the node will log a warning and fall back to its internal, known-good default configuration for that stage.
+
+---
+
+## 8. Troubleshooting & FAQ
+
+* **"The node is throwing an error about connecting to Ollama."**
+    * Make sure your Ollama server is running locally and is accessible at the `ollama_api_base_url`. Test the URL in your browser; you should see a message like "Ollama is running".
+
+* **"The generated YAML is causing a crash in my sampler/guider node."**
+    * This can happen if the LLM ignores the prompt's strict rules. The latest version (v0.2.6+) has heavily reinforced prompts to prevent this. Ensure you are on the latest version. If it still happens, try a different, more instruction-focused Ollama model.
+
+* **"The generation is slow."**
+    * The node makes multiple calls to the LLM, so its speed is entirely dependent on your hardware and the size of the Ollama model you've chosen. For faster iteration, use a smaller model (e.g., a 4B or 7B model).
+
+* **"Can I use this for image generation?"**
+    * While it's *possible*, the prompts and default configurations are heavily optimized for **audio**. The APG prompt specifically enforces `dims: [-1]`, which is correct for audio but incorrect for images. Using this for image generation will likely produce suboptimal or unpredictable results without significant changes to the prompts inside the Python code.

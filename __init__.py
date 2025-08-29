@@ -4,21 +4,16 @@
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
 
-# --- DIAGNOSTIC PRINTS (Keep these for now to confirm behavior) ---
-#import sys
-#print(f"\n--- MD_Nodes __init__.py Diagnostics ---")
-#print(f"__name__: {__name__}")
-#print(f"__package__: {__package__}")
-#print(f"sys.path (relevant part for MD_Nodes):")
-#for p in sys.path:
-#    if "ComfyUI" in p and "MD_Nodes" not in p:
-#        print(f"  - {p}")
-#print(f"--- End MD_Nodes __init__.py Diagnostics ---\n")
-# --- END DIAGNOSTIC PRINTS ---
-
-
 # --- Import and add mappings from node files ---
 # Using relative imports since this __init__.py is now at the package root.
+try:
+    from .AdvancedMediaSave import NODE_CLASS_MAPPINGS as AMS_CLASS_MAPPINGS
+    from .AdvancedMediaSave import NODE_DISPLAY_NAME_MAPPINGS as AMS_DISPLAY_MAPPINGS
+    NODE_CLASS_MAPPINGS.update(AMS_CLASS_MAPPINGS)
+    NODE_DISPLAY_NAME_MAPPINGS.update(AMS_DISPLAY_MAPPINGS)
+except Exception as e:
+    print(f"WARNING: Could not load AdvancedMediaSave: {e}")
+
 try:
     from .APG_Guider_Forked import NODE_CLASS_MAPPINGS as APG_CLASS_MAPPINGS
     from .APG_Guider_Forked import NODE_DISPLAY_NAME_MAPPINGS as APG_DISPLAY_MAPPINGS
@@ -35,7 +30,6 @@ try:
 except Exception as e:
     print(f"WARNING: Could not load NoiseDecayScheduler_Custom: {e}")
 
-# --- Import the ORIGINAL PingPong Sampler Custom ---
 try:
     from .PingPongSampler_Custom import NODE_CLASS_MAPPINGS as PPS_CLASS_MAPPINGS
     from .PingPongSampler_Custom import NODE_DISPLAY_NAME_MAPPINGS as PPS_DISPLAY_MAPPINGS
@@ -45,16 +39,14 @@ try:
 except Exception as e:
     print(f"WARNING: Could not load PingPongSampler_Custom: {e}")
 
-# --- Import the FBG-integrated PingPong Sampler (V0.9.9) ---
 try:
     from .PingPongSampler_Custom_FBG import NODE_CLASS_MAPPINGS as PPS_FBG_CLASS_MAPPINGS
     from .PingPongSampler_Custom_FBG import NODE_DISPLAY_NAME_MAPPINGS as PPS_FBG_DISPLAY_MAPPINGS
     NODE_CLASS_MAPPINGS.update(PPS_FBG_CLASS_MAPPINGS)
     NODE_DISPLAY_NAME_MAPPINGS.update(PPS_FBG_DISPLAY_MAPPINGS)
-    print("INFO: Successfully loaded PingPong Sampler (Custom V0.9.9 FBG).")
+    print("INFO: Successfully loaded FBG-integrated PingPong Sampler Custom.")
 except Exception as e:
-    print(f"WARNING: Could not load PingPongSampler_Custom_FBG: {e}")
-
+    print(f"WARNING: Could not load FBG-integrated PingPong Sampler Custom: {e}")
 
 try:
     from .SCENE_GENIUS_AUTOCREATOR import NODE_CLASS_MAPPINGS as SGC_CLASS_MAPPINGS
@@ -72,7 +64,6 @@ try:
 except Exception as e:
     print(f"WARNING: Could not load Hybrid_Sigma_Scheduler: {e}")
 
-# --- Import and add mappings from the 'latent' subdirectory ---
 try:
     from .latent.ACE_LATENT_VISUALIZER import NODE_CLASS_MAPPINGS as ALV_CLASS_MAPPINGS
     from .latent.ACE_LATENT_VISUALIZER import NODE_DISPLAY_NAME_MAPPINGS as ALV_DISPLAY_MAPPINGS
@@ -81,7 +72,6 @@ try:
 except Exception as e:
     print(f"WARNING: Could not load ACE_LATENT_VISUALIZER: {e}")
 
-# --- Import and add mappings from the 'audio' subdirectory ---
 try:
     from .audio.AdvancedAudioPreviewAndSave import NODE_CLASS_MAPPINGS as AAPS_CLASS_MAPPINGS
     from .audio.AdvancedAudioPreviewAndSave import NODE_DISPLAY_NAME_MAPPINGS as AAPS_DISPLAY_MAPPINGS
@@ -98,21 +88,26 @@ try:
 except Exception as e:
     print(f"WARNING: Could not load mastering_chain_node: {e}")
 
-# --- Add imports for the MD Seed Saver node ---
 try:
-    # Import the new Seed Saver node from the root of the MD_Nodes package
     from .seed_saver_node import NODE_CLASS_MAPPINGS as SS_CLASS_MAPPINGS
     from .seed_saver_node import NODE_DISPLAY_NAME_MAPPINGS as SS_DISPLAY_MAPPINGS
     NODE_CLASS_MAPPINGS.update(SS_CLASS_MAPPINGS)
     NODE_DISPLAY_NAME_MAPPINGS.update(SS_DISPLAY_MAPPINGS)
-    print("INFO: Successfully loaded MD Seed Saver node.") # Updated print message
+    print("INFO: Successfully loaded MD Seed Saver node.")
 except Exception as e:
     print(f"WARNING: Could not load MD Seed Saver node: {e}")
 
+try:
+    from .UniversalGuardian import NODE_CLASS_MAPPINGS as UG_CLASS_MAPPINGS
+    from .UniversalGuardian import NODE_DISPLAY_NAME_MAPPINGS as UG_DISPLAY_MAPPINGS
+    NODE_CLASS_MAPPINGS.update(UG_CLASS_MAPPINGS)
+    NODE_DISPLAY_NAME_MAPPINGS.update(UG_DISPLAY_MAPPINGS)
+    print("INFO: Successfully loaded Universal Guardian node.")
+except Exception as e:
+    print(f"WARNING: Could not load Universal Guardian node: {e}")
 
 # Define __all__ to explicitly expose what should be available when the package is imported
 __all__ = [
     "NODE_CLASS_MAPPINGS",
     "NODE_DISPLAY_NAME_MAPPINGS",
-    # You might have other entries here from your existing __all__ list.
 ]
