@@ -1,217 +1,205 @@
-# PingPong Sampler (Custom v0.9.9-p2 FBG) ComfyUI Node Manual
+# Comprehensive Manual: PingPong Sampler (Custom v0.9.9-p2 FBG)
 
-Welcome to the comprehensive manual for the PingPong Sampler (Custom v0.9.9-p2 FBG), a specialized ComfyUI node designed for advanced control over diffusion model sampling. This version integrates Feedback Guidance (FBG), enabling dynamic and intelligent adjustment of the guidance scale during the denoising process.
+Welcome to the complete guide for the **PingPong Sampler (Custom v0.9.9-p2 FBG)**, a specialized ComfyUI node designed for advanced, dynamic control over the diffusion sampling process.
 
-Originally optimized for Ace-Step audio and video diffusion models due to its focus on temporal coherence, it's also a powerful tool for visual experimentation. This manual will guide you through its features, parameters, and inner workings, catering to both new and advanced users.
-
----
-
-## 1. Understanding the PingPong Sampler Node with FBG
-
-### 1.1. What is it?
-
-The PingPong Sampler (Custom v0.9.9-p2 FBG) is a unique sampling node for ComfyUI that enhances the traditional denoising process in several key ways:
-
-* **"Ping-Pong" Ancestral Noise Injection:** It employs a strategy of intelligently alternating between denoising your latent data and strategically re-injecting controlled ancestral noise. This is particularly beneficial for maintaining coherence in time-series data (like audio or video frames) and can also influence the diversity and texture in static image generation.
-
-* **Feedback Guidance (FBG):** This is the major new addition. FBG uses a state-dependent coefficient to self-regulate the guidance amount (similar to Classifier-Free Guidance, but dynamic) based on whether the model perceives a particular sample as needing more or less "correction." Instead of a fixed guidance scale, FBG adapts it on-the-fly.
-
-* **Advanced Feature Suite:** This version includes numerous enhancements for fine-grained control, including selectable noise types, sigma range presets for scheduling, conditional blending rules, and noise norm clamping for stability.
-
-### 1.2. How it Works (The Synergy)
-
-At its core, a diffusion model refines noisy data step by step. Samplers dictate this transformation. The PingPong Sampler, now with FBG, enhances this process by:
-
-* **Denoising:** At each step, it asks the underlying diffusion model to predict a cleaner version of the current noisy latent.
-
-* **Ancestral Noise (Ping-Pong Action):** For a configurable range of steps, instead of just using the denoised prediction directly, it strategically adds a fresh burst of random noise back into the latent. This "ping-pong" between denoising and controlled noise injection helps maintain diversity and prevent over-smoothing.
-
-* **Dynamic Guidance (FBG Action):** Based on an internal "log posterior" estimate (which measures how "certain" the model is about its conditional prediction relative to its unconditional one), FBG continuously adjusts the effective guidance scale during inference.
-    * If the model is highly certain, FBG can reduce guidance, promoting diversity.
-    * If the model is uncertain or the sample needs more correction, FBG can increase guidance, promoting fidelity.
-
-### 1.3. What it Does
-
-* **Generates High-Quality Audio/Video:** By optimizing for temporal coherence and controlled noise, it excels at creating smooth transitions and detailed outputs in time-series data.
-* **Adaptive Guidance:** FBG provides intelligent, dynamic guidance, potentially leading to more optimal sampling paths and improved results without constant manual `cfg_scale` adjustments.
-* **Enhanced Control over Ancestral Noise:** It provides direct control over the start and end points of ancestral noise injection, including the type of noise used (`gaussian`, `uniform`, etc.).
-* **Flexible Scheduling & Blending:** Allows for nuanced control over when guidance is active and how the sampler progresses from step to step.
-* **Debug Visibility:** A built-in multi-level `debug_mode` allows verbose console logging to understand the sampler's internal state and FBG's dynamic adjustments.
-
-### 1.4. How to Use It (Quick Start)
-
-* **Use as a Sampler Provider:** This node does **not** replace your KSampler. Instead, it generates a custom `SAMPLER` object.
-* **Connect Inputs:**
-    * `scheduler`: Connect a ComfyUI KSamplerScheduler node. This is crucial for the sampler's internal calculations.
-* **Connect Output to a KSampler:**
-    * Connect the `SAMPLER` output of this node to the `sampler` input of a standard KSampler (or similar) node.
-    * The KSampler node will still control the overall `steps`, `cfg` (which FBG will use as a base), `denoise`, `seed`, model, positive/negative conditioning, and latent image.
-* **Adjust Parameters:** Use the extensive parameters on this node to control the FBG and Ping-Pong behavior.
-* **Enable Debug (Optional):** Set `debug_mode` to `1` or `2` to see detailed information in your ComfyUI console about FBG's calculations and guidance scale adjustments. This is invaluable for understanding its behavior.
-* **Advanced (YAML) Control:** For expert users, the `yaml_settings_str` input provides a powerful way to override node parameters with a YAML configuration.
-
-
+Originally optimized for Ace-Step audio and video models, its powerful feature set makes it an exceptional tool for experimental image generation as well. This manual provides everything you need to know, from basic setup to the masterclass in tuning its powerful Feedback Guidance engine.
 
 ---
 
-## 2. Detailed Parameter Information
+### **Table of Contents**
 
-This node's parameters configure the `SAMPLER` object that you pass to a KSampler. The KSampler itself still controls the main generation process.
-
-### 2.1. Ping-Pong Specific Parameters
-
-These parameters control the unique "ping-pong" noise injection behavior.
-
-* **`step_random_mode`** (ENUM, default: `block`)
-    * **Description:** Controls how the RNG seed varies per sampling step. Options: `off`, `block`, `reset`, `step`.
-
-* **`step_size`** (INT, default: `4`)
-    * **Description:** Used by `block` and `reset` random modes to define the interval for seed changes.
-
-* **`seed`** (INT, default: `80085`)
-    * **Description:** The base random seed for reproducibility. Note: This is often overridden by the seed in your KSampler node.
-
-* **`first_ancestral_step`** (INT, default: `0`)
-    * **Description:** The sampler step index (0-based) to begin ancestral noise injection.
-
-* **`last_ancestral_step`** (INT, default: `-1`)
-    * **Description:** The sampler step index to end ancestral noise injection. `-1` means it continues until the last step.
-
-* **`ancestral_noise_type`** (ENUM, default: `gaussian`)
-    * **Description:** The type of random noise to inject during ancestral steps. Options: `gaussian`, `uniform`, `brownian`.
-
-* **`start_sigma_index`** (INT, default: `0`)
-    * **Description:** The index in the sigma array to begin sampling from.
-
-* **`end_sigma_index`** (INT, default: `-1`)
-    * **Description:** The index in the sigma array to end sampling at. `-1` means sample all steps.
-
-* **`enable_clamp_output`** (BOOLEAN, default: `False`)
-    * **Description:** If `True`, clamps the final output latent to the range `[-1.0, 1.0]`.
-
-* **`scheduler`** (SCHEDULER, Required)
-    * **Description:** Connect a ComfyUI KSamplerScheduler node. Essential for defining the noise decay curve.
-
-* **`blend_mode`** (ENUM, default: `lerp`)
-    * **Description:** The function used to blend the *denoised sample* and the *injected noise* during ancestral steps. Options: `lerp`, `slerp`, `add`, `a_only`, `b_only`.
-
-* **`step_blend_mode`** (ENUM, default: `lerp`)
-    * **Description:** The function used to blend the *denoised sample* with the *previous step's latent* during non-ancestral (DDIM-like) steps.
-
-### 2.2. Feedback Guidance (FBG) & Enhancement Parameters
-
-These parameters control the dynamic guidance behavior and other advanced features.
-
-* **`debug_mode`** (INT, default: `0`)
-    * **Description:** Controls the level of detail printed to the console. `0`: Off, `1`: Basic Info & Summary, `2`: Verbose Step-by-Step Details.
-
-* **`sigma_range_preset`** (ENUM, default: `Custom`)
-    * **Description:** Quickly sets the active sigma range for FBG and CFG, overriding the manual sigma inputs. Options: `Custom`, `High`, `Mid`, `Low`, `All`.
-
-* **`conditional_blend_mode`** (BOOLEAN, default: `False`)
-    * **Description:** Enables switching the blend function for non-ancestral steps based on sigma level.
-
-* **`conditional_blend_sigma_threshold`** (FLOAT, default: `0.5`)
-    * **Description:** If the current sigma is below this value, the `conditional_blend_function_name` is used.
-
-* **`conditional_blend_function_name`** (ENUM, default: `slerp`)
-    * **Description:** The blend function to use when the conditional sigma threshold is met.
-
-* **`conditional_blend_on_change`** (BOOLEAN, default: `False`)
-    * **Description:** Enables switching the blend function based on the magnitude of change in a step.
-
-* **`conditional_blend_change_threshold`** (FLOAT, default: `0.1`)
-    * **Description:** Threshold for relative change that triggers the conditional blend.
-
-* **`clamp_noise_norm`** (BOOLEAN, default: `False`)
-    * **Description:** If `True`, limits the L2 norm (magnitude) of the injected ancestral noise vector.
-
-* **`max_noise_norm`** (FLOAT, default: `1.0`)
-    * **Description:** The maximum allowed L2 norm for the noise vector when clamping is enabled.
-
-* **`log_posterior_ema_factor`** (FLOAT, default: `0.0`)
-    * **Description:** Applies Exponential Moving Average smoothing to FBG's internal state. `0.0` is off. Small values like `0.1-0.3` can reduce jitter.
-
-* **`fbg_sampler_mode`** (ENUM, default: `EULER`)
-    * **Description:** FBG's internal sampler mode for its calculations.
-
-* **`cfg_scale`** (FLOAT, default: `1.0`)
-    * **Description:** The base CFG scale that FBG dynamically modifies. This is usually overridden by the CFG value in your KSampler node.
-
-* **`cfg_start_sigma` / `cfg_end_sigma`** (FLOAT)
-    * **Description:** Defines the sigma range where the base CFG is active.
-
-* **`fbg_start_sigma` / `fbg_end_sigma`** (FLOAT)
-    * **Description:** Defines the sigma range where FBG calculations are active.
-
-* **`ancestral_start_sigma` / `ancestral_end_sigma`** (FLOAT)
-    * **Description:** FBG internal parameters defining its own ancestral sampling range.
-
-* **`max_guidance_scale`** (FLOAT, default: `10.0`)
-    * **Description:** An absolute upper limit (ceiling) for the final, combined guidance scale.
-
-* **`initial_guidance_scale`** (FLOAT, default: `1.0`)
-    * **Description:** Initial value for FBG's internal guidance scale tracking.
-
-* **`guidance_max_change`** (FLOAT, default: `1000.0`)
-    * **Description:** Limits the percentage change of the guidance scale per step. A high value (`1000.0`) effectively disables this limiter.
-
-* **`pi (π)`** (FLOAT, default: `0.5`)
-    * **Description:** The mixing parameter ($\pi$) from the FBG paper. Higher values (`0.9+`) are for highly coherent models. Lower values (`0.2-0.8`) are often better for general T2I models.
-
-* **`t_0` / `t_1`** (FLOAT, default: `0.5` / `0.4`)
-    * **Description:** Normalized time values that control the FBG's automatic calculation of `temp` and `offset`. **To enable Manual Mode for tuning, both must be set to `0.0`**.
-
-* **`fbg_temp` / `fbg_offset`** (FLOAT, default: `0.0`)
-    * **Description:** The core sensitivity and drift parameters for FBG. **Only used if both `t_0` and `t_1` are `0.0`**.
-
-* **`log_posterior_initial_value`** (FLOAT, default: `0.0`)
-    * **Description:** The starting value for FBG's internal state.
-
-* **`fbg_guidance_multiplier`** (FLOAT, default: `1.0`)
-    * **Description:** A final multiplier for the FBG component of the guidance.
-
-* **`fbg_eta` / `fbg_s_noise`** (FLOAT)
-    * **Description:** FBG internal parameters for its own noise calculations.
-
-### 2.3. Advanced (YAML) Override
-
-* **`yaml_settings_str`** (STRING, Optional)
-    * **Description:** A multiline text input to provide a YAML string that overrides all other node parameters. This is excellent for saving and sharing complex presets.
+1.  **Introduction**
+    * What is the PingPong Sampler?
+    * Who is this Node For?
+    * Key Features in Version 0.9.9-p2
+2.  **Installation**
+3.  **Core Concepts: The Art of Dynamic Sampling**
+    * "Ping-Pong" Ancestral Noise: Creative Chaos
+    * Feedback Guidance (FBG): The Intelligent Autopilot
+    * Conditional Blending: "If/Then" Rules for Creativity
+4.  **Node Setup and Workflow**
+    * How to Use It: A Step-by-Step Guide
+5.  **Parameter Deep Dive**
+    * Ping-Pong Specific Parameters
+    * Feedback Guidance (FBG) & Enhancement Parameters
+    * Advanced (YAML) Override
+6.  **A Masterclass in Tuning Feedback Guidance**
+    * The Golden Rule: Disabling Autopilot
+    * The Troubleshooting Playbook
+    * Symptom: Guidance Explodes to Max Value Instantly
+    * Symptom: Guidance is Stable but "Stuck"
+    * Reading the Signs: Anatomy of a Perfect Log
+7.  **Practical Recipes & Use Cases**
+    * Recipe 1: Stable & Controlled Image Generation
+    * Recipe 2: Aggressive & Experimental Audio Generation
+    * Recipe 3: The "Slow Burn" Finishing Kick
+8.  **Technical Deep Dive**
+    * The Order of Operations
 
 ---
 
-## 3. A Masterclass in Tuning Feedback Guidance
+## 1. Introduction
 
-This guide will walk you through the entire process of taming and tuning the FBG system. By the end, you will not only have a perfectly tuned sampler but will also understand the philosophy behind adjusting its parameters to suit any model.
+### What is the PingPong Sampler?
 
-Our goal is to achieve a **stable and dynamic guidance curve**: one that starts low, responds to the model's needs, and avoids getting "stuck" or "exploding."
+The **PingPong Sampler (FBG)** is not a standard sampler; it is a *sampler provider*. It acts as an advanced "brain" that plugs into a standard KSampler node, hijacking its internal logic to provide a far more dynamic and controllable generation process. It enhances the denoising process in two key ways:
+
+* **"Ping-Pong" Ancestral Noise Injection:** It employs a strategy of intelligently alternating between denoising your latent data and strategically re-injecting controlled ancestral noise. This is particularly beneficial for maintaining coherence in time-series data (like audio or video frames) and can introduce rich textures in static images.
+
+* **Feedback Guidance (FBG):** This is the core innovation. Instead of a fixed guidance scale (CFG), FBG acts like an adaptive cruise control, dynamically adjusting the guidance strength based on the model's "certainty" at each step.
+
+### Who is this Node For?
+
+* **AI Musicians & Sound Designers:** Anyone generating audio who needs to push their models to the creative limit and achieve unique sonic textures.
+* **Experimental Visual Artists:** Users who want to move beyond the "feel" of standard samplers and explore chaotic, highly-textured, or uniquely detailed image styles.
+* **Workflow Tinkerers & Power Users:** Anyone who loves having deep control over the sampling process and wants to fine-tune every aspect of the generation.
+
+### Key Features in Version 0.9.9-p2
+
+* **Dynamic Feedback Guidance (FBG):** The intelligent, self-regulating guidance system that adapts to your model on the fly.
+* **Advanced Ancestral Noise Control:** Go beyond simple noise injection with selectable noise types (`gaussian`, `uniform`, `brownian`) and precise scheduling.
+* **Full Tuning Control:** A comprehensive suite of parameters allows you to switch between a powerful "Autopilot" mode and a precise "Manual" mode for FBG.
+* **Conditional Blending:** Create complex "if/then" rules to change how the sampler behaves at different stages of the generation.
+* **Multi-Level Debug Mode:** Get unparalleled insight into the sampler's internal state with a verbose console log to perfect your settings.
+* **Full YAML Preset Support:** Define and save every single parameter in a portable YAML string for perfect reproducibility.
+
+---
+
+## 2. 🧰 INSTALLATION: JACK INTO THE MATRIX
+
+This node is part of the **MD Nodes** package. All required Python libraries are listed in the `requirements.txt` and should be installed automatically.
+
+### Method 1: ComfyUI Manager (Recommended)
+
+1.  Open the **ComfyUI Manager**.
+2.  Click "Install Custom Nodes".
+3.  Search for `MD Nodes` and click "Install".
+4.  The manager will download the package and automatically install its dependencies.
+5.  **Restart ComfyUI.**
+
+### Method 2: Manual Installation (Git)
+
+1.  Open a terminal or command prompt.
+2.  Navigate to your `ComfyUI/custom_nodes/` directory.
+3.  Run the following command to clone the repository:
+    ```bash
+    git clone [https://github.com/MDMAchine/ComfyUI_MD_Nodes.git](https://github.com/MDMAchine/ComfyUI_MD_Nodes.git)
+    ```
+4.  Install the required dependencies by running:
+    ```bash
+    pip install -r ComfyUI_MD_Nodes/requirements.txt
+    ```
+5.  **Restart ComfyUI.**
+
+After restarting, the node and all its features should be fully available. Don’t forget, even gods need to reboot.
+
+---
+
+## 3. Core Concepts: The Art of Dynamic Sampling
+
+### "Ping-Pong" Ancestral Noise: Creative Chaos
+
+Standard samplers only remove noise. An ancestral sampler, like this one, re-injects a small, controlled amount of new noise at certain steps. This "ping-pong" between denoising and re-noising prevents the image from becoming overly smooth and can introduce beautiful, complex textures. You have full control over when this happens (`first/last_ancestral_step`) and what kind of noise is used (`ancestral_noise_type`).
+
+### Feedback Guidance (FBG): The Intelligent Autopilot
+
+Think of standard CFG as a simple cruise control—you set it to 7 and it stays there. FBG is an **adaptive cruise control**. It constantly measures the difference between what the model wants to do (unconditional) and what you told it to do (conditional).
+
+* If the model is on the right track, FBG might lower the guidance to allow for more nuance.
+* If the model starts to stray, FBG increases the guidance to steer it back.
+
+This dynamic adjustment can lead to more detailed and coherent results than a fixed CFG value.
+
+### Conditional Blending: "If/Then" Rules for Creativity
+
+This is an advanced feature that lets you change the sampler's blending algorithm mid-generation. You can set up triggers, such as "if the noise level drops below 0.3" or "if the image changes by more than 20% in one step," and tell the sampler to switch to a different blend function. This allows for complex behaviors, like using a stable blend for the initial composition and a sharper one for the final details.
+
+---
+
+## 4. Node Setup and Workflow
+
+### How to Use It: A Step-by-Step Guide
+
+1.  **Add the Node:** Add the `PingPong Sampler (Custom FBG)` node to your workflow.
+2.  **Connect the Scheduler:** Connect a `KSamplerScheduler` node to the `scheduler` input. This is mandatory.
+3.  **Configure the Sampler:** Adjust the parameters on the PingPong Sampler node to your liking. Use the "Masterclass in Tuning" section below to guide you.
+4.  **Connect to KSampler:** Connect the `SAMPLER` output of the PingPong node to the `sampler` input of a standard `KSampler` node.
+5.  **Configure KSampler:** Your KSampler still controls the main process: `model`, `positive`, `negative`, `latent_image`, `steps`, `seed`, and the base `cfg` value. The PingPong node will take this base `cfg` and modify it dynamically.
+6.  **Queue Prompt:** Run the generation. If `debug_mode` is on, check your console to see the FBG system in action.
+
+---
+
+## 5. Parameter Deep Dive
+
+### 5.1. Ping-Pong Specific Parameters
+
+* **`step_random_mode`**: Controls how the seed changes for ancestral noise injection (`off`, `block`, `reset`, `step`).
+* **`step_size`**: The interval used by `block` and `reset` modes.
+* **`seed`**: A base seed for the sampler's internal randomness (often overridden by the KSampler's seed).
+* **`first_ancestral_step` / `last_ancestral_step`**: The step range where "ping-pong" noise injection is active.
+* **`ancestral_noise_type`**: The type of noise to inject (`gaussian`, `uniform`, `brownian`).
+* **`start_sigma_index` / `end_sigma_index`**: The range of the sigma schedule to process.
+* **`enable_clamp_output`**: If `True`, clamps the final latent to `[-1.0, 1.0]`.
+* **`scheduler`**: **Required.** Connects a `KSamplerScheduler`.
+* **`blend_mode`**: The function for blending the *denoised sample* with *new noise* during ancestral steps.
+* **`step_blend_mode`**: The function for blending the *denoised sample* with the *previous latent* during non-ancestral steps.
+
+### 5.2. Feedback Guidance (FBG) & Enhancement Parameters
+
+* **`debug_mode`**: Console log verbosity (`0`: Off, `1`: Basic, `2`: Verbose).
+* **`sigma_range_preset`**: Quick presets for the FBG/CFG active range (`Custom`, `High`, `Mid`, `Low`, `All`).
+* **`conditional_blend_mode`**: Enables the conditional blending triggers.
+* **`conditional_blend_sigma_threshold`**: The noise level that triggers the conditional blend.
+* **`conditional_blend_function_name`**: The blend function to switch to.
+* **`conditional_blend_on_change`**: Enables the "big change" trigger.
+* **`conditional_blend_change_threshold`**: The percentage of change that triggers the conditional blend.
+* **`clamp_noise_norm`**: Enables limiting the magnitude of injected noise.
+* **`max_noise_norm`**: The maximum magnitude for clamped noise.
+* **`log_posterior_ema_factor`**: The smoothing factor for FBG's internal state (`0.0` is off).
+* **`fbg_sampler_mode`**: The internal sampler for FBG's own calculations (`EULER`, `PINGPONG`).
+* **`cfg_scale`**: The base CFG value (usually overridden by the KSampler).
+* **`cfg_start_sigma` / `fbg_start_sigma`**: The noise level where guidance becomes active.
+* **`cfg_end_sigma` / `fbg_end_sigma`**: The noise level where guidance becomes inactive.
+* **`max_guidance_scale`**: The absolute maximum "ceiling" for the guidance scale.
+* **`pi (π)`**: The core sensitivity parameter for FBG. Lower values are more aggressive.
+* **`t_0` / `t_1`**: The **Autopilot controls**. If either is not `0`, they automatically calculate the guidance curve.
+* **`fbg_temp` / `fbg_offset`**: The **Manual controls**. These are the primary tuning knobs for sensitivity and drift, but are **only active when `t_0` and `t_1` are both `0`**.
+
+### 5.3. Advanced (YAML) Override
+
+* **`yaml_settings_str`**: A text box where you can paste a YAML configuration that will **override all settings** on the node.
+
+---
+
+## 6. A Masterclass in Tuning Feedback Guidance
+
+This guide will walk you through the entire process of taming and tuning the FBG system. Our goal is to achieve a **stable and dynamic guidance curve**.
 
 
 
-### 3.1. The Golden Rule: Disabling Autopilot 🛑
+### 6.1. The Golden Rule: Disabling Autopilot 🛑
 
-The sampler has two modes for its sensitivity parameters (`temp` and `offset`): **Automatic** and **Manual**.
+The sampler has two modes for its sensitivity: **Automatic** and **Manual**.
 
 * **Automatic Mode (Autopilot):** If **either `t_0` or `t_1` is NOT `0`**, the system is in Autopilot. It will **IGNORE** any values you set for `fbg_temp` and `fbg_offset`.
 * **Manual Mode:** If **BOTH `t_0` AND `t_1` are set to `0`**, Autopilot is disengaged. You now have full, direct control.
 
 **The first step in any serious tuning process is to engage Manual Mode.**
 
-### 3.2. The Troubleshooting Playbook
+### 6.2. The Troubleshooting Playbook
 
 #### Symptom: Guidance Explodes to Max Value Instantly 🚀
 
-If your `Guidance Scale (GS)` shoots to its maximum value in the first few steps, the system is too sensitive to your model's initial feedback.
+If your `Guidance Scale (GS)` shoots to its maximum value in the first few steps, the system is too sensitive.
 
 **Solution: The "Safe Mode" Reset**
 
-We need to force the sampler into a state of maximum stability. This gives us a safe baseline from which to begin tuning.
+We need to force the sampler into a state of maximum stability.
 
 1.  **Engage Manual Mode** by setting `t_0` and `t_1` to `0`.
-2.  **Apply Safe Start Settings** to desensitize the system and create a safety buffer.
+2.  **Apply Safe Start Settings** to desensitize the system.
 
-Here is the "Safe Mode" `fbg_config` block. Copy this into your YAML to establish a stable starting point.
+Copy this "Safe Mode" `fbg_config` block into your YAML:
 
 ```yaml
 fbg_config:
@@ -227,35 +215,30 @@ fbg_config:
   
   # --- Your other personal settings go here ---
   pi: 0.65
-  cfg_scale: 2.5
   max_guidance_scale: 250.0
   # etc...
 ```
 
 #### Symptom: Guidance is Stable but "Stuck" 🧊
 
-If the `Guidance Scale (GS)` barely moves, our "Safe Mode" settings were successful, but the sensitivity is too low.
+If the `Guidance Scale (GS)` barely moves, our "Safe Mode" reset was successful, but the sensitivity is too low.
 
 **Solution: Tuning the `fbg_temp` Dial**
 
-With the sampler in Manual Mode, **`fbg_temp` is now your primary sensitivity dial.** We started it at `0.01`. Now, we will carefully turn it up.
+With the sampler in Manual Mode, **`fbg_temp` is now your primary sensitivity dial.**
 
-1.  **Make a big jump first.** Change `fbg_temp` from `0.01` to **`0.1`**. This will show a noticeable change.
-2.  **Observe the log.** The guidance will likely start moving, but it might be too aggressive.
-3.  **Fine-tune.** The perfect value is usually between your last two attempts. Try values like **`0.03`**, **`0.05`**, etc., until you see a smooth, gradual change in the Guidance Scale.
+1.  **Make a big jump first.** Change `fbg_temp` from `0.01` to **`0.1`**.
+2.  **Observe the log.** The guidance will likely start moving.
+3.  **Fine-tune.** The perfect value is usually between your last two attempts. Try values like **`0.03`**, **`0.05`**, etc., until you see a smooth, gradual change.
 
-### 3.3. Reading the Signs - Anatomy of a Perfect Log
+### 6.3. Reading the Signs - Anatomy of a Perfect Log
 
 After tuning, you should get a log that tells a story of a controlled, dynamic generation.
 
 ```
 # LOG EXCERPT
-Updated FBGConfig: offset=-0.0930, temp=-0.0001 # Autopilot is OFF, using gentle auto-settings
-
-...
 Step 0: ... GS: 2.55 | Log Posterior mean: 2.0000  # Starts at initial values
 Step 1: ... GS: 2.62 | Log Posterior mean: 1.2110  # GS rises, Posterior falls
-Step 2: ... GS: 2.84 | Log Posterior mean: 0.3180  # Continues the gradual trend
 ...
 Step 6: ... GS: 250.00| Log Posterior mean: -1.0458 # Final push to max guidance!
 ...
@@ -267,32 +250,77 @@ Step 6: ... GS: 250.00| Log Posterior mean: -1.0458 # Final push to max guidance
 ```
 
 **What this log shows:**
-* **Gradual Ramp-Up:** The Guidance Scale (GS) doesn't explode. It climbs steadily, showing the system is responding dynamically.
-* **The "Crescendo":** In the final step, as the sampler locks in the details, the guidance pushes to its maximum. This is desired behavior, not an error.
+* **Gradual Ramp-Up:** The GS doesn't explode. It climbs steadily.
+* **The "Crescendo":** In the final step, the guidance pushes to its maximum. This is desired behavior, not an error.
 * **Healthy Average:** The average guidance is moderate, proving the process was controlled.
 
 By following this process—**1. Engage Manual Mode, 2. Start with Safe Settings, 3. Tune the `fbg_temp` Dial**—you can achieve a perfect FBG curve for any model.
 
 ---
 
-## 4. In-Depth Technical Information
+## 7. Practical Recipes & Use Cases
 
-This section explores the underlying mechanics and algorithms.
+### Recipe 1: Stable & Controlled Image Generation
 
-### 4.1. Sampling Flow Overview
+This recipe uses Manual Mode for a gentle, predictable result ideal for high-fidelity images.
 
-The node parses its parameters, merges them with any YAML overrides, creates an `FBGConfig` object, and finally constructs a `KSAMPLER` object configured to use its internal `go` function. This `KSAMPLER` is what gets passed to the rest of the workflow.
+```yaml
+debug_mode: 1
+sigma_range_preset: "Custom"
+fbg_config:
+  t_0: 0.0
+  t_1: 0.0
+  fbg_temp: 0.05
+  fbg_offset: 0.0
+  initial_value: 1.0
+  pi: 0.5
+  max_guidance_scale: 22.0
+```
 
-### 4.2. The Core `go` Logic
+### Recipe 2: Aggressive & Experimental Audio Generation
 
-* **Initialization:** Instantiates the `PingPongSamplerCore` class. If `t_0` and `t_1` are not both zero, it automatically calculates `temp` and `offset`, overriding any manual values.
-* **Dynamic Guidance Calculation:** At each step, it calculates the effective guidance scale based on the active sigma ranges, the current `log_posterior` value, and the base `cfg_scale`.
-* **Model Denoising:** It calls the model, ensuring both conditional and unconditional predictions are available for the FBG update.
-* **Log Posterior Update:** It updates its internal `log_posterior` estimate based on the difference between the model's predictions, forming the "feedback" loop.
-* **The "Ping-Pong" Action:** During ancestral steps, it generates and blends new noise with the denoised prediction, using the selected `blend_mode`.
+This recipe uses Autopilot for a powerful, front-loaded guidance curve that is great for energetic audio.
 
-### 4.3. Internal Blend Modes
+```yaml
+debug_mode: 2
+sigma_range_preset: "All"
+blend_mode: "a_only"
+step_blend_mode: "b_only"
+fbg_config:
+  t_0: 0.7
+  t_1: 0.4
+  pi: 0.35
+  max_guidance_scale: 350.0
+```
 
-The `_INTERNAL_BLEND_MODES` dictionary maps string names to functions. In this sampler, they are used for two distinct purposes:
-* **`blend_mode`**: Blends the **denoised sample** with **newly injected noise** during an ancestral step.
-* **`step_blend_mode`**: Blends the **denoised sample** with the **previous latent state** during a non-ancestral (DDIM-like) step.
+### Recipe 3: The "Slow Burn" Finishing Kick
+
+This recipe uses Autopilot but flips the controls to create a gentle start and a powerful finish, ideal for complex compositions.
+
+```yaml
+debug_mode: 1
+sigma_range_preset: "All"
+fbg_config:
+  t_0: 0.3 # Target is early
+  t_1: 0.7 # Peak is late
+  pi: 0.65
+  max_guidance_scale: 30.0
+```
+
+---
+
+## 8. Technical Deep Dive
+
+### The Order of Operations
+
+1.  **Parse & Override:** The node reads its UI parameters, then overrides them with any valid settings from the `yaml_settings_str`.
+2.  **Instantiate Core:** The `PingPongSamplerCore` class is created.
+3.  **Check FBG Mode:** It checks if `t_0` and `t_1` are both zero.
+    * If **NO**, it enters **Autopilot** and calculates `temp` and `offset` automatically.
+    * If **YES**, it enters **Manual Mode** and uses the `fbg_temp` and `fbg_offset` you provided.
+4.  **Loop per Step:** For each sampling step, it...
+    * Calculates the dynamic guidance scale using the FBG logic.
+    * Calls the model to get a denoised prediction.
+    * Updates its internal `log_posterior` state based on the model's feedback.
+    * Performs the "Ping-Pong" or standard DDIM-like step using the selected blend modes.
+5.  **Return:** After all steps, it returns the final latent.
