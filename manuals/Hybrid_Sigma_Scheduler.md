@@ -1,172 +1,246 @@
-# Hybrid Sigma Scheduler Node Manual
+# Comprehensive Manual: Hybrid Sigma Scheduler (v0.71)
 
-Welcome to the manual for the Hybrid Sigma Scheduler, a powerful custom node for ComfyUI designed to give you granular control over the noise decay process in your diffusion models. Originally crafted for audio diffusion (like Ace-Step), this scheduler holds significant potential for enhancing image and video generation as well.
-
-## 1. Understanding the Hybrid Sigma Scheduler Node
-
-### What is this Node?
-
-The Hybrid Sigma Scheduler is a specialized ComfyUI node that generates a sequence of "sigma" values. These sigmas are crucial for diffusion models, as they dictate the standard deviation of noise applied at each step of the sampling process. Think of it as a roadmap for your model's journey from pure noise to a coherent output.
-
-### What Does it Do?
-
-Instead of relying on the default sigma schedules built into various samplers, this node allows you to custom-tailor how noise levels change throughout your diffusion steps. This means you can finely tune the "pace" at which noise is removed, which can lead to better quality outputs, more stable generations, or even unique artistic effects.
-
-### How Does it Work?
-
-The node operates by calculating a series of sigma values based on your chosen mode and parameters like start_sigma, end_sigma, and steps. It essentially creates an array (or "tensor") of noise levels, one for each step of your diffusion process. This custom-generated array is then passed to compatible sampler nodes that can accept external sigma inputs.
-
-Currently, it offers two distinct modes for generating these sigma sequences:
-
-* **🔥 Karras Rho**: This mode creates a non-linear, optimized decay curve that is often preferred for high-quality results in stable diffusion. It uses a specific mathematical function to distribute the noise reduction steps more effectively.
-* **🧊 Adaptive Linear**: This mode generates a simple, uniform decay from the starting sigma to the ending sigma. The noise level decreases by an equal amount at each step, resulting in a straight-line progression.
-
-### How to Use It:
-
-1.  **Add the Node**: In ComfyUI, right-click on your graph, navigate to `MD_Nodes -> Schedulers` and select `Hybrid Sigma Scheduler`.
-2.  **Connect to a Sampler**: The primary output of this node is `SIGMAS`. You'll connect this output to the `sigmas` input of a compatible sampler node (e.g., `KSampler` or other custom samplers that support external sigma inputs).
-3.  **Adjust Parameters**: Tweak the node's parameters (explained in the next section) to achieve your desired noise decay profile. Experiment with different modes, `start_sigma`, `end_sigma`, `steps`, and `rho` to see how they affect your generated output.
+Welcome to the complete guide for the **Hybrid Sigma Scheduler (v0.71)** node, an advanced noise scheduler for precision control over the diffusion process in ComfyUI. This manual covers everything from core concepts to practical workflow recipes and technical details.
 
 ---
 
-## 2. Detailed Parameter Information
+### **Table of Contents**
 
-The Hybrid Sigma Scheduler node exposes several parameters, each playing a vital role in shaping your diffusion process.
-
-* **model**
-    * **Type**: `MODEL`
-    * **Description**: This input expects your loaded diffusion model. It's required by the node to correctly determine the computational device (CPU or GPU) where the sigma tensor should be created, ensuring seamless operation with the rest of your ComfyUI workflow.
-    * **Use Cases & Why**: While it doesn't directly influence the sigma values themselves, it's a foundational connection that allows the node to integrate properly into the ComfyUI environment and manage device placement for the generated sigma tensor.
-
-* **steps**
-    * **Type**: `INT`
-    * **Default**: `60`
-    * **Min**: `5`
-    * **Max**: `200`
-    * **Tooltip**: "The number of steps from chaos to clarity. More steps = more precision (and more CPU tears)."
-    * **Description**: This parameter determines the total number of individual noise reduction steps that will be performed during the diffusion process. It's the "resolution" of your sigma schedule.
-    * **Use Cases & Why**:
-        * **Higher steps**: Leads to a more gradual and precise noise reduction. This can result in finer details and potentially higher quality outputs, but it also increases computation time.
-        * **Lower steps**: Speeds up the generation process but might lead to less detailed or lower-quality results, as the noise reduction is more abrupt.
-    * **How to Use**: Adjust this value to balance between desired output quality and generation speed. A common starting point is between 20-50 for images, but for audio, higher values like the default 60 or more can be beneficial.
-
-* **mode**
-    * **Type**: `ENUM` ("karras_rho", "adaptive_linear")
-    * **Tooltip**: "🔥 karras_rho = rich, curvy chaos.\n🧊 adaptive_linear = budget-friendly flatline."
-    * **Description**: This is the core choice for how the sigma values are calculated across your diffusion steps.
-    * **Use Cases & Why**:
-        * **karras_rho (Recommended for general use)**:
-            * **Use**: Ideal when you want a more perceptually uniform noise reduction, which often leads to higher quality and more visually (or audibly) pleasing results. This mode is widely adopted in state-of-the-art diffusion models.
-            * **Why**: It distributes the steps non-linearly, focusing more steps on the crucial parts of the noise decay where small changes have a significant impact. It aims to reduce artifacts and improve overall output fidelity.
-        * **adaptive_linear**:
-            * **Use**: Simpler to understand and might be useful for specific experimental purposes or when you desire a very predictable and uniform noise reduction. It can be a good starting point for quick tests.
-            * **Why**: The noise decreases at a constant rate per step. While straightforward, it might not always yield the same quality as karras_rho for complex generation tasks.
-
-* **denoise**
-    * **Type**: `FLOAT`
-    * **Default**: `1.0`
-    * **Min**: `0.0`
-    * **Max**: `1.0`
-    * **Tooltip**: "Denoising strength. 1.0 = max effect, 0.0 = placebo."
-    * **Description**: This parameter controls the overall strength of the denoising process. It indicates how much of the initial noise the model attempts to remove.
-    * **Use Cases & Why**:
-        * `1.0` (**Full Denoise**): The model will attempt to denoise the input completely, starting from pure noise and aiming for a clean output. This is the standard setting for generative tasks.
-        * `0.0` (**No Denoise**): The model won't perform any denoising, essentially leaving the input as pure noise. This is rarely useful for standard generation.
-        * **Values between `0.0` and `1.0`**: Useful for tasks like image-to-image or audio-to-audio translation, where you want to preserve some of the original content while applying the diffusion process. For example, a denoise of `0.7` means the model will denoise 70% of the way from the input.
-    * **How to Use**: For most generative tasks (text-to-image, text-to-audio), keep this at `1.0`. Adjust it for tasks where you're starting from an existing input and want to control the level of transformation.
-
-* **start_sigma**
-    * **Type**: `FLOAT`
-    * **Default**: `1.0`
-    * **Tooltip**: "Where your noise journey begins. Bigger = noisier."
-    * **Description**: This sets the initial noise standard deviation for the first step of the diffusion process. It defines the "starting point" of chaos.
-    * **Use Cases & Why**:
-        * **Higher start_sigma**: The model starts with a very high level of noise. This can be beneficial for truly random or creative generations, as the model has a wider range to explore.
-        * **Lower start_sigma**: The model starts with less noise. This might be useful if you're working with very controlled inputs or need to converge faster, but it can limit the model's creative freedom in early steps.
-    * **How to Use**: For most generative tasks, the default `1.0` is a good starting point. Experiment with higher values for more exploratory or "wilder" generations, and lower values for more constrained or specific outputs.
-
-* **end_sigma**
-    * **Type**: `FLOAT`
-    * **Default**: `0.0`
-    * **Tooltip**: "Where the noise stops. Zero = total inner peace (or radio silence)."
-    * **Description**: This sets the final noise standard deviation for the last step of the diffusion process. It defines the "endpoint" of clarity.
-    * **Use Cases & Why**:
-        * `0.0` (**Zero Noise**): The model aims to completely remove all noise by the end of the process, leading to a clean, denoised output. This is the standard for most generative tasks.
-        * **Higher end_sigma (e.g., `0.1`)**: The model will leave some residual noise in the output. This can be used to create intentionally noisy, textured, or "lo-fi" effects. For audio, this might manifest as a subtle hiss or background texture.
-    * **How to Use**: For a clean output, keep this at `0.0`. If you want to introduce a specific amount of controlled noise or texture into your final output, gradually increase this value and observe the results.
-
-* **rho**
-    * **Type**: `FLOAT`
-    * **Default**: `2.5`
-    * **Min**: `1.0`
-    * **Max**: `15.0`
-    * **Tooltip**: "Rho controls the Karras curve sharpness. Low = gentle slopes. High = noise rollercoaster."
-    * **Description**: This parameter is only used when the `mode` is set to `karras_rho`. It controls the "sharpness" or "aggressiveness" of the Karras noise decay curve.
-    * **Use Cases & Why**:
-        * **Lower rho (e.g., `1.0 - 2.0`)**: Creates a gentler, more uniform curve, making the Karras schedule behave more like a linear schedule.
-        * **Higher rho (e.g., `5.0 - 15.0`)**: Creates a much sharper curve. This means the model will remove a larger proportion of noise in the early steps and then slow down the noise reduction significantly in later steps. This can be effective for models that benefit from aggressive initial denoising.
-    * **How to Use**: Experiment with rho values to fine-tune the Karras schedule. The default `2.5` is a well-established value from the original Karras paper, but adjusting it can lead to different aesthetic outcomes depending on your model and desired output. Values around `7.0` are also common in certain diffusion setups.
+1.  **Introduction**
+    * What is the Hybrid Sigma Scheduler?
+    * Who is this Node For?
+    * Key Features in Version 0.71
+2.  **Installation**
+3.  **Core Concepts: The Art of Noise Scheduling**
+    * What Are Sigmas? The Heartbeat of Diffusion
+    * Why Scheduling Matters: The Path from Chaos to Clarity
+    * The Scheduler Modes: Your Noise Profile Toolkit
+    * Sigma Range: The Canvas Boundaries (`sigma_min` & `sigma_max`)
+4.  **Node Setup and Workflow**
+    * How to Use It: A Step-by-Step Guide
+5.  **Parameter Deep Dive**
+    * Primary Controls: Model, Steps & Mode
+    * Slicing Controls: Precision Timing
+    * Scheduler-Specific Controls: Fine-Tuning Your Curve
+    * Sigma Override Controls: Expert Mode
+    * Optional & Passthrough Controls
+    * Node Outputs: The Final Schedule
+6.  **Practical Recipes & Use Cases**
+    * Recipe 1: Standard High-Quality Text-to-Image
+    * Recipe 2: Controlled img2img with Schedule Slicing
+    * Recipe 3: Experimental High-Detail Generation
+7.  **Technical Deep Dive**
+    * The Order of Operations
+8.  **Troubleshooting & FAQ**
 
 ---
 
-## 3. In-Depth Technical Information
+## 1. Introduction
 
-This section delves into the technical underpinnings of the Hybrid Sigma Scheduler, providing a more detailed look at how it operates.
+### What is the Hybrid Sigma Scheduler?
 
-### The Concept of Sigmas
+The **Hybrid Sigma Scheduler** is a powerful utility node that gives you fine-grained control over the noise schedule used by samplers in a diffusion workflow. Instead of relying on the sampler's default, often simplistic schedule, this node allows you to generate a custom sequence of sigma (noise) values. This sequence dictates the exact noise level at every step, directly influencing the final image's coherence, detail, and style. It's the difference between letting the car drive itself and being in the driver's seat with a map and a mission.
 
-In the context of diffusion models, "sigmas" refer to the standard deviation of the Gaussian noise applied to the data at each timestep. During the forward (noising) process, noise is progressively added, and sigma represents the amount of noise at a given point. During the reverse (denoising) process (which is what samplers do), sigma decreases, indicating how much noise should be predicted and removed. A sequence of sigmas, often referred to as a "sigma schedule," dictates the precise noise levels at each step from the initial noise to the final denoised output.
+### Who is this Node For?
 
-### karras_rho Mode: The Curvy Path to Clarity
+* **Generative Artists & Detail Fanatics:** Anyone who wants to push their image quality to the limit by perfectly tailoring the denoising process to their model and subject.
+* **Workflow Technicians:** Users creating advanced workflows for tasks like img2img, inpainting, or latent upscaling, where precise control over the start and end of the denoising process is critical.
+* **Experimenters & Sampler Theorists:** Anyone curious about how different noise distributions affect the final output and wants a toolkit to explore those effects.
+* **All ComfyUI Users:** Its ability to automatically pull the correct sigma range from the model makes it a smarter, more reliable choice than a sampler's default settings.
 
-When you select the `karras_rho` mode, the node leverages the `get_sigmas_karras` function from ComfyUI's internal `k_diffusion` library. This function implements the noise schedule proposed in the paper "Elucidating the Design Space of Diffusion-Based Generative Models" by Tero Karras et al.
+### Key Features in Version 0.71
 
-The core idea behind the Karras noise schedule is to distribute the sampling steps in a non-linear fashion. Instead of uniformly spacing the noise levels, it spaces them in a way that is perceptually more uniform and often leads to higher-quality samples. This is achieved by using an exponential decay with a configurable rho parameter:
+* **Automatic Sigma Range Detection:** Intelligently reads the optimal `sigma_min` and `sigma_max` directly from the connected model, ensuring you always start with the right values.
+* **Multiple Scheduler Modes:** Go beyond the basics with a suite of schedulers: `karras_rho`, `adaptive_linear`, `polynomial`, `blended_curves`, `kl_optimal`, and `linear_quadratic`.
+* **Precision Schedule Slicing:** Trim the start and end of the noise schedule with `start_at_step` and `end_at_step` for perfect control in img2img or multi-stage workflows.
+* **`actual_steps` Output:** A crucial output that provides the exact number of steps in the final *sliced* schedule, preventing mismatches with your sampler settings.
+* **Manual Overrides:** Full power for experts to override the model's default sigma range for specific effects.
+* **Schedule Reversal:** An experimental feature to reverse the schedule from low noise to high noise for unique effects.
 
-`σ_i = σ_max^ρ^(1 / N - 1) + i · (σ_min^ρ^(1 / N - 1) − σ_max^ρ^(1 / N - 1))`
+---
 
-Where:
+## 2. 🧰 INSTALLATION: JACK INTO THE MATRIX
 
-* `σ_i` is the sigma value for the i-th step.
-* `σ_min` is `end_sigma`.
-* `σ_max` is `start_sigma`.
-* `N` is `steps`.
-* `ρ` is the `rho` parameter (typically between `1.0` and `15.0`).
+This node is part of the **MD Nodes** package. All required Python libraries are listed in the `requirements.txt` and should be installed automatically.
 
-This formula generates a curve that allocates more sampling steps to the high-frequency (low-sigma) regions, where details are refined, and fewer steps to the low-frequency (high-sigma) regions, where the model is primarily learning global structures. The rho parameter directly influences the sharpness of this curve: a higher rho value results in a more aggressive initial noise reduction and a flatter curve towards the end.
+### Method 1: ComfyUI Manager (Recommended)
 
-### adaptive_linear Mode: The Straightforward Path
+1.  Open the **ComfyUI Manager**.
+2.  Click "Install Custom Nodes".
+3.  Search for `MD Nodes` and click "Install".
+4.  The manager will download the package and automatically install its dependencies.
+5.  **Restart ComfyUI.**
 
-The `adaptive_linear` mode implements a simple, uniform linear decay of sigma values. This means the difference in noise level between any two consecutive steps is constant.
+### Method 2: Manual Installation (Git)
 
-The calculation is straightforward:
+1.  Open a terminal or command prompt.
+2.  Navigate to your `ComfyUI/custom_nodes/` directory.
+3.  Run the following command to clone the repository:
+    ```bash
+    git clone [https://github.com/MDMAchine/ComfyUI_MD_Nodes.git](https://github.com/MDMAchine/ComfyUI_MD_Nodes.git)
+    ```
+4.  Install the required dependencies by running:
+    ```bash
+    pip install -r ComfyUI_MD_Nodes/requirements.txt
+    ```
+5.  **Restart ComfyUI.**
 
-1.  **Calculate Step Size**: The total range of sigmas (`start_sigma - end_sigma`) is divided by the number of steps minus one (`steps - 1`) to get a uniform `step_size`.
+After restarting, the node and all its features should be fully available. Don’t forget, even gods need to reboot.
 
-    `step_size = (start_sigma - end_sigma) / (steps - 1)`
+---
 
-2.  **Generate Sigmas**: Starting from `start_sigma`, each subsequent sigma is calculated by subtracting the `step_size` from the previous sigma, ensuring the value does not drop below `end_sigma`.
+## 3. Core Concepts: The Art of Noise Scheduling
 
-While less mathematically sophisticated than the Karras schedule, the `adaptive_linear` mode offers a predictable and easy-to-understand noise decay, which can be useful for certain research or artistic explorations where a strict linear progression is desired.
+### What Are Sigmas? The Heartbeat of Diffusion
 
-### Tensor Output and Device Management
+In a diffusion model, "sigma" ($\sigma$) is a number that represents the amount of noise present in the latent image at a given time. A high sigma value means the image is mostly random noise (like at the very beginning of generation). A low sigma value means the image is very clean and detailed (like at the end). The entire generation process is a journey from a high sigma to a low sigma.
 
-The node outputs a `torch.tensor` object. `torch.tensor` is PyTorch's fundamental data structure, similar to NumPy arrays, specifically designed for deep learning operations. The `device` argument passed to `torch.tensor` (obtained via `comfy.model_management.get_torch_device()`) ensures that the sigma tensor is created on the correct computational device (CPU or GPU) where your model is loaded. This is crucial for performance and compatibility within the ComfyUI graph.
+### Why Scheduling Matters: The Path from Chaos to Clarity
 
-### Error Handling
+A **noise schedule** is the series of sigma values used at each step of the sampling process. It's the "path" the sampler takes from chaos to clarity. The shape of this path is incredibly important:
+* A **steep curve** at the beginning helps the model quickly establish the main composition.
+* A **flatter curve** at the end allows the model to spend more time refining fine details.
+The scheduler determines the shape of this curve. A good schedule helps the sampler converge on a high-quality image more efficiently.
 
-The `generate` function includes a `try-except` block. This standard Python practice is for robust error handling. If any issue occurs during the sigma generation process (e.g., unexpected input values leading to mathematical errors), the `except` block catches the exception, prints an error message to the console (including a traceback for debugging), and then re-raises the exception. This ensures that errors are clearly communicated and don't silently fail.
+### The Scheduler Modes: Your Noise Profile Toolkit
 
-### Potential Future Implementations (Not Currently Exposed)
+* **`karras_rho`**: The gold standard for many. Based on the Karras paper, it's known for producing high-quality, coherent images. The `rho` parameter controls the curve's steepness.
+* **`adaptive_linear`**: A simple, straight-line descent from high noise to low noise. Predictable and stable.
+* **`polynomial`**: A curve defined by a power exponent. Offers a smooth, controllable curve that can be more or less aggressive than linear.
+* **`blended_curves`**: Your personal DJ mixer for blending the `karras_rho` and `adaptive_linear` schedules.
+* **`kl_optimal`**: A schedule based on the "Align Your Steps" paper, designed to be mathematically optimal for sample quality.
+* **`linear_quadratic`**: A two-part schedule that starts linear and finishes with a more aggressive quadratic curve.
 
-The code contains commented-out parameters that hint at potential future features or experimental functionalities. These are not exposed as direct input options on the ComfyUI node at present but might be considered for implementation in future versions:
+### Sigma Range: The Canvas Boundaries (`sigma_min` & `sigma_max`)
 
-* `tolerance`
-* `min_step_factor`
-* `max_step_factor`
-* `euler_scale_factor`
-* `fixed_noise_epsilon`
+Every diffusion model is trained to operate within a specific range of noise levels.
+* **`sigma_max`**: The highest noise level the model understands (the starting point).
+* **`sigma_min`**: The lowest noise level the model can effectively work with (the ending point).
+Using the wrong range is like giving an artist a canvas that's too big or too small. This node automatically detects the correct range from the model, but also allows you to override it for advanced techniques.
 
-These parameters typically relate to advanced sampling algorithms and adaptive step size determination, which could further refine the noise scheduling process.
+---
 
-The Hybrid Sigma Scheduler offers a flexible and powerful way to control the noise decay in your diffusion workflows, allowing you to experiment with different approaches to achieve optimal results for your specific generative tasks.
+## 4. Node Setup and Workflow
+
+### How to Use It: A Step-by-Step Guide
+
+1.  **Connect the Model:** Connect the `MODEL` output from your "Load Checkpoint" node to the `model` input of the Hybrid Sigma Scheduler. This is crucial for automatic sigma range detection.
+2.  **Set Total Steps & Mode:**
+    * Choose the total number of steps you want to generate in the `steps` input. This is the "resolution" of your schedule *before* slicing.
+    * Select your desired `mode` from the dropdown (e.g., `karras_rho`).
+3.  **Configure Slicing (for img2img or advanced workflows):**
+    * Leave `start_at_step` at `0` for standard text-to-image. For img2img, you might start at a later step to match your denoise value.
+    * Leave `end_at_step` at its default high value (`9999`) to run to the end.
+4.  **Tune Mode-Specific Parameters:** Adjust `rho`, `power`, `blend_factor`, etc., based on the mode you selected.
+5.  **Connect Outputs to Sampler:**
+    * Connect the `sigmas` output directly to the `sigmas` input on your KSampler node.
+    * Connect the `actual_steps` output to the `steps` input on your KSampler. This is **critical** to ensure the sampler runs for the correct number of steps after slicing.
+6.  **Set Sampler to `external`:** In your KSampler node, set the `scheduler` parameter to **`external`**. This tells the sampler to use the custom sigmas you are providing.
+7.  **Queue Prompt:** Run your workflow. The scheduler will generate the custom sigma schedule, and the sampler will use it to generate the image.
+
+
+
+---
+
+## 5. Parameter Deep Dive
+
+### Primary Controls: Model, Steps & Mode
+
+* **`model`** (Required): The diffusion model. It's used to automatically determine the correct `sigma_min` and `sigma_max`.
+* **`steps`** (`INT`, default: `60`): The total number of steps to generate for the schedule *before* any slicing is applied.
+* **`mode`** (`ENUM`): The core algorithm for generating the noise curve. See "Core Concepts" for a breakdown.
+
+### Slicing Controls: Precision Timing
+
+* **`start_at_step`** (`INT`, default: `0`): The step index to *begin* the final schedule from. A value of `10` will discard the first 10 steps.
+* **`end_at_step`** (`INT`, default: `9999`): The step index to *end* the final schedule at (exclusive). The default high value effectively means "run to the very end."
+
+### Scheduler-Specific Controls: Fine-Tuning Your Curve
+
+* **`rho`** (`FLOAT`, default: `1.5`): For `karras_rho` mode. Controls the curve's steepness. Values between 1.1 and 4.5 are common. Higher values are more aggressive.
+* **`blend_factor`** (`FLOAT`, default: `0.5`): For `blended_curves` mode. A value of `0.0` is pure Karras, `1.0` is pure Linear.
+* **`power`** (`FLOAT`, default: `2.0`): For `polynomial` mode. A value of `1.0` is linear. `>1.0` is a faster start, `<1.0` is a slower start.
+* **`threshold_noise` / `linear_steps`**: Advanced controls for the `linear_quadratic` mode.
+
+### Sigma Override Controls: Expert Mode
+
+* **`start_sigma_override`** (`FLOAT`, optional): Manually set the `sigma_max` value. This will override the value read from the model.
+* **`end_sigma_override`** (`FLOAT`, optional): Manually set the `sigma_min` value. This will override the value read from the model.
+
+### Optional & Passthrough Controls
+
+* **`denoise`** (`FLOAT`, default: `1.0`): This is a **passthrough** value. The node does not use it. You can connect it to your KSampler's `denoise` input for convenience.
+* **`reverse_sigmas`** (`BOOLEAN`, default: `False`): If enabled, flips the final schedule to go from low noise to high noise. For experimental use.
+
+### Node Outputs: The Final Schedule
+
+* **`sigmas`** (SIGMAS): The final, sliced tensor of sigma values. This plugs directly into the `sigmas` input of a KSampler.
+* **`actual_steps`** (INT): The final number of steps in the `sigmas` tensor. This plugs into the `steps` input of a KSampler.
+
+---
+
+## 6. Practical Recipes & Use Cases
+
+### Recipe 1: Standard High-Quality Text-to-Image
+
+Goal: Generate a standard image with a reliable, high-quality schedule.
+
+* **`model`**: Connect your checkpoint (e.g., SDXL Base).
+* **`steps`**: `40`
+* **`mode`**: `karras_rho`
+* **`rho`**: `3.0`
+* **`start_at_step`**: `0` (start from the beginning)
+* **`end_at_step`**: `9999` (run to the end)
+* **Sampler Setup**: Connect `sigmas` and `actual_steps` to your KSampler. Set sampler `scheduler` to `external`.
+
+### Recipe 2: Controlled img2img with Schedule Slicing
+
+Goal: Apply a specific amount of denoising to an existing image. Let's say your KSampler `denoise` is set to `0.6`.
+
+* **`model`**: Connect your checkpoint.
+* **`steps`**: `50` (a higher base resolution for more slicing precision)
+* **`mode`**: `karras_rho`
+* **`start_at_step`**: `20` (Calculated as `total_steps * (1 - denoise)`. So, `50 * (1 - 0.6) = 20`. We are skipping the first 40% of the steps).
+* **`end_at_step`**: `9999`
+* **Sampler Setup**: Connect `sigmas` and `actual_steps` to your KSampler. `actual_steps` will now output `30`. Set sampler `scheduler` to `external` and `denoise` to `0.6`.
+
+### Recipe 3: Experimental High-Detail Generation
+
+Goal: Spend more time on fine details at the end of the generation.
+
+* **`model`**: Connect your checkpoint.
+* **`steps`**: `60`
+* **`mode`**: `polynomial`
+* **`power`**: `0.7` (A power less than 1.0 creates a curve that is flatter at the end, meaning more steps are spent at lower noise levels).
+* **`start_at_step`**: `0`
+* **`end_at_step`**: `9999`
+* **Sampler Setup**: Connect `sigmas` and `actual_steps` to your KSampler. Set sampler `scheduler` to `external`.
+
+---
+
+## 7. Technical Deep Dive
+
+### The Order of Operations
+
+The node processes the data in this specific order to generate the final schedule:
+
+1.  **Determine Sigma Range:** The node first tries to get `sigma_min` and `sigma_max` from the connected `model`.
+2.  **Apply Overrides:** If `start_sigma_override` or `end_sigma_override` are provided, these values replace the ones from the model.
+3.  **Apply Fallback:** If no values could be determined from the model or overrides, it uses hardcoded fallback values (defaults for SD1.5).
+4.  **Generate Full Schedule:** Using the final sigma range, total `steps`, and selected `mode`, it generates the complete, unsliced noise schedule.
+5.  **Slice Schedule:** The full schedule is then sliced according to the `start_at_step` and `end_at_step` values.
+6.  **Reverse (Optional):** If `reverse_sigmas` is enabled, the final sliced schedule is flipped.
+7.  **Output:** The final `sigmas` tensor and the calculated `actual_steps` are outputted.
+
+---
+
+## 8. Troubleshooting & FAQ
+
+* **"My output looks noisy, blurry, or generally low-quality."**
+    * This can happen if the sigma range is wrong. Ensure you have the `model` connected correctly. If you are using manual overrides, double-check that they are appropriate for your model (e.g., SD1.5 `sigma_max` is ~14.6, while SDXL is ~1.0). Also, try adjusting the `rho` or `power` values.
+* **"Why is my KSampler only running for 25 steps when I set the scheduler to 40?"**
+    * This is the exact problem the `actual_steps` output solves! You likely used `start_at_step` or `end_at_step` to slice the schedule. The original schedule had 40 steps, but the sliced version has 25. You must connect the `actual_steps` output to the sampler's `steps` input to keep them in sync.
+* **"I'm getting an error that says `sigma_min` is greater than `sigma_max`."**
+    * This happens if your `start_sigma_override` is a smaller number than your `end_sigma_override`. Remember that `start_sigma` corresponds to the maximum noise (`sigma_max`), and `end_sigma` corresponds to the minimum noise (`sigma_min`). The start value must be larger.
+* **"What's the difference between the KSampler's `steps` and this node's `steps`?"**
+    * This node's `steps` input defines the "resolution" of the schedule *before* slicing. The KSampler's `steps` input is how many steps it will actually execute. They should be the same for txt2img, but for img2img, this node's `steps` might be higher to allow for more granular slicing. Always connect this node's `actual_steps` output to the KSampler's `steps` input for best results.

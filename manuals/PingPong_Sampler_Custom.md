@@ -1,170 +1,219 @@
-# PingPong Sampler (Custom V0.8.15) ComfyUI Node Manual
+# Comprehensive Manual: PingPong Sampler (Lite+ V0.8.20)
 
-Welcome to the manual for the PingPong Sampler, a custom ComfyUI node specifically optimized for Ace-Step audio and video diffusion models. While its primary purpose is high-quality audio/video generation, it's also a powerful tool for visual experimentation. This manual will guide you through its features, parameters, and inner workings.
-
----
-
-## 1. Understanding the PingPong Sampler Node
-
-### What is it?
-
-The PingPong Sampler is a specialized sampling node for ComfyUI. Unlike standard samplers that often follow a fixed path through the denoising process, the PingPong Sampler employs a "ping-pong" strategy, intelligently alternating between denoising your latent data and injecting carefully controlled ancestral noise. This nuanced approach is designed to produce results with distinct characteristics, especially beneficial for time-series data like audio and video.
-
-### How it Works
-
-At its core, a diffusion model refines noisy data step by step, gradually transforming it into a clean output. Samplers dictate how this transformation occurs. The PingPong Sampler enhances this process by:
-
-* **Denoising**: At each step, it asks the underlying diffusion model to predict a cleaner version of the current noisy latent.
-* **Ancestral Noise Injection (Ping-Pong Action)**: For a configurable range of steps (the "ancestral steps"), instead of just using the denoised prediction directly, it strategically adds a fresh burst of random noise back into the latent. This "ping-pong" between denoising and controlled noise injection helps maintain diversity, prevent over-smoothing, and contribute to temporal coherence in sequential data.
-* **Noise Scheduling Integration**: It can accept a custom noise decay schedule from the `NoiseDecayScheduler (Custom)` node, allowing precise control over how ancestral noise fades over time.
-* **Conditional Blending**: It offers advanced options to blend the positive and negative conditioning, providing flexible control over how prompts guide the generation.
-
-### What it Does
-
-* **Generates High-Quality Audio/Video**: By optimizing for temporal coherence and controlled noise, it excels at creating smooth transitions and detailed outputs in time-series data.
-* **Enhanced Control over Ancestral Noise**: Unlike standard samplers, it provides direct control over the amount and decay of ancestral noise.
-* **Flexible Prompt Blending**: Allows for nuanced interpretation of positive and negative prompts, potentially leading to more artistic or specific results.
-* **Diverse Outputs**: The strategic noise injection can help prevent mode collapse and encourage more varied generations.
-* **Predictable Workflow**: Designed to integrate smoothly into existing ComfyUI workflows, acting as a direct replacement for standard `KSampler` nodes.
-
-### How to Use It
-
-1.  **Replace your KSampler**: The PingPong Sampler (Custom) node is intended as a direct replacement for your existing `KSampler` or `SamplerCustom` nodes in your ComfyUI workflow.
-2.  **Connect Inputs**:
-    * **model**: Connect your loaded diffusion model (e.g., from `Load Checkpoint`).
-    * **noise**: Connect your initial noise latent (e.g., from `Latent Image` or `Empty Latent Image`).
-    * **positive**: Connect your positive conditioning (e.g., from `CLIPTextEncode`).
-    * **negative**: Connect your negative conditioning (e.g., from `CLIPTextEncode`).
-    * **seed**: Connect your seed (e.g., from `CR Seed`).
-    * **cfg**: Set your Classifier-Free Guidance scale.
-    * **sampler_name**: Choose your preferred sampler algorithm (e.g., `euler_ancestral`, `dpmpp_2m`).
-    * **scheduler_name**: Choose your scheduler (e.g., `karras`, `normal`).
-    * **steps**: Set the total number of sampling steps.
-    * **`optional_noise_decay_scheduler`**: (Crucial for PingPong's unique behavior) Connect the `SCHEDULER` output from the `NoiseDecayScheduler (Custom)` node here. This is where you define how ancestral noise decays.
-3.  **Adjust Ping-Pong Specific Parameters**: Fine-tune the `ancestral_steps_start_ratio`, `ancestral_steps_end_ratio`, `ancestral_noise_strength`, and `blend_mode` to control the unique "ping-pong" behavior.
-4.  **Connect Latent Output**: Connect the `LATENT` output of the PingPong Sampler to your VAE Decode or other latent processing nodes.
-5.  **Advanced (YAML) Control**: For expert users, the `yaml_settings_str` input provides a powerful way to override node parameters with a YAML configuration, allowing for complex presets and fine-grained control.
+Welcome to the complete guide for the **PingPong Sampler (Lite+ V0.8.20)**, a powerful and intuitive custom sampler for ComfyUI. This manual provides everything you need to know, from basic setup to advanced techniques and technical details.
 
 ---
 
-## 2. Detailed Parameter Information
+### **Table of Contents**
 
-The PingPong Sampler node comes with a comprehensive set of parameters, combining standard sampler controls with its unique PingPong-specific options.
-
-### Standard Sampler Inputs (Common to KSampler)
-
-* **model** (`MODEL`, Required)
-    * **Description**: The diffusion model to be used for sampling.
-* **noise** (`LATENT`, Required)
-    * **Description**: The initial latent noise to be denoised.
-* **positive** (`CONDITIONING`, Required)
-    * **Description**: Positive conditioning (e.g., from text prompts).
-* **negative** (`CONDITIONING`, Required)
-    * **Description**: Negative conditioning (e.g., from negative text prompts).
-* **seed** (`INT`, Required)
-    * **Description**: The random seed for reproducibility.
-* **cfg** (`FLOAT`, default: `8.0`, min: `0.1`, max: `100.0`, step: `0.1`)
-    * **Description**: Classifier-Free Guidance scale. Higher values make the output more aligned with the prompt but can lead to artifacts.
-* **sampler_name** (`ENUM`, various sampler algorithms like `euler`, `euler_ancestral`, `dpmpp_2m`, etc.)
-    * **Description**: The core algorithm used for denoising. `euler_ancestral` is often used with ancestral samplers.
-* **scheduler_name** (`ENUM`, `normal`, `karras`, `exponential`, `sgm_uniform`, `simple`)
-    * **Description**: The noise schedule used by the sampler. `karras` is often preferred for quality.
-* **steps** (`INT`, default: `20`, min: `1`, max: `1000`, step: `1`)
-    * **Description**: The total number of denoising steps. More steps generally mean better quality but longer generation times.
-* **denoise** (`FLOAT`, default: `1.0`, min: `0.0`, max: `1.0`, step: `0.01`)
-    * **Description**: Denoising strength. `1.0` means full denoising from noise, `0.0` means no denoising (input latent is unchanged). Useful for img2img.
-* **start_at_step** (`INT`, default: `0`, min: `0`, max: `1000`, step: `1`)
-    * **Description**: Starts sampling from a specific step, skipping initial steps.
-* **end_at_step** (`INT`, default: `10000`, min: `0`, max: `10000`, step: `1`)
-    * **Description**: Ends sampling at a specific step, potentially leaving some noise.
-
-### Ping-Pong Specific Parameters
-
-* **optional_noise_decay_scheduler** (`SCHEDULER`, Optional)
-    * **What it is**: An optional input for a custom noise decay scheduler.
-    * **Use & Why**: This is the primary way to inject a custom ancestral noise decay curve from the `NoiseDecayScheduler (Custom)` node. If provided, it overrides the `ancestral_noise_strength` parameter, using the custom schedule for noise injection. This provides much finer control over the "ping-pong" behavior. If not connected, `ancestral_noise_strength` is used.
-
-* **ancestral_steps_start_ratio** (`FLOAT`, default: `0.0`, min: `0.0`, max: `1.0`, step: `0.001`)
-    * **What it is**: The ratio of total steps at which ancestral noise injection *begins*.
-    * **Use & Why**: A value of `0.0` means ancestral noise can be injected from the very first step. A value of `0.5` means ancestral noise only begins after 50% of the steps are completed. This allows you to delay the "ping-pong" effect.
-
-* **ancestral_steps_end_ratio** (`FLOAT`, default: `1.0`, min: `0.0`, max: `1.0`, step: `0.001`)
-    * **What it is**: The ratio of total steps at which ancestral noise injection *ends*.
-    * **Use & Why**: A value of `1.0` means ancestral noise can be injected until the very last step. A value of `0.5` means ancestral noise stops after 50% of the steps. This is crucial for preventing excessive noise in the final stages of denoising, which can lead to artifacts.
-
-* **ancestral_noise_strength** (`FLOAT`, default: `1.0`, min: `0.0`, max: `2.0`, step: `0.001`)
-    * **What it is**: The baseline strength of ancestral noise to inject at each applicable step.
-    * **Use & Why**: This parameter is active only if `optional_noise_decay_scheduler` is *not* connected. Higher values inject more noise, potentially leading to more "ancestral" characteristics or artifacts. Lower values make the process smoother.
-
-* **blend_mode** (`ENUM`, `lerp`, `a_only`, `b_only`, default: `lerp`)
-    * **What it is**: Determines how the noise prediction from the conditional (positive) and unconditional (negative) prompts are combined.
-    * **Use & Why**:
-        * `lerp` (Linear Interpolation): This is the standard blend, similar to what most samplers do for CFG. The final prediction is a linear mix of the conditional and unconditional.
-        * `a_only`: Only uses the conditional (positive) prediction. This bypasses the negative prompt's influence almost entirely, which can lead to very strong prompt adherence but potentially less creative outputs or artifacts.
-        * `b_only`: Only uses the unconditional (negative) prediction. This is highly experimental and will likely result in very noisy or unguided outputs, as it effectively ignores your positive prompt.
-
-* **step_blend_mode** (`ENUM`, `lerp`, `a_only`, `b_only`, default: `lerp`)
-    * **What it is**: Controls how predictions from previous steps or internal model states are blended with the current step's prediction. Primarily used in advanced internal calculations within the sampler.
-    * **Use & Why**: This parameter is more subtle and generally affects the temporal coherence or stability of the generation. It's often left at `lerp` unless you are actively debugging or experimenting with specific temporal effects.
-
-### Advanced (YAML) Override
-
-* **yaml_settings_str** (`STRING`, Multiline, Optional)
-    * **What it is**: A multiline text input allowing you to provide a YAML (YAML Ain't Markup Language) string to override any of the node's parameters.
-    * **Use & Why**: This is a powerful feature for saving and loading complex sampler presets. You can define all node parameters within the YAML string, and they will take precedence over the individual node inputs. This is excellent for creating consistent workflows or sharing specific settings.
-    * **Example YAML Structure**:
-        ```yaml
-        # Example PingPong Sampler YAML Settings
-        verbose: true
-        step_random_mode: false
-        step_size: 5
-        first_ancestral_step: 15
-        last_ancestral_step: 35
-        start_sigma_index: 0
-        end_sigma_index: -1
-        enable_clamp_output: false
-        blend_mode: lerp
-        step_blend_mode: lerp
-        ```
-    * **Note**: Ensure valid YAML syntax. Boolean values (e.g., `True`/`False`) should be represented as `true`/`false` in YAML.
+1.  **Introduction**
+    * What is the PingPong Sampler?
+    * Who is this Sampler For?
+    * Key Features in Version "Lite+"
+2.  **Installation**
+3.  **Core Concepts: The "Ping-Pong" Method**
+    * Ancestral Noise Injection
+    * Controlling the Noise: Strength and Coherence
+4.  **Node Setup and Workflow**
+    * How to Use It: A Step-by-Step Guide
+5.  **Parameter Deep Dive**
+    * Primary Controls: Noise Behavior
+    * Timing Controls: Ancestral Steps
+    * Randomness Controls: Seed and Mode
+    * Advanced / Custom Controls
+    * Standard Sampler Inputs
+6.  **Practical Recipes & Use Cases**
+    * Recipe 1: Smooth, Cinematic Video
+    * Recipe 2: Glitchy, Energetic Audio Visualizer
+    * Recipe 3: Classic Film Grain for Still Images
+7.  **Advanced Usage: YAML Overrides**
+8.  **Technical Deep Dive**
+    * The `__call__` Function: Core Logic
+    * How Strength and Coherence are Implemented
+9.  **Troubleshooting & FAQ**
 
 ---
 
-## 3. In-Depth Technical Information
+## 1. Introduction
 
-This section explores the underlying mechanics and algorithms that power the PingPong Sampler.
+### What is the PingPong Sampler?
 
-### Sampling Flow Overview
+The PingPong Sampler is a specialized sampling node for ComfyUI, optimized for generating high-quality audio and video with Ace-Step diffusion models. Unlike standard samplers that follow a linear denoising path, it employs a "ping-pong" strategy—alternating between denoising the latent and injecting carefully controlled ancestral noise. This "Lite+" version introduces powerful but simple controls over the **magnitude (strength)** and **evolution (coherence)** of that noise, unlocking a vast range of artistic effects.
 
-The PingPong Sampler integrates into ComfyUI by providing a custom `KSAMPLER` output. This means it essentially wraps a standard KSampler's functionality while injecting its specialized "ping-pong" and blending logic.
+### Who is this Sampler For?
 
-1.  **Input Parsing**: The node first reads all direct input parameters.
-2.  **YAML Override Logic**: It then attempts to parse the `yaml_settings_str`. If valid YAML is found and contains parameters that also exist as direct node inputs, the YAML values take precedence and override the direct node inputs. This means you can paste a complex YAML configuration to instantly change multiple settings, acting as a powerful preset manager. Boolean values from YAML strings are automatically converted to Python booleans.
-3.  **Blend Mode Resolution**: It resolves the `blend_mode` and `step_blend_mode` strings into actual `torch` functions (e.g., `torch.lerp`, or custom lambda functions for `a_only`/`b_only`) using the `_INTERNAL_BLEND_MODES` dictionary.
-4.  **KSampler Construction**: Finally, it constructs and returns a `KSAMPLER` object, passing `PingPongSampler.go` as the sampling function and all the resolved parameters (after YAML merging) as `extra_options` (which are then unpacked as `**kwargs` into `PingPongSampler.go`).
+* **Video and Audio Creators:** Its primary audience. The controls for noise coherence are designed to manage temporal effects, from smooth transitions to chaotic energy.
+* **Creative Coders & Experimental Artists:** Anyone looking for unique textures and behaviors not found in standard samplers.
+* **Still Image Generators:** The noise controls can be used to create beautiful, consistent textures like film grain or atmospheric effects.
 
-### The `PingPongSampler.go` Function (The Core Logic)
+### Key Features in Version "Lite+"
 
-This static method performs the actual sampling loop.
+* **Intuitive Noise Behavior Presets:** A single dropdown menu to instantly select different noise styles, from smooth to chaotic.
+* **Ancestral Strength Control:** A powerful dial to control the *magnitude* of the injected noise, blending between a smooth, DDIM-like output and a highly textured one.
+* **Noise Coherence Control:** A unique parameter to control the *evolution* of noise over time, enabling effects from flickering static to flowing, organic patterns.
+* **Full Backwards Compatibility:** The "Default (Raw)" preset is 100% identical to the original v0.8.15 sampler.
+* **Simple UI with Advanced Options:** The interface remains clean and simple, with advanced sliders hidden until you need them.
 
-* **Ancestral Step Determination**: It determines whether the current step is within the `ancestral_steps_start_ratio` and `ancestral_steps_end_ratio` range. If so, ancestral noise injection is active.
-* **Noise Decay Schedule**:
-    * If `optional_noise_decay_scheduler` is provided, it calls `scheduler.get_decay(num_steps)` to get the custom noise decay curve.
-    * It then calculates `noise_strength_mult = decay_curve[step]` to determine the specific multiplier for ancestral noise at the current step.
-    * If no custom scheduler is provided, `noise_strength_mult` defaults to `ancestral_noise_strength`.
-* **The "Ping-Pong" Action (Ancestral Noise Injection)**:
-    * When an ancestral sampler is used (e.g., `euler_ancestral`) and ancestral steps are active:
-        * After the model predicts the noise, a new `random_noise` tensor is generated.
-        * This `random_noise` is then blended with the existing predicted noise based on `noise_strength_mult` and the `blend_mode`. This is where the core "ping-pong" effect happens, introducing controlled variability.
-* **Conditional Blending**: The `blend_mode` and `step_blend_mode` influence how the model's predictions (conditional and unconditional) are combined, affecting the overall guidance.
-* **Dynamic `model_options`**: The `PingPongSampler.go` function dynamically modifies `model_options` to pass its custom `cfg_function` (which implements the `blend_mode` logic) to the underlying KSampler. This allows the PingPong Sampler to override how the model's output is interpreted.
+---
 
-### Internal Blend Modes
+## 2. Installation
 
-The `_INTERNAL_BLEND_MODES` dictionary is a simple lookup table that maps user-friendly string names (`"lerp"`, `"a_only"`, `"b_only"`) to their corresponding Python functions.
+As a custom node, the PingPong Sampler needs to be placed in the correct ComfyUI directory.
 
-* `"lerp"`: Uses `torch.lerp(a, b, weight)`, which is standard linear interpolation. `a` is typically the unconditional prediction, `b` is the conditional prediction, and `weight` is derived from `cfg`.
-* `"a_only"`: Returns `a`. This means the `cfg_function` will effectively ignore the conditional (positive) prediction and rely solely on the unconditional (negative) prediction. This is usually not what you want for standard generation.
-* `"b_only"`: Returns `b`. This means the `cfg_function` will ignore the unconditional (negative) prediction and rely solely on the conditional (positive) prediction. This essentially turns off negative prompting and can lead to over-saturation or less diverse results.
+1.  Navigate to your ComfyUI installation folder.
+2.  Open the `ComfyUI/custom_nodes/` directory.
+3.  Save the `PingPongSampler_Lite.py` file inside this directory.
+4.  Restart ComfyUI. The "PingPong Sampler (Lite+ V0.8.20)" will now be available when you search for nodes.
 
-In summary, the PingPong Sampler is a finely tuned instrument for diffusion sampling, particularly adept at handling the temporal coherence required by audio and video models. Its internal logic, especially regarding noise injection and the "ping-pong" ancestral steps, is meticulously crafted to produce consistent and high-quality results.
+---
+
+## 3. Core Concepts: The "Ping-Pong" Method
+
+### Ancestral Noise Injection
+
+At its heart, the sampler performs two actions in a loop:
+
+1.  **Denoise:** It asks the model to predict a cleaner version of your image/video frame.
+2.  **Inject Noise (The "Ping-Pong"):** It then strategically adds a small amount of new, random noise back in.
+
+This prevents the output from becoming overly smooth or "baked" and is the key to creating rich textures and details. The "Lite+" version gives you unprecedented control over step #2.
+
+### Controlling the Noise: Strength and Coherence
+
+Imagine the ancestral noise is like TV static being overlaid on your image at each step.
+
+* **Ancestral Strength** is the **volume** of that static. A high value makes the static very visible and influential, creating a raw, energetic texture. A low value makes it a faint whisper, resulting in a much smoother image.
+* **Noise Coherence** is how **quickly the static pattern changes**.
+    * **Low Coherence (0.0):** The static pattern is completely random and different on every single frame. This creates a chaotic, flickering, high-energy effect.
+    * **High Coherence (1.0):** The *exact same* static pattern is used on every frame. This creates a fixed-pattern noise, like a stable film grain or a texture overlay that doesn't change over time.
+    * **Mid-range Coherence (0.5):** The static pattern smoothly evolves, with 50% of the pattern carrying over from the previous frame. This is perfect for organic, flowing effects.
+
+---
+
+## 4. Node Setup and Workflow
+
+### How to Use It: A Step-by-Step Guide
+
+1.  **Replace your KSampler:** The PingPong Sampler is a direct replacement for your existing `KSampler` or `SamplerCustom` nodes.
+2.  **Connect Core Inputs:** Connect your `model`, `positive`, `negative`, `latent`, and `scheduler` as you normally would.
+3.  **Select a Noise Behavior (New!):** This is your primary creative control. Start with a preset from the `noise_behavior` dropdown. "Default (Raw)" is the original, and "Smooth" is great for video.
+4.  **Adjust Timing:** Use `first_ancestral_step` and `last_ancestral_step` to define *when* the ping-pong effect is active during the sampling process. It's often best to stop it before the final steps (e.g., set `last_ancestral_step` to 18 on a 20-step sample).
+5.  **Fine-Tune (Optional):** If you need more specific control, set `noise_behavior` to "Custom". This will activate the `ancestral_strength` and `noise_coherence` sliders for manual adjustment.
+6.  **Connect Latent Output:** Connect the `LATENT` output to your VAE Decode node.
+
+---
+
+## 5. Parameter Deep Dive
+
+### Primary Controls: Noise Behavior
+
+* **`noise_behavior`** (`ENUM`, default: `Default (Raw)`)
+    * **What it is**: A simple dropdown menu to select a preset for the ancestral noise characteristics.
+    * **Presets & Use Cases**:
+        * `Default (Raw)`: The original v0.8.15 behavior. Energetic and chaotic. Best for highly textured still images or glitchy effects. (Strength: 1.0, Coherence: 0.0)
+        * `Dynamic`: High energy, but with a subtle flow between steps. A good starting point for dynamic video where you want texture but not full chaos. (Strength: 1.0, Coherence: 0.25)
+        * `Smooth`: Reduced noise strength and smooth evolution. **The recommended preset for clean, cinematic video.** (Strength: 0.8, Coherence: 0.5)
+        * `Textured Grain`: A highly consistent noise pattern. **Excellent for adding a stable film grain effect to videos or still images.** (Strength: 0.9, Coherence: 0.9)
+        * `Soft (DDIM-Like)`: Very little ancestral noise. Use this if you want a very clean, smooth output that is close to a non-ancestral sampler. (Strength: 0.2, Coherence: 0.0)
+
+### Timing Controls: Ancestral Steps
+
+* **`first_ancestral_step`** (`INT`, default: `0`)
+    * The step index (0-based) where noise injection *begins*. Leave at 0 to apply the effect from the start.
+* **`last_ancestral_step`** (`INT`, default: `-1`)
+    * The step index where noise injection *ends*. A value of `-1` means it continues to the final step. **It is highly recommended to set this to a few steps below your total step count** (e.g., 18 for 20 steps) to ensure a clean final output.
+
+### Randomness Controls: Seed and Mode
+
+* **`step_random_mode`** (`ENUM`, default: `block`)
+    * Controls how the RNG seed for the noise varies at each step. `block` is great for creating structured variations, while `step` or `reset` can create more dynamic randomness.
+* **`step_size`** (`INT`, default: `4`)
+    * The interval used by the `block` and `reset` random modes.
+* **`seed`** (`INT`, Required): The master random seed for reproducibility.
+
+### Advanced / Custom Controls
+
+These sliders are **only active when `noise_behavior` is set to "Custom"**.
+
+* **`ancestral_strength`** (`FLOAT`, default: `1.0`, Optional)
+    * The magnitude of the injected noise, from 0.0 (none) to 1.0 (full) and beyond. Allows you to dial in the exact amount of texture.
+* **`noise_coherence`** (`FLOAT`, default: `0.0`, Optional)
+    * Controls how much of the previous step's noise is blended into the current step's noise. 0.0 is fully random, 1.0 re-uses the same noise pattern.
+
+### Standard Sampler Inputs
+
+* **`start_sigma_index`** / **`end_sigma_index`**: Control the start/end point within the scheduler's sigma steps.
+* **`enable_clamp_output`**: Clamps the final output latent to the range `[-1.0, 1.0]`.
+* **`scheduler`**: The noise schedule used by the sampler (e.g., from a KarrasScheduler node).
+
+---
+
+## 6. Practical Recipes & Use Cases
+
+### Recipe 1: Smooth, Cinematic Video
+
+Goal: Create clean, smoothly evolving video with minimal flickering.
+
+* **`noise_behavior`**: `Smooth`
+* **`last_ancestral_step`**: `[Total Steps - 2]` (e.g., `18` if you have 20 steps)
+* **`step_random_mode`**: `block`
+* **`step_size`**: `1` or `2`
+
+### Recipe 2: Glitchy, Energetic Audio Visualizer
+
+Goal: Create chaotic, flickering noise that reacts wildly.
+
+* **`noise_behavior`**: `Default (Raw)` or `Dynamic`
+* **`last_ancestral_step`**: `[Total Steps]` (Let it run to the end for maximum effect)
+* **`step_random_mode`**: `reset` or `step`
+
+### Recipe 3: Classic Film Grain for Still Images
+
+Goal: Add a stable, consistent grain texture to a still image or video.
+
+* **`noise_behavior`**: `Textured Grain`
+* **`last_ancestral_step`**: `[Total Steps - 2]`
+* **`step_random_mode`**: `off` (This is key to ensure the noise pattern is identical on every step)
+
+---
+
+## 7. Advanced Usage: YAML Overrides
+
+The `yaml_settings_str` input is a powerful feature for saving and loading presets. Any parameter defined in the YAML string will **override** the UI controls.
+
+**Example YAML for a custom "Smooth" preset:**
+```yaml
+# My Custom Smooth Video Settings
+noise_behavior: Custom
+ancestral_strength: 0.75
+noise_coherence: 0.6
+step_random_mode: block
+step_size: 2
+last_ancestral_step: 15
+```
+
+---
+
+## 8. Technical Deep Dive
+
+### The `__call__` Function: Core Logic
+
+The main sampling loop has been updated to incorporate strength and coherence.
+
+1.  **State Management**: The sampler now maintains a `self.previous_noise` state variable to store the noise from the last step.
+2.  **Coherence Blending**: If `noise_coherence > 0`, the noise for the current step is a `torch.lerp` (linear interpolation) between brand new random noise and `self.previous_noise`.
+3.  **Strength Application**: Instead of simply adding the final noise, the sampler calculates the result *with* full noise and the result *without* any noise (the clean `denoised_sample`). It then uses `torch.lerp` to blend between these two states using `ancestral_strength` as the factor. This provides a smooth and stable way to control the noise magnitude.
+
+---
+
+## 9. Troubleshooting & FAQ
+
+* **"My output is too noisy or chaotic."**
+    * Lower the `ancestral_strength` (via a preset like "Soft" or "Custom").
+    * Lower the `last_ancestral_step` to stop noise injection earlier.
+* **"My video feels static or has a fixed pattern."**
+    * Lower the `noise_coherence`. A high coherence value re-uses the same noise pattern.
+* **"The `ancestral_strength` and `noise_coherence` sliders aren't doing anything."**
+    * You must set the `noise_behavior` dropdown to **"Custom"** to activate the manual sliders.
+* **"What's the difference between this and the FBG version?"**
+    * This "Lite+" version focuses on controlling the *character of the ancestral noise*. The FBG (Feedback Guidance) version is a much more complex sampler that focuses on *dynamically adjusting the CFG guidance scale* based on the model's confidence. They solve different problems.
