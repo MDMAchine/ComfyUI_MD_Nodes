@@ -106,6 +106,19 @@ try:
 except Exception as e:
     print(f"WARNING: Could not load Universal Guardian node: {e}")
 
+# --- UPDATED FOR NEW FILE LOCATION ---
+try:
+    # This now points to your file in the 'Internal' subfolder
+    from .Internal.MD_DREAMWEAVERSAMPLER import NODE_CLASS_MAPPINGS as DW_CLASS_MAPPINGS
+    from .Internal.MD_DREAMWEAVERSAMPLER import NODE_DISPLAY_NAME_MAPPINGS as DW_DISPLAY_MAPPINGS
+    NODE_CLASS_MAPPINGS.update(DW_CLASS_MAPPINGS)
+    NODE_DISPLAY_NAME_MAPPINGS.update(DW_DISPLAY_MAPPINGS)
+    print("INFO: Successfully loaded DreamWeaver Sampler (MD).")
+except Exception as e:
+    print(f"WARNING: Could not load DreamWeaver Sampler: {e}")
+# --- END OF UPDATED SECTION ---
+
+
 # Define __all__ to explicitly expose what should be available when the package is imported
 __all__ = [
     "NODE_CLASS_MAPPINGS",

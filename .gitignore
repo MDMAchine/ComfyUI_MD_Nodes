@@ -3,6 +3,7 @@ __pycache__/
 
 # Miscellaneous backups and notes folder inside the package
 misc/
+Internal/
 
 # ComfyUI specific
 .ipynb_checkpoints/
