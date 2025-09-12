@@ -1,10 +1,10 @@
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-# ████ ADVANCED MEDIA SAVE (AMS) v1.0.0 – Optimized for Ace-Step Visuals ████▓▒░
+# ████ ADVANCED MEDIA SAVE (AMS) v1.0.6 – Optimized for Ace-Step Visuals ████▓▒░
 # ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 
 # ░▒▓ ORIGIN & DEV:
 #   • Forged in the digital ether by: MDMAchine & Gemini (pixel perfectionists)
-#   • Inspired by: The robust logic of AAPS and the ComfyUI media saving ecosystem
+#   • Inspired by: The robust timestamp-based saving logic from AAPS.
 #   • License: Public Domain — Spreading the visual love
 
 # ░▒▓ DESCRIPTION:
@@ -25,22 +25,14 @@
 #   ✓ Displays the final saved file path in the node UI for easy access.
 
 # ░▒▓ CHANGELOG:
-#   - v1.0.0 (Initial Release):
-#       • Core functionality for saving images, batches, and videos.
-#       • Full metadata embedding support for all relevant formats.
-#       • UI controls for format, quality, and framerate.
-#       • Dynamic filename parsing.
-
-# ░▒▓ CONFIGURATION:
-#   → Primary Use: Saving final images, animations, or video clips from workflows.
-#   → Secondary Use: Converting image batches into different animated formats.
-#   → Edge Use: Archiving workflows directly inside the generated media files.
-
-# ░▒▓ WARNING:
-#   This node may cause:
-#   ▓▒░ An overwhelming desire to save everything in multiple formats.
-#   ▓▒░ Extreme organization of your output folders.
-#   ▓▒░ A sudden appreciation for embedded metadata.
+#   - v1.0.0-v1.0.4: Initial release and various attempted fixes for file overwriting.
+#   - v1.0.5 (Faulty Fix): Final attempt using ComfyUI's native counter failed due to pathing issues.
+#   - v1.0.6 (Definitive Overwriting Fix - AAPS Method):
+#       • Reworked the entire file saving logic to mirror the robust, timestamp-based method
+#         from the Advanced Audio Preview & Save (AAPS) node.
+#       • The node now saves to a dedicated 'ComfyUI_AdvancedMediaOutputs' folder and uses a
+#         timestamp to guarantee unique filenames, completely avoiding the problematic
+#         ComfyUI sequential counter. This finally and permanently resolves all overwriting issues.
 
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 
@@ -65,20 +57,17 @@ except ImportError:
     print("[AdvancedMediaSave] Warning: imageio not found. Saving animations (GIF, MP4, WEBM) will be disabled.")
     _imageio_available = False
 
-# --- Configuration: Setting up our Digital Workspace ---
+# --- Configuration: Setting up our Digital Workspace (AAPS Method) ---
 MEDIA_OUTPUT_DIR = os.path.join(folder_paths.get_output_directory(), "ComfyUI_AdvancedMediaOutputs")
 os.makedirs(MEDIA_OUTPUT_DIR, exist_ok=True)
-print(f"[{__name__}] Media output directory: {MEDIA_OUTPUT_DIR}")
 
 
 class AdvancedMediaSave:
-    # We are an output node, so we don't need to return anything to other nodes.
     OUTPUT_NODE = True
-    CATEGORY = "MD_Nodes/Save"
+    CATEGORY = "media/save"
 
     @classmethod
     def INPUT_TYPES(cls):
-        # Define available formats, separating image and animation types
         IMAGE_FORMATS = ["PNG", "JPEG", "WEBP"]
         ANIMATION_FORMATS = []
         if _imageio_available:
@@ -89,17 +78,17 @@ class AdvancedMediaSave:
         return {
             "required": {
                 "images": ("IMAGE",),
-                "filename_prefix": ("STRING", {"default": "ComfyUI_media_%Y-%m-%d"}),
+                "filename_prefix": ("STRING", {"default": "AMS_%Y-%m-%d"}),
                 "save_format": (ALL_FORMATS, {"default": "PNG"}),
             },
             "optional": {
                 "save_metadata": ("BOOLEAN", {"default": True, "tooltip": "Embed workflow, prompt, and notes into the media file."}),
                 "custom_notes": ("STRING", {"default": "", "multiline": True, "tooltip": "Add custom text notes to the metadata."}),
-                "jpeg_quality": ("INT", {"default": 95, "min": 1, "max": 100, "step": 1, "tooltip": "Quality for JPEG format."}),
-                "webp_quality": ("INT", {"default": 90, "min": 1, "max": 100, "step": 1, "tooltip": "Quality for WEBP format (lossy)."}),
-                "webp_lossless": ("BOOLEAN", {"default": True, "tooltip": "Use lossless compression for WEBP."}),
-                "framerate": ("FLOAT", {"default": 8.0, "min": 0.1, "max": 60.0, "step": 0.1, "tooltip": "Framerate for animated formats (GIF, MP4, WEBM)."}),
-                "video_quality": ("INT", {"default": 8, "min": 1, "max": 10, "step": 1, "tooltip": "Quality for video formats (10 is best, 1 is worst)."}),
+                "jpeg_quality": ("INT", {"default": 95, "min": 1, "max": 100, "step": 1}),
+                "webp_quality": ("INT", {"default": 90, "min": 1, "max": 100, "step": 1}),
+                "webp_lossless": ("BOOLEAN", {"default": True}),
+                "framerate": ("FLOAT", {"default": 8.0, "min": 0.1, "max": 60.0, "step": 0.1}),
+                "video_quality": ("INT", {"default": 8, "min": 1, "max": 10, "step": 1}),
             },
             "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
         }
@@ -111,84 +100,71 @@ class AdvancedMediaSave:
                    jpeg_quality, webp_quality, webp_lossless, framerate, video_quality,
                    prompt=None, extra_pnginfo=None):
 
-        # --- 1. Prepare filenames and directories ---
+        # --- 1. Prepare Paths, Prefix, and Metadata (AAPS Method) ---
         try:
-            # Sanitize prefix and apply time formatting
             base_prefix = time.strftime(os.path.basename(filename_prefix), time.localtime())
-            subfolder = os.path.dirname(filename_prefix)
-        except Exception as e:
-            print(f"[{self.__class__.__name__}] Warning: Invalid filename prefix format. Using default. Error: {e}")
-            base_prefix = "ComfyUI_media"
-            subfolder = ""
+            subfolder_prefix = os.path.dirname(filename_prefix)
+        except ValueError:
+            print(f"[{self.__class__.__name__}] Warning: Invalid strftime format in prefix. Using as-is.")
+            base_prefix = os.path.basename(filename_prefix)
+            subfolder_prefix = os.path.dirname(filename_prefix)
 
-        output_dir = os.path.join(MEDIA_OUTPUT_DIR, subfolder)
-        os.makedirs(output_dir, exist_ok=True)
+        output_dir_local = os.path.join(MEDIA_OUTPUT_DIR, subfolder_prefix)
+        os.makedirs(output_dir_local, exist_ok=True)
+        
+        timestamp = int(time.time())
 
-        # --- 2. Prepare Metadata ---
         metadata = {}
         if save_metadata and not args.disable_metadata:
-            if prompt is not None:
-                metadata["prompt"] = json.dumps(prompt)
+            if prompt is not None: metadata["prompt"] = json.dumps(prompt)
             if extra_pnginfo is not None and "workflow" in extra_pnginfo:
                 metadata["workflow"] = json.dumps(extra_pnginfo["workflow"])
-            if custom_notes:
-                metadata['notes'] = custom_notes
+            if custom_notes: metadata['notes'] = custom_notes
             print(f"[{self.__class__.__name__}] Metadata will be embedded.")
         else:
             print(f"[{self.__class__.__name__}] Metadata embedding is disabled.")
 
-        # --- 3. Process and Save Media ---
-        # Convert tensor to a list of PIL Images
-        pil_images = []
-        for image_tensor in images:
-            img_np = image_tensor.cpu().numpy() * 255.0
-            img_np = np.clip(img_np, 0, 255).astype(np.uint8)
-            pil_images.append(Image.fromarray(img_np))
-
-        num_images = len(pil_images)
+        # --- 2. Process and Save Media ---
+        pil_images = [Image.fromarray(np.clip(255. * i.cpu().numpy(), 0, 255).astype(np.uint8)) for i in images]
         is_animation_format = "batch" in save_format
-
         results = []
-        
+
         if is_animation_format:
-            # --- Save as Animation/Video ---
-            if num_images > 1:
+            if len(pil_images) > 1:
                 file_ext = save_format.split(" ")[0].lower()
-                filepath = self._save_animation(pil_images, output_dir, base_prefix, file_ext, framerate, video_quality, metadata)
-                if filepath:
-                    results.append({"filename": os.path.basename(filepath), "subfolder": subfolder, "type": "output", "filepath": filepath})
+                result = self._save_animation(pil_images, output_dir_local, base_prefix, timestamp, file_ext, framerate, video_quality, metadata)
+                if result: results.append(result)
             else:
-                print(f"[{self.__class__.__name__}] Warning: Only one frame provided for an animation format. Saving as a PNG instead.")
-                save_format = "PNG" # Fallback to PNG
+                print(f"[{self.__class__.__name__}] Warning: Only one frame for animation format. Saving as PNG instead.")
+                save_format = "PNG"
         
-        if not is_animation_format: # This will also catch the fallback from animation
-            # --- Save as Static Images ---
+        if not is_animation_format:
             file_ext = save_format.lower()
-            filepaths = self._save_static_images(pil_images, output_dir, base_prefix, file_ext, jpeg_quality, webp_quality, webp_lossless, metadata)
-            for fp in filepaths:
-                results.append({"filename": os.path.basename(fp), "subfolder": subfolder, "type": "output", "filepath": fp})
+            batch_results = self._save_static_images(pil_images, output_dir_local, base_prefix, timestamp, file_ext, jpeg_quality, webp_quality, webp_lossless, metadata)
+            results.extend(batch_results)
 
-        # --- 4. Prepare UI Output ---
-        ui_text = [f"Saved {len(results)} file(s) to {os.path.relpath(output_dir, folder_paths.get_output_directory())}"]
+        # --- 3. Prepare UI Output ---
+        ui_text = []
         if results:
-            # Display the path of the first saved file for convenience
-            ui_text.append(f"First file: {os.path.basename(results[0]['filepath'])}")
+            first_file = results[0]
+            subfolder_rel = os.path.relpath(os.path.dirname(first_file["filepath"]), folder_paths.get_output_directory())
+            ui_text.append(f"Saved {len(results)} file(s) to {subfolder_rel}")
+            ui_text.append(f"First file: {first_file['filename']}")
+        else:
+            ui_text.append("Save failed or was skipped.")
 
-        return {"ui": {"text": ui_text, "images": []}} # No image preview in the node itself, ComfyUI handles previews for output nodes
+        return {"ui": {"text": ui_text}}
 
-    def _save_static_images(self, pil_images, output_dir, base_prefix, ext, jpeg_quality, webp_quality, webp_lossless, metadata):
-        saved_paths = []
-        counter = folder_paths.get_output_counter(output_dir, base_prefix)
-        
-        for img in pil_images:
-            filename = f"{base_prefix}_{counter:05}.{ext}"
+    def _save_static_images(self, pil_images, output_dir, base_prefix, timestamp, ext, jpeg_quality, webp_quality, webp_lossless, metadata):
+        saved_files = []
+        for i, img in enumerate(pil_images):
+            filename = f"{base_prefix}_{timestamp}_{i+1:03}.{ext}"
             filepath = os.path.join(output_dir, filename)
             
             save_params = {}
             if ext == 'png':
                 png_info = PngInfo()
-                for k, v in metadata.items():
-                    png_info.add_text(k, str(v))
+                for k, v in metadata.items(): png_info.add_text(k, str(v))
                 save_params['pnginfo'] = png_info
             elif ext in ['jpeg', 'webp']:
                 exif_bytes = b''
@@ -197,51 +173,50 @@ class AdvancedMediaSave:
                     exif_bytes = piexif.dump(exif_dict)
                 save_params['exif'] = exif_bytes
                 save_params['quality'] = jpeg_quality if ext == 'jpeg' else webp_quality
-                if ext == 'webp':
-                    save_params['lossless'] = webp_lossless
+                if ext == 'webp': save_params['lossless'] = webp_lossless
 
             img.save(filepath, **save_params)
-            saved_paths.append(filepath)
-            counter += 1
-            
-        return saved_paths
+            saved_files.append({
+                "filename": filename,
+                "filepath": filepath,
+                "subfolder": os.path.basename(output_dir),
+                "type": "output"
+            })
+        return saved_files
 
-    def _save_animation(self, pil_images, output_dir, base_prefix, ext, framerate, video_quality, metadata):
+    def _save_animation(self, pil_images, output_dir, base_prefix, timestamp, ext, framerate, video_quality, metadata):
         if not _imageio_available:
-            print(f"[{self.__class__.__name__}] ERROR: imageio library is required to save animations.")
+            print(f"[{self.__class__.__name__}] ERROR: imageio library is required.")
             return None
-            
-        counter = folder_paths.get_output_counter(output_dir, base_prefix)
-        filename = f"{base_prefix}_{counter:05}.{ext}"
+        
+        filename = f"{base_prefix}_{timestamp}.{ext}"
         filepath = os.path.join(output_dir, filename)
         
-        # Convert metadata to a string for embedding
         metadata_str = json.dumps(metadata) if metadata else ""
 
         try:
             if ext == 'gif':
                 imageio.mimsave(filepath, pil_images, duration=(1000 / framerate), loop=0)
-                # Note: Standard GIF format does not support metadata like EXIF or PNG chunks.
             elif ext == 'mp4':
-                # H.264 is widely supported
                 writer = imageio.get_writer(filepath, fps=framerate, codec='libx264', quality=video_quality,
                                             ffmpeg_params=['-metadata', f'comment={metadata_str}'])
-                for img in pil_images:
-                    writer.append_data(np.array(img))
+                for img in pil_images: writer.append_data(np.array(img))
                 writer.close()
             elif ext == 'webm':
-                # VP9 is a modern, efficient codec
                 writer = imageio.get_writer(filepath, fps=framerate, codec='libvpx-vp9', quality=video_quality,
                                             ffmpeg_params=['-metadata', f'comment={metadata_str}'])
-                for img in pil_images:
-                    writer.append_data(np.array(img))
+                for img in pil_images: writer.append_data(np.array(img))
                 writer.close()
             
-            return filepath
+            return {
+                "filename": filename,
+                "filepath": filepath,
+                "subfolder": os.path.basename(output_dir),
+                "type": "output"
+            }
         except Exception as e:
             print(f"[{self.__class__.__name__}] ERROR saving animation to {filepath}: {e}")
             return None
-
 
 # --- Node Registration ---
 NODE_CLASS_MAPPINGS = {
@@ -250,3 +225,4 @@ NODE_CLASS_MAPPINGS = {
 NODE_DISPLAY_NAME_MAPPINGS = {
     "AdvancedMediaSave": "Advanced Media Save 🖼️"
 }
+
