@@ -64,7 +64,7 @@ os.makedirs(MEDIA_OUTPUT_DIR, exist_ok=True)
 
 class AdvancedMediaSave:
     OUTPUT_NODE = True
-    CATEGORY = "media/save"
+    CATEGORY = "MD_Nodes/Save"
 
     @classmethod
     def INPUT_TYPES(cls):
