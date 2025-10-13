@@ -1,32 +1,47 @@
-# Python cache directories
-__pycache__/
-
-# Miscellaneous backups and notes folder inside the package
-misc/
-Internal/
-
-# ComfyUI specific
-.ipynb_checkpoints/
-
-# Ignore common large model/checkpoint files and binaries
-*.json     # (Optional: If you save workflows in the node folder and don't want them in repo)
-*.bin
-*.safetensors
-*.ckpt
-*.pt
-*.pth
-
-# Ignore local config files
-*.ini
-*.local
-
-# Ignore documentation backups or editor temp files
-*.docx
 
 # OS generated files
-.DS_Store
-Thumbs.db
-
-# Editor backups and temp files
-*~
 *.swp
+# Editor backups and temp files
+# Ignore documentation backups or editor temp files
+*.ckpt
+MD_Nodes/misc/
+# Ignore local config files
+# Python cache directories
+__pycache__/
+Thumbs.db
+# ComfyUI specific
+*.json     # (Optional: If you save workflows in the node folder and don't want them in repo)
+*.pth
+*.pt
+.DS_Store
+*.local
+.ipynb_checkpoints/
+# Miscellaneous backups and notes folder inside the package
+*.bin
+*.safetensors
+*.ini
+*~
+# Ignore common large model/checkpoint files and binaries
+*.docx
+
+# Added by updater
+# Python cache
+*.py[cod]
+*$py.class
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+# IDE files
+.vscode/
+.idea/
+# OS files
+# Backups
+.project_backups/
+# Large files
+# Local configs
+project_updater_config.json
+updater_settings.json
+# Added by updater
+UniversalGuardian.py
