@@ -45,3 +45,6 @@ project_updater_config.json
 updater_settings.json
 # Added by updater
 UniversalGuardian.py
+# Folders to ignore
+Internal/
+misc/
