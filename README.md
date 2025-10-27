@@ -36,18 +36,12 @@ Packaged with ASCII-flavored love, open-source chaos, and a healthy disregard fo
 
 ## 🔥 Node Collection
 
-### 🎵 Audio Processing & Scheduling
+### Scheduling & Guidance
 
 #### `HYBRID_SIGMA_SCHEDULER`
 **Your vibe, your noise.** 10+ modes (Karras, Poly, AYS, etc.) for precision noise scheduling. Auto-detects model sigmas, supports slicing, visualization, and comparison. Your sigma sommelier.
 
 📖 **[Read the Manual](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/Master%20Technical%20Manual_%20Hybrid%20Sigma%20Scheduler.md)**
-
-#### `MASTERING_CHAIN_NODE`
-**Make your audio thicc.** Pro-grade mastering: true stereo multiband compression, surgical EQ, transparent limiting. Optimized for LUFS-normalized input. Slaps waveforms with attitude.
-
-📖 **[Read the Manual](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/Master%20Technical%20Manual_%20Custom%20Audio%20Mastering%20Chain.md)**
-
 #### `NOISEDECAY_SCHEDULER` (Advanced)
 **Controlled fade into darkness.** Generate custom decay curves (polynomial, sigmoidal, gaussian, etc.) with start/end values, inversion, and smoothing. Modulate noise like a sad synth player.
 
@@ -57,6 +51,10 @@ Packaged with ASCII-flavored love, open-source chaos, and a healthy disregard fo
 **Low-key guiding, high-key results.** Enhanced fork for adaptive projected gradient guidance. Schedule APG scale, CFG, and momentum via YAML based on sigma. Surgical latent steering.
 
 📖 **[Read the Manual](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/Master%20Technical%20Manual_%20APG%20Guider%20(Forked).md)**
+
+---
+
+### 🎵 Audio Processing
 
 #### `ADVANCED_AUDIO_PREVIEW_AND_SAVE` (AAPS)
 **Hear it before you overthink it.** Comprehensive audio export: MP3/FLAC/OPUS, advanced normalization (Peak/RMS/LUFS), effects (fades, limiting), waveform/spectrogram preview, and robust metadata embedding.
@@ -72,6 +70,11 @@ Packaged with ASCII-flavored love, open-source chaos, and a healthy disregard fo
 **Iterative mastering magic.** Automatically analyzes and processes audio using filters, iterative EQ, de-essing, 3-band compression, stereo widening, and limiting to hit target LUFS and spectral profile.
 
 📖 `[Manual Coming Soon]`
+
+#### `MASTERING_CHAIN_NODE`
+**Make your audio thicc.** Pro-grade mastering: true stereo multiband compression, surgical EQ, transparent limiting. Optimized for LUFS-normalized input. Slaps waveforms with attitude.
+
+📖 **[Read the Manual](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/Master%20Technical%20Manual_%20Custom%20Audio%20Mastering%20Chain.md)**
 
 ---
 
