@@ -6,19 +6,19 @@
 ![ComfyUI](https://img.shields.io/badge/ComfyUI-Custom_Nodes-orange?style=flat-square)
 
 ```text
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃                                                                       ┃
-┃  ███╗   ███╗██████╗      ███╗   ██╗ ██████╗ ██████╗ ███████╗███████╗  ┃
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                                                        ┃
+┃  ███╗   ███╗██████╗      ███╗   ██╗ ██████╗ ██████╗ ███████╗███████╗   ┃
 ┃  ████╗ ████║██╔══██╗      ████╗  ██║██╔═══██╗██╔══██╗██╔════╝██╔════╝  ┃
 ┃  ██╔████╔██║██║  ██║      ██╔██╗ ██║██║   ██║██║  ██║█████╗  ███████╗  ┃
 ┃  ██║╚██╔╝██║██║  ██║      ██║╚██╗██║██║   ██║██║  ██║██╔══╝  ╚════██║  ┃
 ┃  ██║ ╚═╝ ██║██████╔╝      ██║ ╚████║╚██████╔╝██████╔╝███████╗███████║  ┃
 ┃  ╚═╝     ╚═╝╚═════╝       ╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚══════╝╚══════╝  ┃
-┃                                                                       ┃
-┃         🎛️ ComfyUI Custom Node Central - v0.69.420-BETA 🎛️         ┃
-┃      "Latent Space Debauchery & Digital Sorcery Since 56k Days"       ┃
-┃                                                                       ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+┃                                                                        ┃
+┃         🎛️ ComfyUI Custom Node Central - v0.69.420-BETA 🎛️             ┃
+┃      "Latent Space Debauchery & Digital Sorcery Since 56k Days"        ┃
+┃                                                                        ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 ```
 
 ## 📟 Welcome to MD_NODES
@@ -95,8 +95,8 @@ Packaged with ASCII-flavored love, open-source chaos, and a healthy disregard fo
 #### `PINGPONG_SAMPLER` (Lite+ & FBG Variants)
 **Symphonic frequencies & lyrical chaos.** Ancestral sampler optimized for Ace-Step. Features noise behavior presets, strength/coherence control, advanced blend modes, NaN recovery. FBG variant adds dynamic Feedback Guidance.
 
-📖 **[Read the Manual (v0.9.9-p4 FBG)](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/Master%20Technical%20Manual_%20PingPong%20Sampler%20(Custom%20v0.9.9-p4%20FBG).md)**
-📖 **[Read the Manual (Lite+ v0.8.21)](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/Master%20Technical%20Manual_%20PingPong%20Sampler%20(Lite+%20V0.8.21).md)**
+📖 **[Read the Manual (v0.9.9-p4 FBG)](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/Master%20Technical%20Manual_%20PingPong%20Sampler%20(Custom%20v0.9.9-p2%20FBG).md).md)**
+📖 **[Read the Manual (Lite+ v0.8.21)](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/Master%20Technical%20Manual_%20PingPong%20Sampler%20(Lite%2B%20V0.8.20).md)**
 
 ---
 
