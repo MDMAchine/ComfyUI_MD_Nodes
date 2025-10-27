@@ -1,89 +1,105 @@
-# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-# ████ Hybrid Sigma Scheduler v1.10 – Optimized for Ace-Step Audio/Video ████▓▒░
-# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ████ MD_Nodes/HybridAdaptiveSigmas – Hybrid noise scheduler ████▓▒░
+# © 2025 MDMAchine
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 # ░▒▓ ORIGIN & DEV:
-#   • Brewed in a Compaq Presario by MDMAchine / MD_Nodes
-#   • License: Apache 2.0 — legal chaos with community spirit
+#   • Cast into the void by: MDMAchine
+#   • Enhanced by: Gemini, Claude, etc.
+#   • License: Apache 2.0 — Sharing is caring
 
 # ░▒▓ DESCRIPTION:
 #   Outputs a tensor of sigmas to control diffusion noise levels.
-#   No guesswork. No drama. Just pure generative groove.
-#   Designed for precision noise scheduling in ComfyUI workflows.
-#   May perform differently outside of intended models.
+#   This node is designed for precision noise scheduling in ComfyUI workflows,
+#   supporting multiple curves, blending, slicing, and presets.
 
 # ░▒▓ FEATURES:
-#   ✓ Multiple core modes: Karras, Linear, Polynomial, Blended, and more
-#   ✓ NEW: Beta, SGM Uniform, DDIM Uniform, Simple, and AYS schedulers
-#   ✓ Automatic sigma range detection from the loaded model
-#   ✓ Manual override for sigma min/max for expert control
-#   ✓ Precision schedule slicing with `start_at_step` and `end_at_step`
-#   ✓ Outputs the actual number of steps after slicing for downstream samplers
-#   ✓ Optional schedule reversal for experimental workflows
-#   ✓ Now supports up to 1000 steps for ultra-high-quality workflows
-#   ✓ Smart presets for common use cases
-#   ✓ Schedule visualization output for analysis
-#   ✓ Adaptive minimum steps based on percentage
-#   ✓ Comparison mode for A/B testing schedules
-#   ✓ Memory-optimized for extreme step counts
+#   ✓ Multiple core modes: Karras, Linear, Polynomial, Blended, Beta, AYS, etc.
+#   ✓ Automatic sigma range detection from the loaded model.
+#   ✓ Manual override for sigma min/max for expert control.
+#   ✓ Precision schedule slicing with `start_at_step` and `end_at_step`.
+#   ✓ Outputs the actual number of steps after slicing.
+#   ✓ Schedule visualization output (JSON) for analysis.
+#   ✓ Adaptive minimum steps based on percentage.
 
 # ░▒▓ CHANGELOG:
-#   - v0.88:
-#         • Added 'low_denoise_color_fix' slider to prevent color shifting in tiling workflows.
-#   - v0.89:
-#         • Fixed a logic bug where `start_at_step` and `end_at_step` were not being correctly applied in all denoise modes.
-#         • All slicing and override logic is now universally applied, ensuring consistent behavior.
-#   - v0.90:
-#         • Increased max steps to 1000 for ultra-high-quality workflows
-#         • Fixed device inconsistencies in kl_optimal and linear_quadratic schedulers
-#         • Added input validation for split_at_step and other parameters
-#         • Improved edge case handling for very low step counts
-#         • Enhanced error messages for better debugging
-#         • Optimized tensor operations for better performance at high step counts
+#   - v1.4.2 (Guideline Update - Oct 2025):
+#       • REFACTOR: Full compliance update to v1.4.2 guidelines.
+#       • CRITICAL: Removed all type hints from function signatures to prevent ComfyUI loading crashes.
+#       • STYLE: Standardized imports, docstrings, and error handling.
+#       • STYLE: Replaced all print() calls with logging.info(), logging.warning(), etc.
+#       • STYLE: Rewrote all tooltips to new standard format.
+#       • ROBUST: Wrapped main execution in try/except with graceful failure passthrough.
+#       • ROBUST: Updated helper functions to use comfy.model_management for device.
+#       • STYLE: Updated node display name to 'MD: Hybrid Sigma Scheduler'.
+#   - v1.10 (Extended Scheduler Suite):
+#       • ADDED: Beta, SGM Uniform, DDIM Uniform, Simple, and AYS schedulers.
+#       • ENHANCED: Preset system with new scheduler options.
 #   - v1.00 (Major Update):
-#         • Added comprehensive preset system for quick workflow setup
-#         • Implemented schedule visualization output for analysis and plotting
-#         • Added adaptive minimum steps using percentage-based scaling
-#         • Introduced comparison mode for A/B testing different schedules
-#         • Optimized memory handling for extreme step counts (500+)
-#         • Enhanced documentation and tooltips throughout
-#         • Added schedule metadata output for downstream processing
-#   - v1.10 (Current Release - Extended Scheduler Suite):
-#         • Added Beta scheduler with alpha/beta parameter control
-#         • Added SGM Uniform (timestep-based uniform scheduling)
-#         • Added DDIM Uniform (DDIM-style timestep scheduling)
-#         • Added Simple scheduler (alternative uniform approach)
-#         • Added AYS (Align Your Steps) research-based scheduler
-#         • All new schedulers support full feature set (splitting, slicing, etc.)
-#         • Enhanced preset system with new scheduler options
-#         • Maintained 100% backward compatibility with existing workflows
+#       • ADDED: Comprehensive preset system and schedule visualization output.
+#       • ADDED: Adaptive minimum steps using percentage-based scaling.
+#   - v0.90 (Quality Update):
+#       • Increased max steps to 1000.
+#       • Fixed device inconsistencies and improved validation.
 
 # ░▒▓ CONFIGURATION:
-#   → Primary Use: Fine-grained diffusion noise scheduling for generative workflows
-#   → Secondary Use: Experimental noise shaping and curve blending
-#   → Edge Use: Hardcore noise tinkerers and sampling theorists
-#   → Advanced Use: Schedule analysis, comparison, and optimization
+#   → Primary Use: Fine-grained diffusion noise scheduling for generative workflows.
+#   → Secondary Use: Experimental noise shaping and curve blending.
+#   → Edge Use: Schedule analysis, comparison, and optimization.
 
 # ░▒▓ WARNING:
 #   This node may trigger:
-#   ▓▒░ Unexpected vibes
-#   ▓▒░ Spontaneous beatboxing
-#   ▓▒░ Mild to moderate enlightenment
-#   ▓▒░ Uncontrollable urge to fine-tune parameters
-
+#   ▓▒░ A 6-hour rabbit hole plotting 10 different polynomial curves.
+#   ▓▒░ The compulsive need to run a 1000-step diffusion "just to see."
+#   ▓▒░ Flashbacks to tweaking `gravis.ini` for the perfect GUS patch mix.
+#   ▓▒░ An existential crisis when you realize all your sigmas are just... numbers, man.
+#   Consult your nearest demoscene vet if hallucinations persist.
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 
 
-import torch
-import comfy.model_management
-from comfy.k_diffusion.sampling import get_sigmas_karras
-import math
+# =================================================================================
+# == Standard Library Imports                                                    ==
+# =================================================================================
 import json
+import logging
+import math
+import traceback
 
-# Referenced from https://github.com/AUTOMATIC1111/stable-diffusion-webui/pull/15608
-def kl_optimal_scheduler(n: int, sigma_min: float, sigma_max: float, device=None) -> torch.Tensor:
+# =================================================================================
+# == Third-Party Imports                                                         ==
+# =================================================================================
+import torch
+
+# =================================================================================
+# == ComfyUI Core Modules                                                        ==
+# =================================================================================
+import comfy.k_diffusion.sampling
+import comfy.model_management
+
+# =================================================================================
+# == Local Project Imports                                                       ==
+# =================================================================================
+# (No local project imports in this file)
+
+# =================================================================================
+# == Helper Classes & Dependencies                                               ==
+# =================================================================================
+
+def kl_optimal_scheduler(n, sigma_min, sigma_max, device=None):
+    """
+    Calculates the KL optimal schedule.
+    Referenced from https://github.com/AUTOMATIC1111/stable-diffusion-webui/pull/15608
+    
+    Args:
+        n (int): Number of steps.
+        sigma_min (float): Minimum sigma.
+        sigma_max (float): Maximum sigma.
+        device (torch.device, optional): The device to create tensors on.
+    
+    Returns:
+        torch.Tensor: The calculated sigmas.
+    """
     if device is None:
-        device = torch.device('cpu')
+        device = comfy.model_management.get_torch_device()
     
     sigma_min_t = torch.tensor(sigma_min, dtype=torch.float32, device=device)
     sigma_max_t = torch.tensor(sigma_max, dtype=torch.float32, device=device)
@@ -98,10 +114,23 @@ def kl_optimal_scheduler(n: int, sigma_min: float, sigma_max: float, device=None
     
     return sigmas
 
-# Adapted from: https://github.com/genmoai/models/blob/main/src/mochi_preview/infer.py#L41
-def linear_quadratic_schedule_adapted(steps: int, sigma_max: float, threshold_noise: float = 0.0025, linear_steps: int = None, device=None) -> torch.Tensor:
+def linear_quadratic_schedule_adapted(steps, sigma_max, threshold_noise=0.0025, linear_steps=None, device=None):
+    """
+    Calculates a schedule that is linear at the start and quadratic at the end.
+    Adapted from: https://github.com/genmoai/models/blob/main/src/mochi_preview/infer.py#L41
+    
+    Args:
+        steps (int): Total number of steps.
+        sigma_max (float): Maximum sigma.
+        threshold_noise (float): The sigma value where the schedule transitions.
+        linear_steps (int, optional): Number of steps for the linear portion.
+        device (torch.device, optional): The device to create tensors on.
+    
+    Returns:
+        torch.Tensor: The calculated sigmas.
+    """
     if device is None:
-        device = torch.device('cpu')
+        device = comfy.model_management.get_torch_device()
     
     if steps <= 0:
         return torch.FloatTensor([sigma_max, 0.0]).to(device)
@@ -142,20 +171,30 @@ def linear_quadratic_schedule_adapted(steps: int, sigma_max: float, threshold_no
     return torch.FloatTensor(sigma_schedule_inverted).to(device) * sigma_max
 
 
-def beta_scheduler(steps: int, sigma_min: float, sigma_max: float, alpha: float = 0.6, beta: float = 0.6, device=None) -> torch.Tensor:
-    """Beta distribution-based scheduler. Popular in diffusion models for controlled noise distribution."""
+def beta_scheduler(steps, sigma_min, sigma_max, alpha=0.6, beta=0.6, device=None):
+    """
+    Beta distribution-based scheduler. Popular in diffusion models for controlled noise distribution.
+    
+    Args:
+        steps (int): Total number of steps.
+        sigma_min (float): Minimum sigma.
+        sigma_max (float): Maximum sigma.
+        alpha (float): Beta distribution alpha parameter.
+        beta (float): Beta distribution beta parameter.
+        device (torch.device, optional): The device to create tensors on.
+    
+    Returns:
+        torch.Tensor: The calculated sigmas.
+    """
     if device is None:
-        device = torch.device('cpu')
+        device = comfy.model_management.get_torch_device()
     
     if steps <= 0:
         return torch.tensor([sigma_max, sigma_min], device=device)
     
-    # Use a simpler, more stable approach based on how beta schedules work in practice
-    # Create a linear schedule first, then apply beta-like transformation
     t = torch.linspace(0, 1, steps + 1, device=device)
     
     # Apply beta-inspired curve transformation
-    # Higher alpha pushes more steps toward the end, higher beta toward the start
     alpha_safe = max(alpha, 0.1)
     beta_safe = max(beta, 0.1)
     
@@ -175,31 +214,51 @@ def beta_scheduler(steps: int, sigma_min: float, sigma_max: float, alpha: float 
     return sigmas
 
 
-def sgm_uniform_scheduler(steps: int, sigma_min: float, sigma_max: float, device=None) -> torch.Tensor:
-    """SGM Uniform: Uniform spacing in timestep domain, then converted to sigmas."""
+def sgm_uniform_scheduler(steps, sigma_min, sigma_max, device=None):
+    """
+    SGM Uniform: Uniform spacing in timestep domain, then converted to sigmas.
+    
+    Args:
+        steps (int): Total number of steps.
+        sigma_min (float): Minimum sigma.
+        sigma_max (float): Maximum sigma.
+        device (torch.device, optional): The device to create tensors on.
+    
+    Returns:
+        torch.Tensor: The calculated sigmas.
+    """
     if device is None:
-        device = torch.device('cpu')
+        device = comfy.model_management.get_torch_device()
     
     if steps <= 0:
         return torch.tensor([sigma_max, sigma_min], device=device)
     
-    # Create uniform timesteps (typically 0 to 999 for SD models)
     # We'll assume a typical 1000-step timestep range
     max_timestep = 999.0
     timesteps = torch.linspace(max_timestep, 0, steps + 1, device=device)
     
     # Convert timesteps to sigmas using a log-linear relationship
-    # This mimics how SDM does it: sigma = (timestep / max_timestep) ^ 0.5 * sigma_max
     t_normalized = timesteps / max_timestep
     sigmas = sigma_min + (sigma_max - sigma_min) * t_normalized
     
     return sigmas
 
 
-def ddim_uniform_scheduler(steps: int, sigma_min: float, sigma_max: float, device=None) -> torch.Tensor:
-    """DDIM Uniform: Uniform timestep spacing specifically for DDIM-style sampling."""
+def ddim_uniform_scheduler(steps, sigma_min, sigma_max, device=None):
+    """
+    DDIM Uniform: Uniform timestep spacing specifically for DDIM-style sampling.
+    
+    Args:
+        steps (int): Total number of steps.
+        sigma_min (float): Minimum sigma.
+        sigma_max (float): Maximum sigma.
+        device (torch.device, optional): The device to create tensors on.
+    
+    Returns:
+        torch.Tensor: The calculated sigmas.
+    """
     if device is None:
-        device = torch.device('cpu')
+        device = comfy.model_management.get_torch_device()
     
     if steps <= 0:
         return torch.tensor([sigma_max, sigma_min], device=device)
@@ -208,7 +267,6 @@ def ddim_uniform_scheduler(steps: int, sigma_min: float, sigma_max: float, devic
     max_timestep = 1000
     step_ratio = max_timestep // steps
     
-    # Create uniform timesteps with DDIM's characteristic spacing
     timesteps = torch.arange(0, steps + 1, device=device) * step_ratio
     timesteps = torch.flip(max_timestep - timesteps, [0]).float()
     
@@ -219,10 +277,21 @@ def ddim_uniform_scheduler(steps: int, sigma_min: float, sigma_max: float, devic
     return sigmas
 
 
-def simple_scheduler(steps: int, sigma_min: float, sigma_max: float, device=None) -> torch.Tensor:
-    """Simple scheduler: Alternative uniform approach with slight easing."""
+def simple_scheduler(steps, sigma_min, sigma_max, device=None):
+    """
+    Simple scheduler: Alternative uniform approach with slight easing.
+    
+    Args:
+        steps (int): Total number of steps.
+        sigma_min (float): Minimum sigma.
+        sigma_max (float): Maximum sigma.
+        device (torch.device, optional): The device to create tensors on.
+    
+    Returns:
+        torch.Tensor: The calculated sigmas.
+    """
     if device is None:
-        device = torch.device('cpu')
+        device = comfy.model_management.get_torch_device()
     
     if steps <= 0:
         return torch.tensor([sigma_max, sigma_min], device=device)
@@ -239,24 +308,29 @@ def simple_scheduler(steps: int, sigma_min: float, sigma_max: float, device=None
     return sigmas
 
 
-def ays_scheduler(steps: int, sigma_min: float, sigma_max: float, device=None) -> torch.Tensor:
+def ays_scheduler(steps, sigma_min, sigma_max, device=None):
     """
     AYS (Align Your Steps): Research-based scheduler that optimally aligns
     sampling steps with the model's learned distribution.
-    Based on the paper's findings about optimal step positioning.
+    
+    Args:
+        steps (int): Total number of steps.
+        sigma_min (float): Minimum sigma.
+        sigma_max (float): Maximum sigma.
+        device (torch.device, optional): The device to create tensors on.
+    
+    Returns:
+        torch.Tensor: The calculated sigmas.
     """
     if device is None:
-        device = torch.device('cpu')
+        device = comfy.model_management.get_torch_device()
     
     if steps <= 0:
         return torch.tensor([sigma_max, sigma_min], device=device)
     
-    # AYS uses a specific non-uniform distribution based on the model's training
-    # More steps at high noise levels, fewer at low noise
     t = torch.linspace(0, 1, steps + 1, device=device)
     
     # AYS characteristic curve: concentrates steps at beginning and end
-    # Using a modified sigmoid-like curve
     ays_curve = 1.0 / (1.0 + torch.exp(-10 * (t - 0.5)))
     ays_curve = (ays_curve - ays_curve.min()) / (ays_curve.max() - ays_curve.min())
     
@@ -273,7 +347,19 @@ def ays_scheduler(steps: int, sigma_min: float, sigma_max: float, device=None) -
     return sigmas
 
 
+# =================================================================================
+# == Core Node Class                                                             ==
+# =================================================================================
+
 class HybridAdaptiveSigmas:
+    """
+    Core node for generating advanced sigma (noise) schedules.
+    
+    This node produces a SIGMAS tensor that controls the noise level at each
+    step of the diffusion process. It supports multiple mathematical curves,
+    blending, slicing, and presets for fine-grained control.
+    """
+    
     FALLBACK_SIGMA_MIN = 0.006
     FALLBACK_SIGMA_MAX = 1.000
     
@@ -358,55 +444,282 @@ class HybridAdaptiveSigmas:
     }
 
     @classmethod
-    def INPUT_TYPES(s):
+    def INPUT_TYPES(cls):
+        """
+        Define all input parameters with standardized tooltips.
+        """
         return {
             "required": {
-                "model": ("MODEL", {"tooltip": "The diffusion model, used to auto-detect the optimal sigma_min and sigma_max."}),
-                "steps": ("INT", {"default": 60, "min": 1, "max": 1000, "tooltip": "The total number of steps for a full schedule, before any slicing is applied."}),
-                "denoise_mode": (["Hybrid (Adaptive Steps)", "Subtractive (Slice)", "Repaced (Full Steps)"], {"tooltip": "How denoise is applied.\nHybrid (Best for Tiling): Slices, but ensures a minimum number of steps to prevent seams.\nSubtractive: 4 steps @ 0.25 denoise = 1 step.\nRepaced: 4 steps @ 0.25 denoise = 4 steps."}),
-                "mode": (s.SCHEDULER_MODES, {"tooltip": "The primary mathematical curve used to generate the noise schedule."}),
+                "model": ("MODEL", {
+                    "tooltip": (
+                        "MODEL INPUT\n"
+                        "- The diffusion model to process.\n"
+                        "- Used to auto-detect the optimal sigma_min and sigma_max range.\n"
+                        "- Connects from a model loader."
+                    )
+                }),
+                "steps": ("INT", {
+                    "default": 60, "min": 1, "max": 1000,
+                    "tooltip": (
+                        "TOTAL STEPS\n"
+                        "- The total number of steps for a full, un-sliced schedule.\n"
+                        "- This is the step count *before* any slicing is applied.\n"
+                        "- Higher = slower, more refined."
+                    )
+                }),
+                "denoise_mode": (["Hybrid (Adaptive Steps)", "Subtractive (Slice)", "Repaced (Full Steps)"], {
+                    "tooltip": (
+                        "DENOISE MODE\n"
+                        "- 'Hybrid': Slices, but ensures a minimum step count. (Best for Tiling)\n"
+                        "- 'Subtractive': Slices the schedule. (e.g., 4 steps @ 0.25 denoise = 1 step)\n"
+                        "- 'Repaced': Re-generates the schedule within the sliced range. (e.g., 4 steps @ 0.25 denoise = 4 steps)"
+                    )
+                }),
+                "mode": (cls.SCHEDULER_MODES, {
+                    "tooltip": (
+                        "PRIMARY MODE\n"
+                        "- The primary mathematical curve used to generate the noise schedule.\n"
+                        "- 'karras_rho': Good default, fast.\n"
+                        "- 'linear_quadratic': Good for high detail.\n"
+                        "- 'polynomial': Flexible curve."
+                    )
+                }),
             },
             "optional": {
-                "preset": (list(s.PRESETS.keys()), {"default": "Custom", "tooltip": "Quick-load optimized settings for common workflows. 'Custom' uses your manual settings below."}),
-                "denoise": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01, "tooltip": "Strength of the denoising effect. 1.0 is full generation, while a lower value like 0.25 is for making smaller changes (img2img)."}),
-                "start_at_step": ("INT", {"default": 0, "min": 0, "max": 10000, "tooltip": "Manually starts the schedule from this step. Overrides the `denoise` setting if this step is later."}),
-                "end_at_step": ("INT", {"default": 9999, "min": 0, "max": 10000, "tooltip": "Manually ends the schedule at this step (exclusive). Useful for isolating a specific part of the schedule."}),
-                "min_steps_mode": (["fixed", "adaptive"], {"default": "fixed", "tooltip": "Fixed: Use exact min_sliced_steps. Adaptive: Calculate minimum steps as a percentage of total steps."}),
-                "min_sliced_steps": ("INT", {"default": 3, "min": 1, "max": 100, "tooltip": "For Hybrid mode with 'fixed': If slicing results in fewer steps than this, the schedule is repaced. Ignored when using 'adaptive'."}),
-                "adaptive_min_percentage": ("FLOAT", {"default": 2.0, "min": 0.1, "max": 20.0, "step": 0.1, "tooltip": "For Hybrid mode with 'adaptive': Minimum steps as % of total steps. E.g., 2.0% of 200 steps = 4 minimum steps."}),
-                "detail_preservation": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "tooltip": "Prevents the schedule from reaching absolute zero noise, which helps preserve fine textures. Ideal for second passes."}),
-                "low_denoise_color_fix": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "tooltip": "Helps prevent color shifting (e.g., green tint) in low-denoise or tiling workflows by subtly adjusting the final steps. Start with 0.2."}),
-                "split_schedule": ("BOOLEAN", {"default": False, "tooltip": "Enable to use two different schedulers in one run. E.g., start with 'exponential' and finish with 'karras'."}),
-                "mode_b": (s.SCHEDULER_MODES, {"tooltip": "The scheduler to use for the *second* part of the schedule, after the split point."}),
-                "split_at_step": ("INT", {"default": 30, "min": 0, "max": 1000, "tooltip": "The step where the schedule switches from the primary mode to mode_b."}),
-                "start_sigma_override": ("FLOAT", {"default": 1.000, "min": 0.0, "max": 20.0, "step": 0.001, "optional": True, "tooltip": "Manually set the absolute maximum noise level (sigma_max). Overrides model auto-detection."}),
-                "end_sigma_override": ("FLOAT", {"default": 0.006, "min": 0.0, "max": 20.0, "step": 0.001, "optional": True, "tooltip": "Manually set the absolute minimum noise level (sigma_min). Overrides model auto-detection."}),
-                "rho": ("FLOAT", {"default": 1.5, "min": 1.0, "max": 15.0, "tooltip": "Controls curve steepness for Karras. Higher values concentrate steps at the beginning (high noise)."}),
-                "blend_factor": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.01, "tooltip": "For 'blended_curves' mode. A factor of 0.0 is pure Karras, 1.0 is pure Linear."}),
-                "power": ("FLOAT", {"default": 2.0, "min": 0.1, "max": 8.0, "step": 0.1, "tooltip": "The exponent for the Polynomial curve. >1.0 concentrates steps early, <1.0 concentrates them late."}),
-                "threshold_noise": ("FLOAT", {"default": 0.0025, "min": 0.0, "max": 1.0, "step": 0.001, "tooltip": "For Linear-Quadratic: The point where the schedule transitions from linear to quadratic. Lower values create a sharper 'knee' in the curve."}),
-                "linear_steps": ("INT", {"default": 30, "min": 0, "max": 1000, "tooltip": "For Linear-Quadratic: The number of steps dedicated to the initial linear portion of the schedule."}),
-                "beta_alpha": ("FLOAT", {"default": 0.6, "min": 0.1, "max": 5.0, "step": 0.1, "tooltip": "For Beta scheduler: Alpha parameter controlling the distribution shape. Higher values shift concentration toward later steps."}),
-                "beta_beta": ("FLOAT", {"default": 0.6, "min": 0.1, "max": 5.0, "step": 0.1, "tooltip": "For Beta scheduler: Beta parameter controlling the distribution shape. Higher values shift concentration toward earlier steps."}),
-                "reverse_sigmas": ("BOOLEAN", {"default": False, "tooltip": "Experimental: Flips the schedule to go from low noise to high noise. Can create 'glitch' effects."}),
-                "enable_visualization": ("BOOLEAN", {"default": False, "tooltip": "Output schedule values as a list for external plotting/analysis. Useful for debugging and optimization."}),
-                "comparison_mode": ("BOOLEAN", {"default": False, "tooltip": "A/B test mode: Generate a second schedule with mode_b settings for direct comparison."}),
-                "memory_efficient": ("BOOLEAN", {"default": False, "tooltip": "For 500+ steps: Process in smaller chunks to reduce peak memory usage. Slight performance cost."}),
+                "preset": (list(cls.PRESETS.keys()), {
+                    "default": "Custom",
+                    "tooltip": (
+                        "SCHEDULER PRESET\n"
+                        "- Quick-load optimized settings for common workflows.\n"
+                        "- 'Custom' uses your manual settings below.\n"
+                        "- 'High Detail' is recommended for quality."
+                    )
+                }),
+                "denoise": ("FLOAT", {
+                    "default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01,
+                    "tooltip": (
+                        "DENOISE STRENGTH\n"
+                        "- Strength of the denoising effect.\n"
+                        "- 1.0 is full generation (txt2img).\n"
+                        "- Lower values are for img2img or partial diffusion."
+                    )
+                }),
+                "start_at_step": ("INT", {
+                    "default": 0, "min": 0, "max": 10000,
+                    "tooltip": (
+                        "START AT STEP (SLICE)\n"
+                        "- Manually starts the schedule from this step number.\n"
+                        "- Overrides the `denoise` setting if this step is later."
+                    )
+                }),
+                "end_at_step": ("INT", {
+                    "default": 9999, "min": 0, "max": 10000,
+                    "tooltip": (
+                        "END AT STEP (SLICE)\n"
+                        "- Manually ends the schedule at this step (exclusive).\n"
+                        "- Useful for isolating a specific part of the schedule."
+                    )
+                }),
+                "min_steps_mode": (["fixed", "adaptive"], {
+                    "default": "fixed",
+                    "tooltip": (
+                        "MINIMUM STEPS MODE (HYBRID)\n"
+                        "- Used only by 'Hybrid' denoise mode.\n"
+                        "- 'fixed': Use the exact 'min_sliced_steps' value.\n"
+                        "- 'adaptive': Calculate minimum steps as a percentage of total steps."
+                    )
+                }),
+                "min_sliced_steps": ("INT", {
+                    "default": 3, "min": 1, "max": 100,
+                    "tooltip": (
+                        "MIN SLICED STEPS (FIXED)\n"
+                        "- For 'Hybrid' mode with 'fixed' setting.\n"
+                        "- If slicing results in fewer steps than this, the schedule is repaced."
+                    )
+                }),
+                "adaptive_min_percentage": ("FLOAT", {
+                    "default": 2.0, "min": 0.1, "max": 20.0, "step": 0.1,
+                    "tooltip": (
+                        "ADAPTIVE MIN % (ADAPTIVE)\n"
+                        "- For 'Hybrid' mode with 'adaptive' setting.\n"
+                        "- Minimum steps as % of total steps. (e.g., 2.0% of 200 steps = 4 min steps)"
+                    )
+                }),
+                "detail_preservation": ("FLOAT", {
+                    "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
+                    "tooltip": (
+                        "DETAIL PRESERVATION\n"
+                        "- Prevents the schedule from reaching absolute zero noise (sigma_min).\n"
+                        "- Helps preserve fine textures and details.\n"
+                        "- Recommended: 0.0 for first pass, 0.1-0.3 for second passes."
+                    )
+                }),
+                "low_denoise_color_fix": ("FLOAT", {
+                    "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
+                    "tooltip": (
+                        "LOW DENOISE COLOR FIX\n"
+                        "- Helps prevent color shifting (e.g., green tint) in low-denoise or tiling workflows.\n"
+                        "- Subtly adjusts the final steps.\n"
+                        "- Recommended: 0.1 - 0.3 if color shift is observed."
+                    )
+                }),
+                "split_schedule": ("BOOLEAN", {
+                    "default": False,
+                    "tooltip": (
+                        "SPLIT SCHEDULE\n"
+                        "- Enable to use two different schedulers in one run.\n"
+                        "- e.g., Start with 'exponential' and finish with 'karras'."
+                    )
+                }),
+                "mode_b": (cls.SCHEDULER_MODES, {
+                    "tooltip": (
+                        "SECONDARY MODE (SPLIT)\n"
+                        "- The scheduler to use for the *second* part of the schedule.\n"
+                        "- Only active if 'split_schedule' is True."
+                    )
+                }),
+                "split_at_step": ("INT", {
+                    "default": 30, "min": 0, "max": 1000,
+                    "tooltip": (
+                        "SPLIT AT STEP (SPLIT)\n"
+                        "- The step number where the schedule switches from 'mode' to 'mode_b'.\n"
+                        "- Only active if 'split_schedule' is True."
+                    )
+                }),
+                "start_sigma_override": ("FLOAT", {
+                    "default": 1.000, "min": 0.0, "max": 20.0, "step": 0.001, "optional": True,
+                    "tooltip": (
+                        "SIGMA MAX OVERRIDE\n"
+                        "- Manually set the absolute maximum noise level (sigma_max).\n"
+                        "- Overrides the model's auto-detected value."
+                    )
+                }),
+                "end_sigma_override": ("FLOAT", {
+                    "default": 0.006, "min": 0.0, "max": 20.0, "step": 0.001, "optional": True,
+                    "tooltip": (
+                        "SIGMA MIN OVERRIDE\n"
+                        "- Manually set the absolute minimum noise level (sigma_min).\n"
+                        "- Overrides the model's auto-detected value."
+                    )
+                }),
+                "rho": ("FLOAT", {
+                    "default": 1.5, "min": 1.0, "max": 15.0,
+                    "tooltip": (
+                        "RHO (KARRAS)\n"
+                        "- Controls curve steepness for 'karras_rho' mode.\n"
+                        "- Higher values (e.g., 7.0) concentrate steps at the beginning (high noise).\n"
+                        "- Lower values (e.g., 1.5) spread them out."
+                    )
+                }),
+                "blend_factor": ("FLOAT", {
+                    "default": 0.5, "min": 0.0, "max": 1.0, "step": 0.01,
+                    "tooltip": (
+                        "BLEND FACTOR (BLENDED)\n"
+                        "- For 'blended_curves' mode only.\n"
+                        "- 0.0 = 100% Karras curve.\n"
+                        "- 1.0 = 100% Linear curve.\n"
+                        "- 0.5 = A 50/50 mix."
+                    )
+                }),
+                "power": ("FLOAT", {
+                    "default": 2.0, "min": 0.1, "max": 8.0, "step": 0.1,
+                    "tooltip": (
+                        "POWER (POLYNOMIAL)\n"
+                        "- The exponent for the 'polynomial' curve.\n"
+                        "- > 1.0: Concentrates steps early (high noise).\n"
+                        "- 1.0: Equivalent to 'adaptive_linear'.\n"
+                        "- < 1.0: Concentrates steps late (low noise)."
+                    )
+                }),
+                "threshold_noise": ("FLOAT", {
+                    "default": 0.0025, "min": 0.0, "max": 1.0, "step": 0.001,
+                    "tooltip": (
+                        "THRESHOLD (LINEAR-QUADRATIC)\n"
+                        "- For 'linear_quadratic' mode.\n"
+                        "- The noise level where the schedule transitions from linear to quadratic.\n"
+                        "- Lower values create a sharper 'knee' in the curve."
+                    )
+                }),
+                "linear_steps": ("INT", {
+                    "default": 30, "min": 0, "max": 1000,
+                    "tooltip": (
+                        "LINEAR STEPS (LINEAR-QUADRATIC)\n"
+                        "- For 'linear_quadratic' mode.\n"
+                        "- The number of steps dedicated to the initial linear portion."
+                    )
+                }),
+                "beta_alpha": ("FLOAT", {
+                    "default": 0.6, "min": 0.1, "max": 5.0, "step": 0.1,
+                    "tooltip": (
+                        "ALPHA (BETA)\n"
+                        "- For 'beta' scheduler: Alpha parameter.\n"
+                        "- Higher values shift concentration toward later steps (low noise)."
+                    )
+                }),
+                "beta_beta": ("FLOAT", {
+                    "default": 0.6, "min": 0.1, "max": 5.0, "step": 0.1,
+                    "tooltip": (
+                        "BETA (BETA)\n"
+                        "- For 'beta' scheduler: Beta parameter.\n"
+                        "- Higher values shift concentration toward earlier steps (high noise)."
+                    )
+                }),
+                "reverse_sigmas": ("BOOLEAN", {
+                    "default": False,
+                    "tooltip": (
+                        "REVERSE SIGMAS (EXPERIMENTAL)\n"
+                        "- Flips the schedule to go from low noise to high noise.\n"
+                        "- Can create 'glitch' effects or be used for specific model types."
+                    )
+                }),
+                "enable_visualization": ("BOOLEAN", {
+                    "default": False,
+                    "tooltip": (
+                        "ENABLE VISUALIZATION DATA\n"
+                        "- If True, outputs schedule values as a JSON string.\n"
+                        "- Useful for external plotting or debugging."
+                    )
+                }),
+                "comparison_mode": ("BOOLEAN", {
+                    "default": False,
+                    "tooltip": (
+                        "COMPARISON MODE (DEBUG)\n"
+                        "- A/B test mode: Generates a second schedule with 'mode_b' settings.\n"
+                        "- Used for debugging and analysis."
+                    )
+                }),
+                "memory_efficient": ("BOOLEAN", {
+                    "default": False,
+                    "tooltip": (
+                        "MEMORY EFFICIENT (HIGH STEPS)\n"
+                        "- For 500+ steps: Process in smaller chunks to reduce peak VRAM usage.\n"
+                        "- May have a slight performance cost."
+                    )
+                }),
             }
         }
 
     RETURN_TYPES = ("SIGMAS", "INT", "STRING", "STRING")
     RETURN_NAMES = ("sigmas", "actual_steps", "schedule_info", "visualization_data")
     FUNCTION = "generate"
-    CATEGORY = "MD_Nodes/Schedulers"
+    CATEGORY = "MD_Nodes/Scheduler"
 
     def _apply_preset(self, preset_name, **kwargs):
-        """Apply preset configuration, allowing kwargs to override preset values."""
+        """
+        Apply preset configuration, allowing kwargs to override preset values.
+        
+        Args:
+            preset_name (str): The name of the preset to apply.
+            **kwargs: The current settings from the node inputs.
+            
+        Returns:
+            dict: The updated settings dictionary.
+        """
         if preset_name == "Custom" or preset_name not in self.PRESETS:
             return kwargs
         
         preset = self.PRESETS[preset_name].copy()
-        print(f"Hybrid Sigma Scheduler INFO: Applying preset '{preset_name}'")
+        logging.info(f"[HybridAdaptiveSigmas] Applying preset '{preset_name}'")
         
         # Merge preset with user overrides (kwargs take precedence)
         for key, value in preset.items():
@@ -416,7 +729,21 @@ class HybridAdaptiveSigmas:
         return kwargs
 
     def _get_sigmas(self, steps, mode, sigma_min, sigma_max, device, rho, blend_factor, power, threshold_noise, linear_steps, beta_alpha, beta_beta, memory_efficient=False):
-        """Helper function to generate a sigma schedule based on the selected mode."""
+        """
+        Helper function to generate a sigma schedule based on the selected mode.
+        
+        Args:
+            steps (int): Total number of steps.
+            mode (str): The scheduler mode to use.
+            sigma_min (float): Minimum sigma.
+            sigma_max (float): Maximum sigma.
+            device (torch.device): The device to create tensors on.
+            (various floats/ints): Parameters for specific schedulers.
+            memory_efficient (bool): Whether to use chunked processing.
+            
+        Returns:
+            torch.Tensor: The generated sigma schedule.
+        """
         if steps <= 0:
             return torch.tensor([sigma_max, sigma_min], device=device)
         
@@ -440,7 +767,7 @@ class HybridAdaptiveSigmas:
         
         # Original schedulers
         if mode == "karras_rho":
-            return get_sigmas_karras(steps, sigma_min, sigma_max, rho, device)
+            return comfy.k_diffusion.sampling.get_sigmas_karras(steps, sigma_min, sigma_max, rho, device)
         elif mode == "adaptive_linear":
             return torch.linspace(sigma_max, sigma_min, steps + 1, device=device)
         elif mode == "polynomial":
@@ -454,7 +781,7 @@ class HybridAdaptiveSigmas:
             log_sigmas = (1 - t) * torch.log(torch.tensor(sigma_min, device=device)) + t * torch.log(torch.tensor(sigma_max, device=device))
             return torch.exp(log_sigmas)
         elif mode == "blended_curves":
-            karras = get_sigmas_karras(steps, sigma_min, sigma_max, rho, device)
+            karras = comfy.k_diffusion.sampling.get_sigmas_karras(steps, sigma_min, sigma_max, rho, device)
             linear = torch.linspace(sigma_max, sigma_min, steps + 1, device=device)
             return (1.0 - blend_factor) * karras + blend_factor * linear
         elif mode == "kl_optimal":
@@ -474,11 +801,26 @@ class HybridAdaptiveSigmas:
         elif mode == "ays":
             return ays_scheduler(steps, sigma_min, sigma_max, device=device)
         
+        # --- FIX IS HERE ---
         # Fallback to linear if mode is somehow invalid
+        # The f-string is now correctly on a single line.
+        logging.warning(f"[HybridAdaptiveSigmas] Unknown mode '{mode}'. Falling back to 'adaptive_linear'.")
         return torch.linspace(sigma_max, sigma_min, steps + 1, device=device)
 
     def _generate_schedule_metadata(self, final_sigmas, actual_steps, mode, denoise_mode, **kwargs):
-        """Generate human-readable metadata about the schedule."""
+        """
+        Generate human-readable metadata about the schedule.
+        
+        Args:
+            final_sigmas (torch.Tensor): The generated sigmas.
+            actual_steps (int): The number of steps in the final schedule.
+            mode (str): The primary scheduler mode.
+            denoise_mode (str): The denoise mode used.
+            **kwargs: Additional context (preset, split info).
+            
+        Returns:
+            str: JSON string of the schedule metadata.
+        """
         info = {
             "scheduler_version": "1.10",
             "primary_mode": mode,
@@ -499,7 +841,15 @@ class HybridAdaptiveSigmas:
         return json.dumps(info, indent=2)
 
     def _generate_visualization_data(self, final_sigmas):
-        """Convert sigma tensor to JSON for external visualization."""
+        """
+        Convert sigma tensor to JSON for external visualization.
+        
+        Args:
+            final_sigmas (torch.Tensor): The generated sigmas.
+            
+        Returns:
+            str: JSON string of the sigma values.
+        """
         sigma_list = final_sigmas.cpu().tolist()
         viz_data = {
             "sigmas": sigma_list,
@@ -521,10 +871,18 @@ class HybridAdaptiveSigmas:
                  threshold_noise=0.0025, linear_steps=30,
                  beta_alpha=0.6, beta_beta=0.6,
                  enable_visualization=False, comparison_mode=False, memory_efficient=False):
+        """
+        Main execution function.
+        
+        Args:
+            (All args from INPUT_TYPES)
+        
+        Returns:
+            Tuple containing (sigmas, actual_steps, schedule_info, visualization_data)
+        """
+        device = comfy.model_management.get_torch_device()
         
         try:
-            device = comfy.model_management.get_torch_device()
-            
             # Apply preset if selected
             if preset != "Custom":
                 preset_config = self.PRESETS.get(preset, {})
@@ -553,7 +911,7 @@ class HybridAdaptiveSigmas:
                 sigma_min, sigma_max = model_sampling.sigma_min, model_sampling.sigma_max
             except Exception:
                 sigma_min, sigma_max = self.FALLBACK_SIGMA_MIN, self.FALLBACK_SIGMA_MAX
-                print("Hybrid Sigma Scheduler WARNING: Using fallback sigmas.")
+                logging.warning("[HybridAdaptiveSigmas] Using fallback sigmas.")
 
             if start_sigma_override is not None:
                 sigma_max = start_sigma_override
@@ -561,32 +919,32 @@ class HybridAdaptiveSigmas:
                 sigma_min = end_sigma_override
             
             if sigma_min >= sigma_max:
-                print(f"Hybrid Sigma Scheduler ERROR: sigma_min ({sigma_min:.4f}) >= sigma_max ({sigma_max:.4f}). Adjusting.")
+                logging.error(f"[HybridAdaptiveSigmas] sigma_min ({sigma_min:.4f}) >= sigma_max ({sigma_max:.4f}). Adjusting.")
                 sigma_max = sigma_min + 0.1
 
-            print(f"Hybrid Sigma Scheduler INFO: Initial sigma range: min={sigma_min:.4f}, max={sigma_max:.4f}")
+            logging.info(f"[HybridAdaptiveSigmas] Initial sigma range: min={sigma_min:.4f}, max={sigma_max:.4f}")
 
             if steps <= 0:
-                print("Hybrid Sigma Scheduler WARNING: Steps <= 0, returning empty schedule.")
+                logging.warning("[HybridAdaptiveSigmas] Steps <= 0, returning empty schedule.")
                 return (torch.tensor([], device=device), 0, "{}", "{}")
             
             # Calculate adaptive minimum steps if needed
             if min_steps_mode == "adaptive":
                 calculated_min_steps = max(1, int(steps * adaptive_min_percentage / 100.0))
-                print(f"Hybrid Sigma Scheduler INFO: Adaptive min steps: {calculated_min_steps} ({adaptive_min_percentage}% of {steps})")
+                logging.info(f"[HybridAdaptiveSigmas] Adaptive min steps: {calculated_min_steps} ({adaptive_min_percentage}% of {steps})")
                 min_sliced_steps = calculated_min_steps
             
             # Input validation
             if split_schedule and split_at_step >= steps:
-                print(f"Hybrid Sigma Scheduler WARNING: split_at_step ({split_at_step}) >= steps ({steps}). Disabling split.")
+                logging.warning(f"[HybridAdaptiveSigmas] split_at_step ({split_at_step}) >= steps ({steps}). Disabling split.")
                 split_schedule = False
             
             if split_schedule and split_at_step <= 0:
-                print(f"Hybrid Sigma Scheduler WARNING: split_at_step ({split_at_step}) <= 0. Disabling split.")
+                logging.warning(f"[HybridAdaptiveSigmas] split_at_step ({split_at_step}) <= 0. Disabling split.")
                 split_schedule = False
             
             if mode == "linear_quadratic" and linear_steps > steps:
-                print(f"Hybrid Sigma Scheduler WARNING: linear_steps ({linear_steps}) > total steps ({steps}). Clamping to {steps}.")
+                logging.warning(f"[HybridAdaptiveSigmas] linear_steps ({linear_steps}) > total steps ({steps}). Clamping to {steps}.")
                 linear_steps = steps
             
             common_params = {
@@ -599,7 +957,7 @@ class HybridAdaptiveSigmas:
             # --- 2. Generate the Full, Un-sliced Schedule ---
             full_sigmas = None
             if split_schedule and 0 < split_at_step < steps:
-                print(f"Hybrid Sigma Scheduler INFO: Generating split schedule at step {split_at_step}.")
+                logging.info(f"[HybridAdaptiveSigmas] Generating split schedule at step {split_at_step}.")
                 steps_a = split_at_step
                 steps_b = steps - split_at_step
 
@@ -615,42 +973,34 @@ class HybridAdaptiveSigmas:
                 full_sigmas = self._get_sigmas(steps, mode, sigma_min, sigma_max, **common_params)
 
             # --- 3. Handle Slicing and Denoise Mode ---
-
-            # First, universally determine the intended slice from the original full schedule
-            # based on all relevant inputs (denoise, start_at_step, end_at_step).
             denoise_start_step = int(steps * (1.0 - denoise)) if denoise < 1.0 else 0
             final_start_step = max(start_at_step, denoise_start_step)
 
             total_points = full_sigmas.shape[0]  # Typically steps + 1
 
-            # Calculate the final indices for slicing from the original full schedule
             start_idx = max(0, min(final_start_step, total_points - 1))
             end_idx = total_points if end_at_step >= total_points else max(start_idx + 1, min(end_at_step, total_points))
             
             final_sigmas = None
 
-            # Now, apply the logic for the selected denoise_mode using the calculated slice
             if denoise_mode == "Repaced (Full Steps)":
                 effective_sigma_max = full_sigmas[start_idx].item()
-                # The end_idx is exclusive, so we use end_idx-1 to get the last sigma value of the slice
                 effective_sigma_min = full_sigmas[min(end_idx, total_points) - 1].item()
                 
-                print(f"Hybrid Sigma Scheduler INFO: 'Repaced' mode active. Using slice {start_idx}-{end_idx-1}. Generating {steps} steps between {effective_sigma_max:.4f} and {effective_sigma_min:.4f}.")
+                logging.info(f"[HybridAdaptiveSigmas] 'Repaced' mode active. Using slice {start_idx}-{end_idx-1}. Generating {steps} steps between {effective_sigma_max:.4f} and {effective_sigma_min:.4f}.")
                 final_sigmas = self._get_sigmas(steps, mode, effective_sigma_min, effective_sigma_max, **common_params)
 
             elif denoise_mode == "Subtractive (Slice)":
                 final_sigmas = full_sigmas[start_idx:end_idx]
-                print(f"Hybrid Sigma Scheduler INFO: 'Subtractive' mode active. Slicing from step {start_idx} to {end_idx-1}.")
+                logging.info(f"[HybridAdaptiveSigmas] 'Subtractive' mode active. Slicing from step {start_idx} to {end_idx-1}.")
 
             elif denoise_mode == "Hybrid (Adaptive Steps)":
-                # Start by slicing like normal
                 final_sigmas = full_sigmas[start_idx:end_idx]
-                print(f"Hybrid Sigma Scheduler INFO: Slicing from step {start_idx} to {end_idx-1}.")
+                logging.info(f"[HybridAdaptiveSigmas] Slicing from step {start_idx} to {end_idx-1}.")
 
-                # Then, check if the slice is too short and regenerate if needed
                 calculated_steps = final_sigmas.shape[0] - 1
                 if calculated_steps > 0 and calculated_steps < min_sliced_steps:
-                    print(f"Hybrid Sigma Scheduler INFO: Hybrid mode triggered. Sliced steps ({calculated_steps}) < min ({min_sliced_steps}). Repacing schedule.")
+                    logging.info(f"[HybridAdaptiveSigmas] Hybrid mode triggered. Sliced steps ({calculated_steps}) < min ({min_sliced_steps}). Repacing schedule.")
                     hybrid_sigma_max = final_sigmas[0].item()
                     hybrid_sigma_min = final_sigmas[-1].item()
                     final_sigmas = self._get_sigmas(min_sliced_steps, mode, hybrid_sigma_min, hybrid_sigma_max, **common_params)
@@ -665,27 +1015,22 @@ class HybridAdaptiveSigmas:
                 if final_sigmas.shape[0] > 1 and new_final >= final_sigmas[-2].item():
                     new_final = final_sigmas[-2].item() - 1e-4
                 final_sigmas[-1] = new_final
-                print(f"Hybrid Sigma Scheduler INFO: Detail Preservation raised final sigma to {new_final:.4f}.")
+                logging.info(f"[HybridAdaptiveSigmas] Detail Preservation raised final sigma to {new_final:.4f}.")
 
             if low_denoise_color_fix > 0.0 and final_sigmas.shape[0] > 1:
                 final_sigma = final_sigmas[-1].item()
                 pre_final_sigma = final_sigmas[-2].item()
                 
-                # A safe target is a fraction of the second-to-last sigma
-                target_sigma = pre_final_sigma * 0.25 
-                
-                # Interpolate towards the target
+                target_sigma = pre_final_sigma * 0.25
                 new_final = final_sigma + (target_sigma - final_sigma) * low_denoise_color_fix
-                
-                # Ensure the new final sigma is still less than the previous one
                 new_final = min(new_final, pre_final_sigma - 1e-5)
                 
                 final_sigmas[-1] = new_final
-                print(f"Hybrid Sigma Scheduler INFO: Color Fix active. Final sigma adjusted to {new_final:.4f}.")
+                logging.info(f"[HybridAdaptiveSigmas] Color Fix active. Final sigma adjusted to {new_final:.4f}.")
 
             if reverse_sigmas:
                 final_sigmas = torch.flip(final_sigmas, dims=[0])
-                print("Hybrid Sigma Scheduler INFO: Schedule reversed (experimental mode).")
+                logging.info("[HybridAdaptiveSigmas] Schedule reversed (experimental mode).")
 
             actual_step_count = max(0, final_sigmas.shape[0] - 1)
             
@@ -699,30 +1044,39 @@ class HybridAdaptiveSigmas:
             visualization_data = "{}"
             if enable_visualization:
                 visualization_data = self._generate_visualization_data(final_sigmas)
-                print(f"Hybrid Sigma Scheduler INFO: Visualization data generated ({len(final_sigmas)} points)")
+                logging.info(f"[HybridAdaptiveSigmas] Visualization data generated ({len(final_sigmas)} points)")
             
             # --- 6. Comparison Mode (Optional) ---
             if comparison_mode and mode_b != mode:
-                print(f"Hybrid Sigma Scheduler INFO: Comparison mode active - generating secondary schedule with {mode_b}")
+                logging.info(f"[HybridAdaptiveSigmas] Comparison mode active - generating secondary schedule with {mode_b}")
                 comparison_sigmas = self._get_sigmas(actual_step_count, mode_b, sigma_min, sigma_max, **common_params)
                 
-                # Add comparison data to visualization
                 if enable_visualization:
                     viz_dict = json.loads(visualization_data)
                     viz_dict["comparison_sigmas"] = comparison_sigmas.cpu().tolist()
                     viz_dict["comparison_mode"] = mode_b
                     visualization_data = json.dumps(viz_dict, indent=2)
             
-            print(f"Hybrid Sigma Scheduler INFO: Final schedule has {actual_step_count} steps.")
-            print(f"Hybrid Sigma Scheduler INFO: Preset: {preset}, Mode: {mode}, Denoise: {denoise_mode}")
+            logging.info(f"[HybridAdaptiveSigmas] Final schedule has {actual_step_count} steps.")
+            logging.info(f"[HybridAdaptiveSigmas] Preset: {preset}, Mode: {mode}, Denoise: {denoise_mode}")
             
             return (final_sigmas, actual_step_count, schedule_info, visualization_data)
 
         except Exception as e:
-            import traceback
-            print(f"ERROR in HybridAdaptiveSigmas.generate: {e}")
-            traceback.print_exc()
-            raise e
+            logging.error(f"[HybridAdaptiveSigmas] Processing failed: {e}")
+            logging.debug(traceback.format_exc())
+            print(f"[HybridAdaptiveSigmas] ⚠️ Error encountered, returning empty schedule. Check console for details.")
+            # Return neutral, valid output on failure
+            return (torch.tensor([], device=device), 0, "{}", "{}")
 
-NODE_CLASS_MAPPINGS = {"HybridAdaptiveSigmas": HybridAdaptiveSigmas}
-NODE_DISPLAY_NAME_MAPPINGS = {"HybridAdaptiveSigmas": "Hybrid Sigma Scheduler"}
+# =================================================================================
+# == Node Registration                                                           ==
+# =================================================================================
+
+NODE_CLASS_MAPPINGS = {
+    "HybridAdaptiveSigmas": HybridAdaptiveSigmas
+}
+
+NODE_DISPLAY_NAME_MAPPINGS = {
+    "HybridAdaptiveSigmas": "MD: Hybrid Sigma Scheduler"
+}

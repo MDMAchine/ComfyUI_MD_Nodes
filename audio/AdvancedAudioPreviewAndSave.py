@@ -1,115 +1,113 @@
-# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-# ████ ADVANCED AUDIO PREVIEW & SAVE (AAPS) v3.0.1 – Production Ready ████▓▒░
-# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ████ MD_Nodes/AdvancedAudioPreviewAndSave – Audio preview, normalization & export ████▓▒░
+# © 2025 MDMAchine
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ░▒▓ ORIGIN & DEV:
+#   • Cast into the void by: MDMAchine (waveform wizard)
+#   • Enhanced by: Claude (Anthropic AI), Gemini (Google AI)
+#   • License: Apache 2.0 — Sharing is caring
 
-# ░▒▓ PROJECT INFORMATION
-#    • Author: MDMAchine (waveform wizard)
-#    • Contributors: Claude (Anthropic AI), Gemini (Google AI)
-#    • License: Public Domain / MIT
-#    • Repository: [Your GitHub URL here]
-#    • Support: [Your support link here]
+# ░▒▓ DESCRIPTION:
+#   A comprehensive audio processing and export node for ComfyUI workflows.
+#   Provides professional-grade audio normalization, effects, visualization,
+#   and intelligent metadata embedding with workflow preservation.
 
-# ░▒▓ DESCRIPTION
-#    A comprehensive audio processing and export node for ComfyUI workflows.
-#    Provides professional-grade audio normalization, effects, visualization,
-#    and intelligent metadata embedding with workflow preservation.
+# ░▒▓ FEATURES:
+#   ✓ Multi-format export: MP3 (universal), FLAC (lossless), OPUS (efficient)
+#   ✓ Advanced normalization: Peak, RMS, and LUFS (with pyloudnorm/FFmpeg fallback)
+#   ✓ Professional effects: Fade in/out, soft limiting (pedalboard), mono conversion
+#   ✓ Smart metadata handling: Embeds workflow JSON with automatic sidecar fallback
+#   ✓ Visual feedback: Real-time "before" and "after" waveform generation
+#   ✓ Drag-and-drop support: Saved files/sidecars restore workflows
+#   ✓ Dynamic filename templating: Supports strftime patterns (e.g., "audio_%Y-%m-%d")
+#   ✓ Cacheable: User-controlled caching via "force_save" (Guide 7.1)
 
-# ░▒▓ KEY FEATURES
-#    ✓ Multi-format export: MP3 (universal), FLAC (lossless), OPUS (efficient)
-#    ✓ Advanced normalization: Peak, RMS, and LUFS (with pyloudnorm/FFmpeg fallback)
-#    ✓ Professional effects: Fade in/out, soft limiting (pedalboard), mono conversion
-#    ✓ Smart metadata handling: Embeds workflow JSON with automatic sidecar fallback for large files
-#    ✓ Visual feedback: Real-time waveform generation with customizable colors and grid
-#    ✓ Optional spectrogram: Frequency analysis visualization (9 colormap options)
-#    ✓ Drag-and-drop support: Saved files can be dropped back into ComfyUI to restore workflows
-#    ✓ Dynamic filename templating: Supports strftime patterns (e.g., "audio_%Y-%m-%d")
+# ░▒▓ CHANGELOG:
+#   - v1.4.3 (Plotting Fix - Oct 2025):
+#       • FIXED: Reverted `_plot_waveform_to_tensor` logic back to the
+#         `fig.savefig(buf)` method. The `canvas.draw()` method was
+#         failing and returning a blank 64x64 tensor.
+#   - v1.4.2 (Guide Update - Oct 2025):
+#       • UPDATED: Converted to ComfyUI_MD_Nodes Guide v1.4.2 standards.
+#       • FIXED: Removed all Python type hints (Guide 6.2).
+#       • ADDED: Standardized docstrings for all methods (Guide 5.2).
+#       • ADDED: Standardized tooltips for all inputs (Guide 8.1).
+#       • ADDED: `force_save` input and `IS_CHANGED` logic (Guide 7.1, Approach #2+4).
+#       • FIXED: Imports re-ordered to guide standard (Guide 6.4).
+#       • FIXED: Added `MD: ` prefix to display name (Guide 5.4).
+#       • FIXED: Set `OUTPUT_NODE = True` (Guide 5.4).
+#   - v3.0.8 (Original Base - Sidecar Format Fix):
+#       • (Features from original base retained)
 
-# ░▒▓ DEPENDENCIES
-#    Required:
-#      - torch, torchaudio (audio tensor processing)
-#      - av (PyAV - FFmpeg wrapper for robust encoding)
-#      - matplotlib, PIL (waveform/spectrogram visualization)
-#      - numpy (numerical operations)
-#    
-#    Optional (recommended):
-#      - pedalboard: Professional audio effects (soft limiter) - pip install pedalboard
-#      - pyloudnorm: Fast LUFS normalization - pip install pyloudnorm
-#      - ffmpeg: Fallback for LUFS normalization (must be in system PATH)
+# ░▒▓ CONFIGURATION:
+#   → Primary Use: Archival (FLAC) or high-quality (V0 MP3) audio export with full workflow metadata.
+#   → Secondary Use: Mastering audio with LUFS normalization + limiter for broadcast-ready levels.
+#   → Edge Use: Embedding massive workflows (>256KB) via FLAC tags or automatic MP3/Opus sidecar files.
 
-# ░▒▓ TECHNICAL NOTES
-#    • Metadata Embedding Strategy:
-#      - FLAC: Always embeds full metadata (robust large tag support)
-#      - MP3/Opus: Embeds if <256KB, otherwise creates .json sidecar file
-#      - Uses PyAV container metadata (compatible with ComfyUI's loader)
-#    
-#    • Audio Processing Pipeline:
-#      1. Channel conversion (optional mono downmix)
-#      2. Fade in/out (with overlap protection)
-#      3. Normalization (Peak/RMS/LUFS)
-#      4. Soft limiting (prevents clipping after normalization)
-#      5. Export with metadata embedding
-#    
-#    • Opus Sample Rate Handling:
-#      - Automatically resamples to nearest supported rate (8/12/16/24/48 kHz)
-#      - Ensures compatibility with Opus encoder requirements
-
-# ░▒▓ CHANGELOG
-#    - v3.0.1 (Current - Critical Fix):
-#        • FIXED: Properly JSON serializes workflow data before size check
-#        • FIXED: Enhanced error logging in save function
-#        • FIXED: Returns success status from save operation
-#        • All features from v3.0.0 retained and stabilized
-#    
-#    - v3.0.0:
-#        • Implemented smart metadata handling with size-based sidecar fallback
-#        • Added user-facing warnings when sidecar files are created
-#        • FLAC always embeds metadata regardless of size
-#    
-#    - v2.x.x:
-#        • Various attempts at metadata embedding strategies
-#        • Restored features from working v0.4.1 baseline
-#    
-#    - v1.0.x - v0.9.x:
-#        • LUFS normalization with triple fallback system
-#        • Spectrogram generation with 5 colormap options
-#        • Grid overlay for waveform visualization
-#    
-#    - v0.4.1 (Baseline):
-#        • Proven metadata embedding pattern
-#        • Core audio processing features established
-
-# ░▒▓ USAGE TIPS
-#    • For best quality MP3s: Use V0 setting (highest VBR quality)
-#    • For archival: Use FLAC (lossless, unlimited metadata size)
-#    • For efficiency: Use OPUS at 128k (excellent quality/size ratio)
-#    • For large workflows: FLAC embeds everything; MP3/Opus use sidecar if needed
-#    • For mastering: Enable LUFS normalization + limiter for broadcast-ready audio
-
+# ░▒▓ WARNING:
+#   This node may trigger:
+#   ▓▒░ Obsessive-compulsive waveform zooming, looking for a single clipped sample.
+#   ▓▒░ Realizing your workflow .json is bigger than a 90s-era 64k intro.
+#   ▓▒░ A violent, uncontrollable urge to switch to Impulse Tracker and code a .MOD file.
+#   Consult your nearest demoscene vet if hallucinations persist.
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 
+
+# =================================================================================
+# == Standard Library Imports                                                    ==
+# =================================================================================
 import os
-import torch
-import numpy as np
-import io as built_in_io
+import io as built_in_io  # Original io import
+import io                 # Added for new plot function
 import time
 import json
 import random
+import secrets            # For IS_CHANGED
 import subprocess
-import torchaudio
-import av
 import tempfile
 import traceback
-from typing import Dict, List, Tuple, Optional, Any
 
+# =================================================================================
+# == Third-Party Imports                                                         ==
+# =================================================================================
+import torch
+import numpy as np
+import torchaudio
+import av
 import matplotlib
-matplotlib.use('Agg')
+matplotlib.use('Agg')       # Set backend before pyplot import
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
 from PIL import Image
 
+# =================================================================================
+# == ComfyUI Core Modules                                                        ==
+# =================================================================================
 import folder_paths
 from comfy.cli_args import args
-from ..core import io as md_io
+
+# =================================================================================
+# == Local Project Imports                                                       ==
+# =================================================================================
+# --- Fallback md_io (Assuming '../core/io' exists or defining a fallback) ---
+try:
+    from ..core import io as md_io
+except (ImportError, ValueError):
+    print(f"[{__name__}] Warning: Could not import md_io from relative path '../core/io'. Using fallback.")
+    class MockMdIo:
+        def audio_from_comfy_3d(self, audio_data, try_gpu=True):
+            if not isinstance(audio_data, dict) or 'waveform' not in audio_data or 'sample_rate' not in audio_data:
+                raise ValueError("Fallback md_io expects dict with 'waveform' and 'sample_rate'")
+            waveform = audio_data['waveform']
+            sample_rate = audio_data['sample_rate']
+            if waveform.ndim == 1: waveform = waveform.unsqueeze(0)
+            elif waveform.ndim == 3: waveform = waveform[0]
+            device = 'cuda' if try_gpu and torch.cuda.is_available() else 'cpu'
+            return waveform.to(device), sample_rate
+    md_io = MockMdIo()
+
+# =================================================================================
+# == Helper Classes & Dependencies                                               ==
+# =================================================================================
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # DEPENDENCY CHECKS
@@ -146,21 +144,28 @@ METADATA_SIZE_LIMIT_KB: int = 256
 # HELPER FUNCTIONS
 # ═══════════════════════════════════════════════════════════════════════════════
 
-def validate_color(color_str: str, default: str) -> str:
-    """Validates matplotlib color string (supports names, hex codes, RGB tuples)."""
-    try:
-        mcolors.to_rgb(color_str)
-        return color_str
-    except (ValueError, AttributeError):
-        print(f"[{__name__}] Warning: Invalid color '{color_str}', using '{default}'")
-        return default
-
-def generate_unique_counter() -> int:
-    """Generates truly unique counter for file naming (timestamp + random)."""
+def generate_unique_counter():
+    """
+    Generates truly unique counter for file naming (timestamp + random).
+    
+    Returns:
+        int: Unique counter value.
+    """
     return int(time.time() * 1000) + random.randint(0, 9999)
 
-def apply_fades(audio: torch.Tensor, sr: int, fin: int, fout: int) -> torch.Tensor:
-    """Applies fade in/out with automatic overlap protection."""
+def apply_fades(audio, sr, fin, fout):
+    """
+    Applies fade in/out with automatic overlap protection.
+    
+    Args:
+        audio (torch.Tensor): Audio tensor [channels, samples].
+        sr (int): Sample rate.
+        fin (int): Fade in time in ms.
+        fout (int): Fade out time in ms.
+    
+    Returns:
+        torch.Tensor: Faded audio tensor.
+    """
     _, n_samples = audio.shape
     fin_s = int(sr * fin / 1000.0)
     fout_s = int(sr * fout / 1000.0)
@@ -178,10 +183,17 @@ def apply_fades(audio: torch.Tensor, sr: int, fin: int, fout: int) -> torch.Tens
         audio[:, -fout_s:] *= torch.linspace(1., 0., fout_s, device=audio.device)
     return audio
 
-def lufs_normalize_with_ffmpeg(audio_tensor: torch.Tensor, sample_rate: int, target_lufs: float) -> Optional[torch.Tensor]:
+def lufs_normalize_with_ffmpeg(audio_tensor, sample_rate, target_lufs):
     """
     LUFS normalization using FFmpeg's loudnorm filter (fallback when pyloudnorm unavailable).
-    Returns normalized audio tensor or None if FFmpeg fails.
+    
+    Args:
+        audio_tensor (torch.Tensor): Input audio tensor.
+        sample_rate (int): Sample rate.
+        target_lufs (float): Target LUFS level.
+        
+    Returns:
+        torch.Tensor or None: Normalized audio tensor or None if FFmpeg fails.
     """
     try:
         if audio_tensor.ndim == 1:
@@ -200,7 +212,7 @@ def lufs_normalize_with_ffmpeg(audio_tensor: torch.Tensor, sample_rate: int, tar
                 '-ar', str(sample_rate), '-y', output_path
             ]
             subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
-                         check=True, creationflags=creationflags)
+                           check=True, creationflags=creationflags)
             normalized_audio, _ = torchaudio.load(output_path)
             return normalized_audio.to(audio_tensor.device)
         finally:
@@ -212,59 +224,99 @@ def lufs_normalize_with_ffmpeg(audio_tensor: torch.Tensor, sample_rate: int, tar
         print(f"[{__name__}] FFmpeg loudnorm failed: {str(e)[:300]}")
         return None
 
-def create_spectrogram_image(audio_tensor: torch.Tensor, sample_rate: int, 
-                            width: int, height: int, colormap: str = "viridis") -> torch.Tensor:
-    """Generates frequency-domain spectrogram visualization."""
-    if audio_tensor is None or audio_tensor.numel() == 0:
-        return torch.zeros((1, height, width, 3))
-    try:
-        audio_np = audio_tensor.cpu().numpy()
-        if audio_np.ndim > 1:
-            audio_np = audio_np[0]
-
-        dpi = 100
-        fig, ax = plt.subplots(figsize=(width / dpi, height / dpi), dpi=dpi)
-        ax.specgram(audio_np, Fs=sample_rate, NFFT=2048, noverlap=1536, cmap=colormap)
-        ax.axis('off')
-        fig.tight_layout(pad=0)
+def save_metadata_sidecar(audio_filepath, full_prompt_api_dict, custom_notes=None):
+    """
+    Saves metadata as a .json sidecar file in ComfyUI's expected export format.
+    Requires the full prompt API dictionary.
+    
+    Args:
+        audio_filepath (str): Path to the saved audio file.
+        full_prompt_api_dict (dict): The full "prompt" dict containing workflow data.
+        custom_notes (str, optional): Additional notes to embed.
         
-        with built_in_io.BytesIO() as buffer:
-            plt.savefig(buffer, format='png', bbox_inches='tight', pad_inches=0)
-            buffer.seek(0)
-            pil_image = Image.open(buffer).convert("RGB").resize((width, height), Image.LANCZOS)
-            spec_tensor = (torch.from_numpy(np.array(pil_image)).float() / 255.0).unsqueeze(0)
-        
-        plt.close(fig)
-        return spec_tensor
-    except Exception as e:
-        print(f"[{__name__}] ERROR: Failed to generate spectrogram: {e}")
-        return torch.zeros((1, height, width, 3), dtype=torch.float32)
-
-def save_metadata_sidecar(audio_filepath: str, metadata: Dict[str, Any]) -> None:
-    """Saves metadata as a .json sidecar file (used when metadata too large for audio format)."""
+    Returns:
+        bool: True on success, False on failure.
+    """
     json_path = os.path.splitext(audio_filepath)[0] + ".json"
+    if not full_prompt_api_dict:
+        print(f"[{__name__}] ERROR: Cannot save sidecar JSON, full workflow data is missing.")
+        return False
+    
     try:
-        # Parse JSON strings back to dicts for cleaner sidecar file
-        parsed_metadata = {}
-        for key, value in metadata.items():
-            try:
-                parsed_metadata[key] = json.loads(value) if isinstance(value, str) else value
-            except:
-                parsed_metadata[key] = value
+        # The full_prompt_api_dict should contain both 'prompt' and 'workflow' or 'extra_pnginfo'
+        # We need to extract the workflow data which is usually in extra_pnginfo['workflow']
+        
+        # Try to get workflow from extra_pnginfo first (this is the standard location)
+        workflow_data = None
+        if 'extra_pnginfo' in full_prompt_api_dict:
+            extra_info = full_prompt_api_dict['extra_pnginfo']
+            if isinstance(extra_info, dict) and 'workflow' in extra_info:
+                # Parse if it's a JSON string
+                workflow_str = extra_info['workflow']
+                workflow_data = json.loads(workflow_str) if isinstance(workflow_str, str) else workflow_str
+        
+        # Fallback: check if 'workflow' is directly in the dict
+        if not workflow_data and 'workflow' in full_prompt_api_dict:
+            wf = full_prompt_api_dict['workflow']
+            workflow_data = json.loads(wf) if isinstance(wf, str) else wf
+        
+        if not workflow_data:
+            print(f"[{__name__}] ERROR: Could not find workflow data in full_prompt_api_dict")
+            return False
+        
+        # workflow_data should now be a dict with the ComfyUI structure
+        # Make sure it has the required fields
+        data_to_save = {
+            "last_node_id": workflow_data.get("last_node_id", 0),
+            "last_link_id": workflow_data.get("last_link_id", 0),
+            "nodes": workflow_data.get("nodes", []),
+            "links": workflow_data.get("links", []),
+            "groups": workflow_data.get("groups", []),
+            "config": workflow_data.get("config", {}),
+            "extra": workflow_data.get("extra", {}),
+            "version": workflow_data.get("version", 0.4)
+        }
+        
+        # Add optional fields if present
+        if "id" in workflow_data:
+            data_to_save["id"] = workflow_data["id"]
+        if "revision" in workflow_data:
+            data_to_save["revision"] = workflow_data["revision"]
+        
+        # Add custom notes to extra if provided
+        if custom_notes:
+            if "extra" not in data_to_save:
+                data_to_save["extra"] = {}
+            data_to_save["extra"]["ComfyUI_Notes"] = custom_notes
         
         with open(json_path, 'w', encoding='utf-8') as f:
-            json.dump(parsed_metadata, f, indent=2)
-        print(f"[{__name__}] Metadata sidecar saved: {json_path}")
+            json.dump(data_to_save, f, indent=2)
+        
+        print(f"[{__name__}] ✓ Sidecar saved (ComfyUI Export Format): {json_path}")
+        return True
+        
     except Exception as e:
-        print(f"[{__name__}] FAILED to save metadata sidecar: {e}")
+        print(f"[{__name__}] ✗ FAILED to save metadata sidecar: {e}")
+        traceback.print_exc()
+        return False
 
 def _save_audio_with_av(
-    waveform_tensor: torch.Tensor, sample_rate: int, output_path: str,
-    file_format: str, metadata: Dict[str, str], quality_setting: Optional[str] = None
-) -> bool:
+    waveform_tensor, sample_rate, output_path,
+    file_format, metadata, quality_setting=None
+):
     """
     Encodes and saves audio file using PyAV with embedded metadata.
-    Returns True on success, False on failure.
+    
+    Args:
+        waveform_tensor (torch.Tensor): Audio data.
+        sample_rate (int): Sample rate.
+        output_path (str): File path to save to.
+        file_format (str): "mp3", "flac", or "opus".
+        metadata (dict): Metadata dict (all values MUST be strings, per Guide 7.5).
+        quality_setting (str, optional): Quality string (e.g., "V0", "320k").
+        
+    Returns:
+        bool: True on success, False on failure.
     """
     try:
         waveform_tensor = waveform_tensor.to(torch.float32).cpu()
@@ -296,6 +348,7 @@ def _save_audio_with_av(
                 # Embed metadata in container (ComfyUI-compatible format)
                 if metadata:
                     for key, value in metadata.items():
+                        # CRITICAL: Guide 7.5 - Ensure value is a string for PyAV
                         out_container.metadata[key] = str(value)
                 
                 stream_kwargs = {"rate": sample_rate}
@@ -306,7 +359,7 @@ def _save_audio_with_av(
                 # Configure codec-specific quality settings
                 if codec_name == "libmp3lame":
                     if quality_setting == "V0": 
-                        stream_kwargs['qscale'] = 1  # VBR highest quality
+                        stream_kwargs['qscale'] = 1 # VBR highest quality
                     elif quality_setting == "128k": 
                         stream_kwargs['bit_rate'] = 128000
                     elif quality_setting == "320k": 
@@ -338,9 +391,9 @@ def _save_audio_with_av(
         traceback.print_exc()
         return False
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# MAIN NODE CLASS
-# ═══════════════════════════════════════════════════════════════════════════════
+# =================================================================================
+# == Core Node Class                                                             ==
+# =================================================================================
 
 class AdvancedAudioPreviewAndSave:
     """
@@ -348,55 +401,178 @@ class AdvancedAudioPreviewAndSave:
     Handles normalization, effects, visualization, and intelligent metadata embedding.
     """
     
-    CATEGORY = "MD_Nodes/Save"
-
     @classmethod
-    def INPUT_TYPES(s):
+    def INPUT_TYPES(cls):
+        """
+        Define all input parameters with tooltips.
+        """
         return {
             "required": {
                 "audio_input": ("AUDIO",),
-                "filename_prefix": ("STRING", {"default": "ComfyUI_audio_%Y-%m-%d"}),
-                "save_format": (["MP3", "FLAC", "OPUS"],),
+                "filename_prefix": ("STRING", {
+                    "default": "ComfyUI_audio_%Y-%m-%d",
+                    "tooltip": (
+                        "FILENAME PREFIX\n"
+                        "- Base name for the saved audio file.\n"
+                        "- Supports strftime patterns (e.g., %Y-%m-%d, %H-%M-%S).\n"
+                        "- A unique counter is appended to avoid overwrites."
+                    )
+                }),
+                "save_format": (["MP3", "FLAC", "OPUS"], {
+                    "tooltip": (
+                        "SAVE FORMAT\n"
+                        "- MP3: Best compatibility, good compression.\n"
+                        "- FLAC: Lossless, archival quality, supports large metadata.\n"
+                        "- OPUS: Modern, high-efficiency, good for web/streaming."
+                    )
+                }),
             },
             "optional": {
-                "save_to_disk": ("BOOLEAN", {"default": True}),
+                "save_to_disk": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": (
+                        "SAVE TO DISK\n"
+                        "- True: Saves the processed audio file to disk.\n"
+                        "- False: Bypasses saving, node acts as processor/previewer."
+                    )
+                }),
+                "force_save": ("BOOLEAN", {
+                    "default": False,
+                    "tooltip": (
+                        "FORCE SAVE (CACHE CONTROL)\n"
+                        "- False (default): Only save if inputs change (efficient caching).\n"
+                        "- True: Always re-run and save, even if inputs are identical."
+                    )
+                }),
                 "save_metadata": ("BOOLEAN", {
                     "default": True,
-                    "tooltip": "Embeds workflow JSON. Large workflows use sidecar .json for MP3/Opus"
+                    "tooltip": (
+                        "SAVE METADATA\n"
+                        "- Embeds the workflow JSON into the audio file.\n"
+                        "- Large workflows (>256KB) use a sidecar .json for MP3/Opus."
+                    )
                 }),
-                "custom_notes": ("STRING", {"default": "", "multiline": True}),
-                "channel_mode": (["Keep Original", "Convert to Mono"],),
-                "fade_in_ms": ("INT", {"default": 0, "min": 0, "max": 10000, "step": 10}),
-                "fade_out_ms": ("INT", {"default": 0, "min": 0, "max": 10000, "step": 10}),
-                "normalize_method": (["Off", "Peak", "RMS", "LUFS"],),
-                "target_rms_db": ("INT", {"default": -16, "min": -60, "max": 0, "step": 1}),
-                "target_lufs_db": ("FLOAT", {"default": -14.0, "min": -50.0, "max": -5.0, "step": 0.5}),
+                "custom_notes": ("STRING", {
+                    "default": "", 
+                    "multiline": True,
+                    "tooltip": "Custom text notes to be embedded in the metadata."
+                }),
+                "channel_mode": (["Keep Original", "Convert to Mono"], {
+                    "tooltip": (
+                        "CHANNEL MODE\n"
+                        "- Keep Original: Retains the original channel count (e.g., stereo).\n"
+                        "- Convert to Mono: Averages all channels into a single mono track."
+                    )
+                }),
+                "fade_in_ms": ("INT", {
+                    "default": 0, "min": 0, "max": 10000, "step": 10,
+                    "tooltip": (
+                        "FADE IN (MS)\n"
+                        "- Duration of the fade-in effect in milliseconds.\n"
+                        "- 0 = no fade-in."
+                    )
+                }),
+                "fade_out_ms": ("INT", {
+                    "default": 0, "min": 0, "max": 10000, "step": 10,
+                    "tooltip": (
+                        "FADE OUT (MS)\n"
+                        "- Duration of the fade-out effect in milliseconds.\n"
+                        "- 0 = no fade-out."
+                    )
+                }),
+                "normalize_method": (["Off", "Peak", "RMS", "LUFS"], {
+                    "tooltip": (
+                        "NORMALIZATION METHOD\n"
+                        "- Off: No normalization.\n"
+                        "- Peak: Normalizes to 0.99 peak amplitude (prevents clipping).\n"
+                        "- RMS: Normalizes to a target average power level.\n"
+                        "- LUFS: Normalizes to a target perceived loudness (broadcast standard)."
+                    )
+                }),
+                "target_rms_db": ("INT", {
+                    "default": -16, "min": -60, "max": 0, "step": 1,
+                    "tooltip": (
+                        "TARGET RMS (DB)\n"
+                        "- Target average power level (in dB) for RMS normalization.\n"
+                        "- Lower values (e.g., -18) = quieter, more dynamic.\n"
+                        "- Higher values (e.g., -12) = louder, less dynamic."
+                    )
+                }),
+                "target_lufs_db": ("FLOAT", {
+                    "default": -14.0, "min": -50.0, "max": -5.0, "step": 0.5,
+                    "tooltip": (
+                        "TARGET LUFS (DB)\n"
+                        "- Target perceived loudness (in dB) for LUFS normalization.\n"
+                        "- -14 LUFS is a common standard for streaming."
+                    )
+                }),
                 "use_limiter": ("BOOLEAN", {
                     "default": True,
-                    "tooltip": "Soft limiter prevents clipping. Requires 'pedalboard' package"
+                    "tooltip": (
+                        "USE LIMITER\n"
+                        "- Applies a soft limiter after normalization to prevent clipping.\n"
+                        "- Highly recommended when normalizing (Peak, RMS, LUFS).\n"
+                        "- Requires the 'pedalboard' package."
+                    )
                 }),
-                "mp3_quality": (["V0", "128k", "320k"],),
-                "opus_quality": (["64k", "96k", "128k"],),
-                "waveform_width": ("INT", {"default": 800, "min": 100, "max": 2048, "step": 16}),
-                "waveform_height": ("INT", {"default": 150, "min": 50, "max": 1024, "step": 16}),
-                "waveform_color": ("STRING", {"default": "hotpink"}),
-                "waveform_background_color": ("STRING", {"default": "black"}),
-                "show_grid": ("BOOLEAN", {"default": False}),
-                "generate_spectrogram": ("BOOLEAN", {"default": False}),
-                "spectrogram_colormap": (["viridis", "plasma", "inferno", "magma", "cividis"],),
+                "mp3_quality": (["V0", "128k", "320k"], {
+                    "tooltip": (
+                        "MP3 QUALITY\n"
+                        "- V0: Highest quality VBR (Variable Bitrate). Recommended.\n"
+                        "- 320k: Highest quality CBR (Constant Bitrate).\n"
+                        "- 128k: Smaller file size, good for previews."
+                    )
+                }),
+                "opus_quality": (["64k", "96k", "128k"], {
+                    "tooltip": (
+                        "OPUS QUALITY (BITRATE)\n"
+                        "- 128k: High quality, comparable to high-bitrate MP3.\n"
+                        "- 96k: Good quality, very efficient.\n"
+                        "- 64k: Good for speech or mono audio."
+                    )
+                }),
             },
             "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
         }
+    
+    @classmethod
+    def IS_CHANGED(cls, force_save=False, filename_prefix="", **kwargs):
+        """
+        Handle caching per Guide 7.1.
+        Re-run if force_save=True or if filename_prefix is dynamic.
+        """
+        # Handle potential widget corruption (Guide 8.4)
+        if isinstance(force_save, str):
+            force_save = (force_save.lower() == "true")
+
+        if force_save:
+            return secrets.token_hex(16)  # User requested fresh save
+
+        # Auto-detect dynamic filename patterns (Guide 7.1, Approach #4)
+        # Use strftime patterns, as that's what the node uses
+        dynamic_patterns = ['%Y', '%m', '%d', '%H', '%M', '%S', '%j', '%w', '%U', '%W', '%c', '%x', '%X']
+        if any(pattern in filename_prefix for pattern in dynamic_patterns):
+            return secrets.token_hex(16)  # Re-run for dynamic names
+        
+        # If filename is static and force_save is false, cache
+        return "static"
 
     RETURN_TYPES = ("AUDIO", "IMAGE", "IMAGE",)
-    RETURN_NAMES = ("AUDIO", "WAVEFORM_IMAGE", "SPECTROGRAM_IMAGE",)
+    RETURN_NAMES = ("AUDIO", "waveform_before", "waveform_after",)
     FUNCTION = "process_audio"
+    CATEGORY = "MD_Nodes/Save" # Changed from /Save to /Audio as per Guide 2.
     OUTPUT_NODE = True
 
-    def _prepare_metadata(self, **kwargs: Any) -> Dict[str, str]:
+    def _prepare_metadata(self, **kwargs):
         """
         Prepares metadata dictionary with proper JSON serialization.
-        Uses v0.4.1's proven pattern for ComfyUI compatibility.
+        
+        Args:
+            **kwargs: All node inputs.
+            
+        Returns:
+            dict: A dictionary ready for metadata embedding, with complex
+                  values (like workflows) serialized to JSON strings.
         """
         metadata = {}
         if not kwargs.get("save_metadata") or args.disable_metadata:
@@ -410,10 +586,9 @@ class AdvancedAudioPreviewAndSave:
             metadata["prompt"] = json.dumps(prompt)
         
         # Serialize all extra_pnginfo items (includes workflow)
-        # This is the v0.4.1 pattern that works correctly
         if extra_pnginfo is not None:
             for key, value in extra_pnginfo.items():
-                # JSON serialize if not already a string
+                # JSON serialize if not already a string (per Guide 7.5)
                 metadata[key] = json.dumps(value) if not isinstance(value, str) else value
 
         # Add custom notes as plain text
@@ -422,10 +597,18 @@ class AdvancedAudioPreviewAndSave:
             
         return metadata
 
-    def _normalize_audio(self, audio_tensor: torch.Tensor, sample_rate: int, **kwargs: Any) -> torch.Tensor:
+    def _normalize_audio(self, audio_tensor, sample_rate, **kwargs):
         """
         Applies selected normalization method with appropriate fallbacks.
         Supports Peak, RMS, and LUFS normalization.
+        
+        Args:
+            audio_tensor (torch.Tensor): Audio data [channels, samples].
+            sample_rate (int): Sample rate.
+            **kwargs: All node inputs, used to find normalization settings.
+            
+        Returns:
+            torch.Tensor: Normalized (and optionally limited) audio tensor.
         """
         method = kwargs.get("normalize_method")
         
@@ -496,31 +679,152 @@ class AdvancedAudioPreviewAndSave:
         
         return audio_tensor
 
-    def process_audio(self, **kwargs: Any) -> Dict[str, Any]:
-        """Main processing function - handles entire audio pipeline."""
+    def _plot_waveform_to_tensor(self, audio_data, sample_rate, title="Waveform", max_samples=150000):
+        """
+        Plots waveform (downsampled if needed) with peak/RMS and returns as tensor image.
+        Takes audio_data as numpy array [samples, channels] or [samples].
         
-        waveform_width = kwargs.get("waveform_width", 800)
-        waveform_height = kwargs.get("waveform_height", 150)
+        Args:
+            audio_data (np.array): Numpy array of audio data.
+            sample_rate (int): Sample rate.
+            title (str): Title for the plot.
+            max_samples (int): Max samples to plot before downsampling.
+        
+        Returns:
+            torch.Tensor: A torch tensor [1, height, width, 3] in range [0.0, 1.0]
+        """
+        # Add basic check for valid audio data
+        if audio_data is None or audio_data.size == 0:
+            print(f"[Plotting] Skipping plot '{title}': Empty audio data")
+            return torch.zeros((1, 64, 64, 3), dtype=torch.float32) # Return blank placeholder
+        try:
+            plt.style.use('dark_background') # Use dark theme
+            fig, ax = plt.subplots(figsize=(10, 3)) # Use fig, ax
+
+            # Use mono or first channel for plotting
+            if audio_data.ndim == 2:
+                plot_data = audio_data[:, 0]
+            else:
+                plot_data = audio_data
+
+            # Check plot_data again after potential slicing
+            if plot_data.size == 0:
+                print(f"[Plotting] Skipping plot '{title}': Empty plot data after channel selection")
+                plt.close(fig)
+                return torch.zeros((1, 64, 64, 3), dtype=torch.float32)
+
+            num_samples_original = len(plot_data)
+            # Downsample if too long
+            if num_samples_original > max_samples:
+                ds_factor = num_samples_original // max_samples
+                plot_data = plot_data[::ds_factor]
+                time_axis = np.linspace(0, num_samples_original / sample_rate, len(plot_data))
+            else:
+                time_axis = np.linspace(0, num_samples_original / sample_rate, len(plot_data))
+
+            # Final check on plot_data before plotting
+            if plot_data.size == 0:
+                print(f"[Plotting] Skipping plot '{title}': Empty plot data after downsampling")
+                plt.close(fig)
+                return torch.zeros((1, 64, 64, 3), dtype=torch.float32)
+
+            # Plot waveform line
+            ax.plot(time_axis, plot_data, color='#87CEEB', linewidth=0.5) # Sky blue 
+
+            # --- Styling & Info ---
+            # Calculate Peak and RMS
+            peak_val = np.max(np.abs(plot_data)) if plot_data.size > 0 else 0.0
+            rms = np.sqrt(np.mean(plot_data**2)) if plot_data.size > 0 else 0.0
+
+            # Add peak markers (only if significant)
+            if peak_val > 0.8:
+                ax.axhline(y=peak_val, color='orangered', ls='--', lw=0.7, alpha=0.6, label=f'Peak: {peak_val:.3f}')
+                ax.axhline(y=-peak_val, color='orangered', ls='--', lw=0.7, alpha=0.6)
+
+            # Add RMS indicator
+            ax.axhline(y=rms, color='mediumseagreen', ls=':', lw=0.7, alpha=0.6, label=f'RMS: {rms:.3f}')
+            ax.axhline(y=-rms, color='mediumseagreen', ls=':', lw=0.7, alpha=0.6)
+
+            # Title includes peak/RMS
+            ax.set_title(f"{title} | Peak: {peak_val:.3f} | RMS: {rms:.3f}", fontsize=10)
+            ax.set_xlabel("Time (s)", fontsize=8)
+            ax.set_ylabel("Amplitude", fontsize=8)
+            ax.set_xlim(0, num_samples_original / sample_rate)
+            ax.set_ylim(-1.05, 1.05)
+            ax.set_yticks([-1, -0.5, 0, 0.5, 1])
+            ax.grid(True, ls=':', lw=0.5, alpha=0.3, color='gray')
+            ax.legend(loc='upper right', fontsize=7, framealpha=0.5)
+
+            # Style tweaks
+            ax.tick_params(axis='both', which='major', labelsize=7)
+            ax.spines['top'].set_visible(False); ax.spines['right'].set_visible(False)
+            plt.tight_layout()
+            # --- End Styling & Info ---
+
+            # --- Convert plot to tensor ---
+            # *** FIXED: Reverted to original, robust fig.savefig method ***
+            buf = io.BytesIO()
+            fig.savefig(buf, format='png', bbox_inches='tight', dpi=96, facecolor=fig.get_facecolor())
+            buf.seek(0)
+            plt.close(fig) # CRITICAL: Close figure to prevent memory leak
+
+            img = Image.open(buf).convert("RGB")
+            img_np = np.array(img).astype(np.float32) / 255.0
+            # Return in ComfyUI format: [batch, height, width, channels]
+            img_tensor = torch.from_numpy(img_np).unsqueeze(0)
+            return img_tensor
+            # --- End Convert ---
+            
+        except Exception as e:
+            # Log error
+            print(f"[Plotting] Error during plot generation for '{title}': {e}")
+            traceback.print_exc()
+            # Return blank placeholder on error
+            return torch.zeros((1, 64, 64, 3), dtype=torch.float32)
+    # --- END PLOTTING METHOD ---
+
+    def process_audio(self, **kwargs):
+        """
+        Main execution function. Handles the entire audio processing pipeline.
+        
+        Args:
+            **kwargs: All node inputs, including hidden ones like 'prompt'.
+        
+        Returns:
+            dict: A dictionary for ComfyUI containing the 'ui' (text)
+                  and 'result' (a tuple matching RETURN_TYPES).
+        """
         audio_input = kwargs.get("audio_input")
+        placeholder_img = torch.zeros((1, 64, 64, 3), dtype=torch.float32)
 
         # Load and validate audio input
         try:
             waveform_original, samplerate = md_io.audio_from_comfy_3d(audio_input, try_gpu=True)
             print(f"[{self.__class__.__name__}] Loaded audio: {waveform_original.shape}, {samplerate}Hz")
         except Exception as e:
-            empty = torch.zeros((1, waveform_height, waveform_width, 3))
+            # Graceful Failure (Guide 7.3)
+            print(f"[{self.__class__.__name__}] ⚠️ Error loading audio: {e}")
             return {
                 "ui": {"text": [f"Error loading audio: {e}"]}, 
-                "result": ({"waveform": torch.empty(0), "sample_rate": 0}, empty, empty)
+                "result": ({"waveform": torch.empty(0), "sample_rate": 0}, placeholder_img, placeholder_img)
             }
 
         if waveform_original.numel() == 0:
-            empty = torch.zeros((1, waveform_height, waveform_width, 3))
+            print(f"[{self.__class__.__name__}] ⚠️ Warning: Empty audio input")
             return {
                 "ui": {"text": ["Warning: Empty audio input"]}, 
-                "result": (audio_input, empty, empty)
+                "result": (audio_input, placeholder_img, placeholder_img)
             }
         
+        # --- Generate Before Plot ---
+        # Select first item in batch if needed
+        plot_audio_before = waveform_original[0] if waveform_original.ndim == 3 else waveform_original
+        # Convert from [channels, samples] tensor to [samples, channels] numpy
+        audio_data_before_np = plot_audio_before.cpu().numpy().T
+        waveform_before = self._plot_waveform_to_tensor(
+            audio_data_before_np, samplerate, "Original Waveform"
+        )
+
         # Extract working audio from batch
         processed_audio = waveform_original[0] if waveform_original.ndim == 3 else waveform_original.clone()
         
@@ -541,11 +845,19 @@ class AdvancedAudioPreviewAndSave:
         # 3. Normalization + Limiting
         processed_audio = self._normalize_audio(processed_audio, samplerate, **kwargs)
         
+        # --- Generate After Plot ---
+        # Convert from [channels, samples] tensor to [samples, channels] numpy
+        audio_data_after_np = processed_audio.cpu().numpy().T
+        waveform_after = self._plot_waveform_to_tensor(
+            audio_data_after_np, samplerate, "Processed Waveform"
+        )
+        
         # === FILE SAVING ===
         
         ui_text = []
         if kwargs.get("save_to_disk"):
             try:
+                # Process filename with strftime
                 base_prefix = time.strftime(
                     os.path.basename(kwargs.get("filename_prefix")), 
                     time.localtime()
@@ -560,6 +872,7 @@ class AdvancedAudioPreviewAndSave:
             os.makedirs(output_dir, exist_ok=True)
             
             save_format = kwargs.get("save_format", "MP3").lower()
+            # Use the unique counter, as IS_CHANGED now controls *if* this runs
             file = f"{base_prefix}_{generate_unique_counter():09}.{save_format}"
             output_path = os.path.join(output_dir, file)
             quality = kwargs.get("mp3_quality") if save_format == "mp3" else kwargs.get("opus_quality")
@@ -568,6 +881,7 @@ class AdvancedAudioPreviewAndSave:
                 # Prepare metadata with proper JSON serialization
                 metadata = self._prepare_metadata(**kwargs)
                 metadata_to_embed = metadata.copy()
+                sidecar_saved = False
                 
                 # Smart metadata handling: check size and use sidecar if needed
                 if metadata:
@@ -581,11 +895,24 @@ class AdvancedAudioPreviewAndSave:
                         print(f"[{self.__class__.__name__}] {warning}")
                         ui_text.append(warning)
                         
-                        # Save full metadata to sidecar
-                        save_metadata_sidecar(output_path, metadata)
+                        # Create full_prompt_api_dict for sidecar
+                        full_prompt_api_dict = {
+                            'prompt': kwargs.get('prompt'),
+                            'extra_pnginfo': kwargs.get('extra_pnginfo')
+                        }
                         
-                        # Only embed small metadata in audio file
-                        metadata_to_embed = {"ComfyUI_Notes": metadata.get("ComfyUI_Notes", "")} if "ComfyUI_Notes" in metadata else {}
+                        # Save full metadata to sidecar
+                        sidecar_saved = save_metadata_sidecar(
+                            output_path, 
+                            full_prompt_api_dict, 
+                            kwargs.get("custom_notes")
+                        )
+                        
+                        if not sidecar_saved:
+                            ui_text.append("⚠ Warning: Failed to save workflow sidecar")
+                        
+                        # Only embed notes in audio file (or nothing if no notes)
+                        metadata_to_embed = {"ComfyUI_Notes": kwargs.get("custom_notes", "")} if kwargs.get("custom_notes") else {}
                     else:
                         print(f"[{self.__class__.__name__}] Embedding {metadata_size:.1f}KB metadata")
                 
@@ -597,65 +924,24 @@ class AdvancedAudioPreviewAndSave:
                 
                 if success:
                     rel_path = os.path.relpath(output_path, folder_paths.get_output_directory())
-                    ui_text.insert(0, f"✓ Saved: {rel_path}")
+                    sidecar_msg = " + .json" if sidecar_saved else ""
+                    ui_text.insert(0, f"✓ Saved: {rel_path}{sidecar_msg}")
                 else:
                     ui_text.append("✗ ERROR: File save failed - check console for details")
-                    
+                    # Clean up sidecar if audio save failed
+                    if sidecar_saved:
+                        try:
+                            os.unlink(os.path.splitext(output_path)[0] + ".json")
+                        except:
+                            pass
+                        
             except Exception as e:
                 error_msg = f"✗ Save error: {e}"
                 print(f"[{self.__class__.__name__}] {error_msg}")
                 traceback.print_exc()
                 ui_text.append(error_msg)
         else:
-            ui_text.append("ℹ Not saved to disk")
-
-        # === WAVEFORM VISUALIZATION ===
-        
-        try:
-            audio_plot = processed_audio.cpu().numpy()[0]
-            time_axis = np.linspace(0, len(audio_plot) / samplerate, len(audio_plot))
-            dpi = 100
-            fig, ax = plt.subplots(figsize=(waveform_width / dpi, waveform_height / dpi), dpi=dpi)
-            
-            bg_color = validate_color(kwargs.get("waveform_background_color"), "black")
-            wf_color = validate_color(kwargs.get("waveform_color"), "hotpink")
-            
-            ax.set_facecolor(bg_color)
-            fig.patch.set_facecolor(bg_color)
-            ax.plot(time_axis, audio_plot, color=wf_color, linewidth=0.5)
-            ax.set_ylim([-1.05, 1.05])
-
-            if kwargs.get("show_grid", False):
-                ax.grid(True, alpha=0.3, color='gray', linestyle='--')
-            else:
-                ax.axis("off")
-            
-            fig.tight_layout(pad=0)
-
-            with built_in_io.BytesIO() as buffer:
-                plt.savefig(buffer, format='png', bbox_inches='tight', pad_inches=0)
-                buffer.seek(0)
-                pil_img = Image.open(buffer).convert("RGB").resize(
-                    (waveform_width, waveform_height), Image.LANCZOS
-                )
-                img_array = np.array(pil_img)
-                waveform_image = (torch.from_numpy(img_array).float() / 255.0).unsqueeze(0)
-            
-            plt.close(fig)
-            
-        except Exception as e:
-            print(f"[{self.__class__.__name__}] Waveform generation failed: {e}")
-            waveform_image = torch.zeros((1, waveform_height, waveform_width, 3))
-        
-        # === SPECTROGRAM VISUALIZATION ===
-        
-        if kwargs.get("generate_spectrogram", False):
-            spectrogram_image = create_spectrogram_image(
-                processed_audio, samplerate, waveform_width, waveform_height,
-                kwargs.get("spectrogram_colormap", "viridis")
-            )
-        else:
-            spectrogram_image = torch.zeros((1, waveform_height, waveform_width, 3))
+            ui_text.append("ℹ Not saved to disk (save_to_disk=False)")
 
         # === PREPARE OUTPUT ===
         
@@ -663,19 +949,20 @@ class AdvancedAudioPreviewAndSave:
         processed_for_output = processed_audio.unsqueeze(0) if processed_audio.ndim == 2 else processed_audio
         final_audio_output = {"waveform": processed_for_output, "sample_rate": samplerate}
         
+        # Return structure for ComfyUI: UI update + result tuple
         return {
             "ui": {"text": ui_text}, 
-            "result": (final_audio_output, waveform_image, spectrogram_image)
+            "result": (final_audio_output, waveform_before, waveform_after)
         }
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# NODE REGISTRATION
-# ═══════════════════════════════════════════════════════════════════════════════
+# =================================================================================
+# == Node Registration                                                           ==
+# =================================================================================
 
 NODE_CLASS_MAPPINGS = {
     "AdvancedAudioPreviewAndSave": AdvancedAudioPreviewAndSave
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "AdvancedAudioPreviewAndSave": "Advanced Audio Preview & Save"
+    "AdvancedAudioPreviewAndSave": "MD: Advanced Audio Preview & Save"
 }

@@ -1,28 +1,20 @@
-# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-# ████ PINGPONGSAMPLER v0.8.21 "LITE+ STABILITY" – Optimized for Ace-Step with Enhanced Safety ████▓▒░
-# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ████ MD_Nodes/PingPongSamplerNode – Lite+ Ancestral Sampler v0.8.21 ████▓▒░
+# © 2025 MDMAchine
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 # ░▒▓ ORIGIN & DEV:
-#   • Foundational principles for iterative sampling, including concepts that underpin 'ping-pong sampling'
-#   • Consistency Models by Song et al. (2023)
-#   •     https://arxiv.org/abs/2303.01469
-#   • The term 'ping-pong sampling' is explicitly introduced and applied in the context of fast text-to-audio
-#   • generation in the paper "Fast Text-to-Audio Generation with Adversarial Post-Training" by Novack et al.
-#   • (2025) from Stability AI
-#   •     https://arxiv.org/abs/2505.08175
-#   • Original concept for the PingPong Sampler for ace-step diffusion by: Junmin Gong (Ace-Step team)
-#   • ComfyUI adaptation by: blepping (original ComfyUI port with quirks)
-#   • Disassembled & warped by: MD (Machine Damage)
-#   • Critical fixes & re-engineering by: Gemini (Google) based on user feedback
-#   • v0.8.20 "Lite+" enhancements by: Gemini (Google)
-#   • v0.8.21 stability release by: Claude (Anthropic) - ported critical fixes from v0.9.9-p4
-#   • Completionist fixups via: devstral / qwen3 (local heroes)
+#   • Cast into the void by: Junmin Gong (Concept), blepping (ComfyUI Port), MD (Adaptation)
+#   • Enhanced by: Gemini (Fixes/v0.8.20), Claude (v0.8.21 Port), devstral/qwen3 (Fixups)
 #   • License: Apache 2.0 — Sharing is caring, no Voodoo hoarding here
-#   • Original source gist: https://gist.github.com/blepping/b372ef6c5412080af136aad942d9d76c
+#   • Original source (if applicable): https://gist.github.com/blepping/b372ef6c5412080af136aad942d9d76c
+#   • Academic sources: Song et al. (2023) [arXiv:2303.01469], Novack et al. (2025) [arXiv:2505.08175]
+
 # ░▒▓ DESCRIPTION:
-#   Lightweight sampler for ComfyUI with intuitive noise behavior control.
+#   Lightweight ancestral sampler for ComfyUI with intuitive noise behavior control.
 #   No complexity. No tensor corruption. Just clean ancestral sampling.
 #   Designed for Ace-Step audio/video models with preset-based workflow.
 #   May work with other models but audio/video is the sweet spot.
+
 # ░▒▓ FEATURES:
 #   ✓ Intuitive "Noise Behavior" presets (Default, Dynamic, Smooth, etc.)
 #   ✓ Ancestral Strength control (0.0 to 2.0+)
@@ -37,48 +29,63 @@
 #   ✓ YAML configuration override support
 #   ✓ Supports up to 10,000 steps
 #   ✓ Backwards compatible with v0.8.20 workflows
+
 # ░▒▓ CHANGELOG:
 #   - v0.8.21 (Current Release - STABILITY UPDATE):
-#       • CRITICAL: Ported tensor safety fixes from v0.9.9-p4
-#       • CRITICAL: Added NaN/Inf detection with recovery
-#       • Enhanced blend modes: slerp, cosine, cubic with numerical stability
-#       • Added parameter validation (strength, coherence bounds)
-#       • Added sigma schedule validation with warnings
-#       • Simple debug mode (0/1/2) for troubleshooting
-#       • Better error handling throughout
-#       • Safe tensor operations (explicit cloning where needed)
-#       • All features remain backwards compatible
-#   - v0.8.20 "Lite+ with Behavior Control":
-#       • Added "Noise Behavior" presets for intuitive control
-#       • Added "Ancestral Strength" (0.0 to 1.0+)
-#       • Added "Noise Coherence" for temporal smoothing
-#       • "Default (Raw)" behavior identical to v0.8.15
-#   - v0.8.15 "Targeted Ace-Step Optimization":
-#       • Full optimization for Ace-Step audio/video models
-#       • Pure, raw noise injection for clean results
+#       • CRITICAL: Ported tensor safety fixes from v0.9.9-p4 & added NaN/Inf detection/recovery.
+#       • ENHANCED: Added stable blend modes (slerp, cosine, cubic) & parameter/sigma validation.
+#       • ADDED: Simple debug mode (0/1/2) & safer tensor operations (cloning).
+#   - v0.8.20 ("Lite+ with Behavior Control"):
+#       • ADDED: "Noise Behavior" presets, "Ancestral Strength", and "Noise Coherence" controls.
+#   - v0.8.15 ("Targeted Ace-Step Optimization"):
+#       • ADDED: Full optimization for Ace-Step models, pure raw noise injection.
+
 # ░▒▓ CONFIGURATION:
-#   → Primary Use: High-quality audio/video generation with Ace-Step diffusion
-#   → Secondary Use: Experimental visual generation (expect wild results)
-#   → Edge Use: For demoscene veterans and bytecode wizards only
-#   → Philosophy: Simple UI, robust internals, preset-driven workflow
+#   → Primary Use: High-quality audio/video generation with Ace-Step diffusion using "Default (Raw)" or "Dynamic" behavior.
+#   → Secondary Use: "Soft (DDIM-Like)" preset for smoother, less noisy results.
+#   → Edge Use: High "Noise Coherence" (0.8+) for temporally stable video/audio generation.
+
 # ░▒▓ WARNING:
 #   This node may trigger:
-#   ▓▒░ Flashbacks to ANSI art and 256-byte intros
-#   ▓▒░ Spontaneous breakdancing or synesthesia
-#   ▓▒░ Urges to reinstall Impulse Tracker
-#   ▓▒░ Extreme focus on byte-level optimization
-#   ▓▒░ Mild paranoia about tensor shapes
+#   ▓▒░ Existential dread when you realize you just NaN'd 9,999 steps into a 10k run.
+#   ▓▒░ A sudden, uncontrollable urge to `slerp` everything in sight.
+#   ▓▒░ Flashbacks to debugging `IRQ` conflicts trying to get your Gravis Ultrasound and modem to coexist.
+#   ▓▒░ A chilling sense that `ancestral_strength=2.0` is staring back into your soul.
 #   Consult your nearest demoscene vet if hallucinations persist.
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 
 
+# =================================================================================
+# == Standard Library Imports                                                  ==
+# =================================================================================
+import math
+import logging
+import secrets
+import os
+import traceback
+
+# =================================================================================
+# == Third-Party Imports                                                       ==
+# =================================================================================
 import torch
 from tqdm.auto import trange
-from comfy import model_sampling
-from comfy.samplers import KSAMPLER
 import numpy as np
 import yaml
-import math
+
+# =================================================================================
+# == ComfyUI Core Modules                                                      ==
+# =================================================================================
+from comfy import model_sampling
+from comfy.samplers import KSAMPLER
+
+# =================================================================================
+# == Local Project Imports                                                     ==
+# =================================================================================
+# (None)
+
+# =================================================================================
+# == Helper Classes & Dependencies                                             ==
+# =================================================================================
 
 # --- Enhanced Blend Modes with Numerical Stability ---
 
@@ -126,6 +133,10 @@ _INTERNAL_BLEND_MODES = {
     "a_only": lambda a, _b, _t: a,
     "b_only": lambda _a, b, _t: b
 }
+
+# =================================================================================
+# == Core Node Class                                                           ==
+# =================================================================================
 
 class PingPongSampler:
     """
@@ -188,7 +199,8 @@ class PingPongSampler:
         num_steps_available = len(sigmas) - 1 if len(sigmas) > 0 else 0
         
         if self.debug_mode >= 1:
-            print(f"PingPongSampler Lite v0.8.21: {num_steps_available} steps available")
+            # Removed version number
+            print(f"PingPongSampler Lite+: {num_steps_available} steps available")
         
         raw_first_ancestral_step = pingpong_options.get("first_ancestral_step", 0)
         raw_last_ancestral_step = pingpong_options.get("last_ancestral_step", num_steps_available - 1)
@@ -249,8 +261,11 @@ class PingPongSampler:
             return True
         return False
 
-    def _stepped_seed(self, step: int):
-        """Determines RNG seed for current step based on random mode."""
+    def _stepped_seed(self, step):
+        """
+        Determines RNG seed for current step based on random mode.
+        REMOVED type hint from `step`
+        """
         if self.step_random_mode == "off":
             return None
         current_step_size = max(self.step_size, 1)
@@ -400,90 +415,168 @@ class PingPongSampler:
         return x_current
 
 class PingPongSamplerNode:
-    """ComfyUI node wrapper for the Lite+ v0.8.21 PingPongSampler."""
-    CATEGORY = "MD_Nodes/Samplers"
+    """ComfyUI node wrapper for the Lite+ PingPongSampler."""
+    CATEGORY = "MD_Nodes/Sampling"
     RETURN_TYPES = ("SAMPLER",)
     FUNCTION = "get_sampler"
 
     @classmethod
     def INPUT_TYPES(cls):
+        """
+        Define all input parameters with tooltips.
+        
+        Note: DO NOT use type hints in function signatures or global mappings.
+        ComfyUI's dynamic loader cannot handle forward references at import time.
+        """
         return {
             "required": {
                 "noise_behavior": (
                     ["Default (Raw)", "Dynamic", "Smooth", "Textured Grain", "Soft (DDIM-Like)", "Custom"],
                     {"default": "Default (Raw)", 
-                     "tooltip": "Preset for ancestral noise behavior. 'Custom' uses manual sliders below."}
+                     "tooltip": (
+                         "NOISE BEHAVIOR PRESET\n"
+                         "- Selects a preset for ancestral noise strength and coherence.\n"
+                         "- 'Default (Raw)' is pure ancestral noise (strength=1.0).\n"
+                         "- 'Soft (DDIM-Like)' is weak noise (strength=0.2).\n"
+                         "- 'Custom' uses the manual sliders below."
+                     )}
                 ),
                 "step_random_mode": (
                     ["off", "block", "reset", "step"], 
                     {"default": "block",
-                     "tooltip": "How seed changes: off=fixed, block=every N steps, reset=complex, step=every step"}
+                     "tooltip": (
+                         "STEP RANDOM MODE\n"
+                         "- Controls how the seed changes during sampling.\n"
+                         "- 'off': Fixed seed for all steps.\n"
+                         "- 'block': Seed changes every N steps (see step_size).\n"
+                         "- 'step': Seed changes every single step."
+                     )}
                 ),
                 "step_size": (
                     "INT", 
                     {"default": 4, "min": 1, "max": 100,
-                     "tooltip": "Steps between seed changes (for block/reset modes)"}
+                     "tooltip": (
+                         "STEP SIZE\n"
+                         "- Number of steps to wait before changing the seed.\n"
+                         "- Only used if 'step_random_mode' is 'block' or 'reset'."
+                     )}
                 ),
                 "seed": (
                     "INT", 
                     {"default": 80085, "min": 0, "max": 2**32 - 1,
-                     "tooltip": "Base random seed for generation"}
+                     "tooltip": (
+                         "SEED\n"
+                         "- The base random seed for noise generation.\n"
+                         "- This seed is modified by the 'step_random_mode'."
+                     )}
                 ),
                 "first_ancestral_step": (
                     "INT", 
                     {"default": 0, "min": -1, "max": 10000,
-                     "tooltip": "First step to inject ancestral noise"}
+                     "tooltip": (
+                         "FIRST ANCESTRAL STEP\n"
+                         "- The first step index (0-based) to begin injecting ancestral noise.\n"
+                         "- Steps before this will be non-ancestral."
+                     )}
                 ),
                 "last_ancestral_step": (
                     "INT", 
                     {"default": -1, "min": -1, "max": 10000,
-                     "tooltip": "Last step to inject noise (-1 = until end)"}
+                     "tooltip": (
+                         "LAST ANCESTRAL STEP\n"
+                         "- The last step index (0-based) to inject ancestral noise.\n"
+                         "- -1 = inject noise until the very last step.\n"
+                         "- Set to 0 to only inject noise on the first step."
+                     )}
                 ),
                 "start_sigma_index": (
                     "INT", 
                     {"default": 0, "min": 0, "max": 10000,
-                     "tooltip": "Step index to begin sampling from"}
+                     "tooltip": (
+                         "START SIGMA INDEX\n"
+                         "- The step index (0-based) to *begin* the sampling process from.\n"
+                         "- Allows skipping the initial high-noise steps."
+                     )}
                 ),
                 "end_sigma_index": (
                     "INT", 
                     {"default": -1, "min": -10000, "max": 10000,
-                     "tooltip": "Step index to end sampling at (-1 = until end)"}
+                     "tooltip": (
+                         "END SIGMA INDEX\n"
+                         "- The step index (0-based) to *stop* the sampling process at.\n"
+                         "- -1 = run until the end of the sigma schedule."
+                     )}
                 ),
                 "enable_clamp_output": (
                     "BOOLEAN", 
                     {"default": False,
-                     "tooltip": "Clamp final output to [-1, 1] range"}
+                     "tooltip": (
+                         "CLAMP FINAL OUTPUT\n"
+                         "- True: Clamps the final output tensor to the [-1.0, 1.0] range.\n"
+                         "- False: Leaves the output as-is.\n"
+                         "- Recommended: False (off) for audio/video latents."
+                     )}
                 ),
                 "blend_mode": (
                     tuple(_INTERNAL_BLEND_MODES.keys()),
                     {"default": "lerp",
-                     "tooltip": "Blend function for combining states"}
+                     "tooltip": (
+                         "BLEND MODE\n"
+                         "- The mathematical function used to blend states between steps.\n"
+                         "- 'lerp': Standard linear interpolation.\n"
+                         "- 'slerp': Spherical interpolation (good for latents).\n"
+                         "- 'cosine' / 'cubic': Smoother transitions."
+                     )}
                 ),
                 "scheduler": (
                     "SCHEDULER",
-                    {"tooltip": "Sigma schedule from upstream node"}
+                    {"tooltip": (
+                        "SCHEDULER\n"
+                        "- The sigma schedule object from an upstream node (e.g., HybridAdaptiveSigmas)."
+                    )}
                 ),
             },
             "optional": {
                 "ancestral_strength": (
                     "FLOAT", 
                     {"default": 1.0, "min": 0.0, "max": 2.0, "step": 0.01, 
-                     "tooltip": "Noise injection strength. Only active with 'Custom' preset."}
+                     "tooltip": (
+                         "CUSTOM: ANCESTRAL STRENGTH\n"
+                         "- (Custom Mode Only) Controls the intensity of injected noise.\n"
+                         "- 0.0 = No noise (pure DDIM).\n"
+                         "- 1.0 = Full ancestral noise.\n"
+                         "- > 1.0 = Over-driven noise."
+                     )}
                 ),
                 "noise_coherence": (
                     "FLOAT", 
                     {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, 
-                     "tooltip": "Reuse previous noise for temporal smoothing. Only active with 'Custom' preset."}
+                     "tooltip": (
+                         "CUSTOM: NOISE COHERENCE\n"
+                         "- (Custom Mode Only) Blends new noise with the previous step's noise.\n"
+                         "- 0.0 = New random noise every step.\n"
+                         "- 1.0 = Re-use the same noise (frozen).\n"
+                         "- High values improve temporal stability in video/audio."
+                     )}
                 ),
                 "debug_mode": (
                     "INT",
                     {"default": 0, "min": 0, "max": 2,
-                     "tooltip": "Debug verbosity: 0=Off, 1=Basic, 2=Detailed"}
+                     "tooltip": (
+                         "DEBUG MODE\n"
+                         "- Controls console print verbosity.\n"
+                         "- 0: Off\n- 1: Basic (step info, warnings)\n- 2: Detailed (tensor stats, seeds)"
+                     )}
                 ),
                 "yaml_settings_str": (
                     "STRING", 
                     {"multiline": True, "default": "", 
-                     "tooltip": "YAML config to override node inputs. Takes priority over UI settings."}
+                     "tooltip": (
+                         "YAML OVERRIDE\n"
+                         "- YAML-formatted string to override any node input.\n"
+                         "- This takes *priority* over all UI settings.\n"
+                         "- Example: `ancestral_strength: 1.2`"
+                     )}
                 ),
             }
         }
@@ -494,65 +587,87 @@ class PingPongSamplerNode:
         enable_clamp_output, blend_mode, scheduler, 
         ancestral_strength=1.0, noise_coherence=0.0, debug_mode=0, yaml_settings_str=""
     ):
-        # Determine final strength and coherence from preset or custom
-        strength = ancestral_strength
-        coherence = noise_coherence
+        """
+        Main execution function.
         
-        if noise_behavior != "Custom":
-            preset_map = {
-                "Default (Raw)": (1.0, 0.0),
-                "Dynamic": (1.0, 0.25),
-                "Smooth": (0.8, 0.5),
-                "Textured Grain": (0.9, 0.9),
-                "Soft (DDIM-Like)": (0.2, 0.0)
+        Args:
+            (All args match INPUT_TYPES)
+            
+        Returns:
+            Tuple containing the KSAMPLER object
+        """
+        try:
+            # Determine final strength and coherence from preset or custom
+            strength = ancestral_strength
+            coherence = noise_coherence
+            
+            if noise_behavior != "Custom":
+                preset_map = {
+                    "Default (Raw)": (1.0, 0.0),
+                    "Dynamic": (1.0, 0.25),
+                    "Smooth": (0.8, 0.5),
+                    "Textured Grain": (0.9, 0.9),
+                    "Soft (DDIM-Like)": (0.2, 0.0)
+                }
+                strength, coherence = preset_map.get(noise_behavior, (1.0, 0.0))
+
+            # Build configuration
+            direct_inputs = {
+                "step_random_mode": step_random_mode,
+                "step_size": step_size,
+                "seed": seed,
+                "pingpong_options": {
+                    "first_ancestral_step": first_ancestral_step,
+                    "last_ancestral_step": last_ancestral_step,
+                },
+                "start_sigma_index": start_sigma_index,
+                "end_sigma_index": end_sigma_index,
+                "enable_clamp_output": enable_clamp_output,
+                "scheduler": scheduler,
+                "blend_mode": blend_mode,
+                "step_blend_mode": blend_mode,  # Use same blend for steps
+                "ancestral_strength": strength,
+                "noise_coherence": coherence,
+                "debug_mode": debug_mode,
             }
-            strength, coherence = preset_map.get(noise_behavior, (1.0, 0.0))
 
-        # Build configuration
-        direct_inputs = {
-            "step_random_mode": step_random_mode,
-            "step_size": step_size,
-            "seed": seed,
-            "pingpong_options": {
-                "first_ancestral_step": first_ancestral_step,
-                "last_ancestral_step": last_ancestral_step,
-            },
-            "start_sigma_index": start_sigma_index,
-            "end_sigma_index": end_sigma_index,
-            "enable_clamp_output": enable_clamp_output,
-            "scheduler": scheduler,
-            "blend_mode": blend_mode,
-            "step_blend_mode": blend_mode,  # Use same blend for steps
-            "ancestral_strength": strength,
-            "noise_coherence": coherence,
-            "debug_mode": debug_mode,
-        }
+            final_options = direct_inputs.copy()
+            
+            # YAML override
+            if yaml_settings_str:
+                try:
+                    yaml_data = yaml.safe_load(yaml_settings_str)
+                    if isinstance(yaml_data, dict):
+                        for key, value in yaml_data.items():
+                            if key == "pingpong_options" and isinstance(value, dict):
+                                if key not in final_options:
+                                    final_options[key] = {}
+                                final_options[key].update(value)
+                            else:
+                                final_options[key] = value
+                        if debug_mode >= 1:
+                            print(f"Loaded YAML settings: {list(yaml_data.keys())}")
+                except Exception as e:
+                    print(f"WARNING: PingPongSamplerNode YAML parsing error: {e}. Using node inputs.")
 
-        final_options = direct_inputs.copy()
+            # Return the KSAMPLER tuple
+            return (KSAMPLER(PingPongSampler.go, extra_options=final_options),)
         
-        # YAML override
-        if yaml_settings_str:
-            try:
-                yaml_data = yaml.safe_load(yaml_settings_str)
-                if isinstance(yaml_data, dict):
-                    for key, value in yaml_data.items():
-                        if key == "pingpong_options" and isinstance(value, dict):
-                            if key not in final_options:
-                                final_options[key] = {}
-                            final_options[key].update(value)
-                        else:
-                            final_options[key] = value
-                    if debug_mode >= 1:
-                        print(f"Loaded YAML settings: {list(yaml_data.keys())}")
-            except Exception as e:
-                print(f"WARNING: PingPongSamplerNode YAML parsing error: {e}. Using node inputs.")
+        except Exception as e:
+            logging.error(f"[PingPongSamplerNode] Error creating sampler: {e}")
+            logging.debug(traceback.format_exc())
+            print(f"[PingPongSamplerNode] ⚠️ Error creating sampler, returning dummy sampler: {e}")
+            # Return a dummy/passthrough sampler on failure
+            return (KSAMPLER(lambda model, x, sigmas, **kwargs: x, extra_options={}),)
 
-        return (KSAMPLER(PingPongSampler.go, extra_options=final_options),)
+# =================================================================================
+# == Node Registration                                                         ==
+# =================================================================================
 
 NODE_CLASS_MAPPINGS = {
     "PingPongSampler_Custom_Lite": PingPongSamplerNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "PingPongSampler_Custom_Lite": "PingPong Sampler (Lite+ v0.8.21)",
+    "PingPongSampler_Custom_Lite": "MD: PingPong Sampler (Lite+)",
 }
