@@ -1,213 +1,255 @@
 {
-  "name": "comfyui-md-nodes",
-  "version": "1.4.1",
-  "author": "MDMAchine",
-  "description": "████ MD_Nodes by MDMAchine - The L337est Collection of ComfyUI Unleashed! ████▓▒░\n\nForged in the digital fires, this node pack brings next-level tensor manipulation, advanced image alchemy, and precision audio sorcery to your ComfyUI workflows. Optimized for maximum creative chaos and minimal dependency friction. Expect surgical precision... or beautiful catastrophe, depending on your vibe. This is not your grandpappy's ComfyUI – this is the future, delivered.",
-  "repository": "https://github.com/MDMAchine/ComfyUI_MD_Nodes",
-  "license": "Apache-2.0",
-  "tags": [
-    "utility",
-    "tensor",
-    "image processing",
-    "audio",
-    "video",
-    "sampler",
-    "scheduler",
-    "latent",
-    "MDMAchine",
-    "advanced",
-    "demonic_magic",
-    "chaos"
-  ],
-  "dependencies": [
-    "Jinja2",
-    "MarkupSafe",
-    "filelock",
-    "fsspec",
-    "imageio",
-    "librosa",
-    "math",
-    "matplotlib",
-    "mpmath",
-    "networkx",
-    "ollama",
-    "pedalboard",
-    "piexif",
-    "pykakasi",
-    "pyloudnorm",
-    "requests",
-    "scipy",
-    "sentencepiece",
-    "sympy",
-    "tokenizers",
-    "tqdm"
-  ],
-  "files": [
-    ".gitignore",
-    "APG_Guider_Forked.py",
-    "AdvancedMediaSave.py",
-    "Hybrid_Sigma_Scheduler.py",
-    "NoiseDecayScheduler_Custom.py",
-    "PingPongSampler_Custom.py",
-    "PingPongSampler_Custom_FBG.py",
-    "README.md",
-    "SCENE_GENIUS_AUTOCREATOR.py",
-    "UniversalGuardian.py",
-    "__init__.py",
-    "audio/AdvancedAudioPreviewAndSave.py",
-    "audio/__init__.py",
-    "audio/mastering_chain_node.py",
-    "comfyui.json",
-    "conditioning/ACE_T5_Conditioning_Node.py",
-    "conditioning/ace_text_cleaners.py",
-    "conditioning/spiece.model",
-    "conditioning/spiece_tokenizer.py",
-    "core/io.py",
-    "latent/ACE_LATENT_VISUALIZER.py",
-    "latent/__init__.py",
-    "manuals/ACE_LATENT_VISUALIZER.md",
-    "manuals/APG_Guider_Forked.md",
-    "manuals/AdvancedAudioPreviewAndSave.md",
-    "manuals/Advanced_Media_Save.md",
-    "manuals/Hybrid_Sigma_Scheduler.md",
-    "manuals/MD_Seed_Saver_Manual.md",
-    "manuals/Master Technical Manual_ ACE Latent Visualizer.md",
-    "manuals/Master Technical Manual_ APG Guider (Forked).md",
-    "manuals/Master Technical Manual_ Advanced Audio Preview & Save (AAPS).md",
-    "manuals/Master Technical Manual_ Advanced Media Save (AMS).md",
-    "manuals/Master Technical Manual_ Advanced Noise Decay Scheduler.md",
-    "manuals/Master Technical Manual_ Custom Audio Mastering Chain.md",
-    "manuals/Master Technical Manual_ Hybrid Sigma Scheduler.md",
-    "manuals/Master Technical Manual_ MD Seed Saver.md",
-    "manuals/Master Technical Manual_ PingPong Sampler (Custom v0.9.9-p2 FBG).md",
-    "manuals/Master Technical Manual_ PingPong Sampler (Lite+ V0.8.20).md",
-    "manuals/Master Technical Manual_ Scene Genius Autocreator.md",
-    "manuals/Master Technical Manual_ Universal Guardian.md",
-    "manuals/NoiseDecayScheduler_Custom.md",
-    "manuals/PingPong_Sampler_Custom.md",
-    "manuals/PingPong_Sampler_Custom_FBG.md",
-    "manuals/SCENE_GENIUS_AUTOCREATOR.md",
-    "manuals/UniversalGuardian.md",
-    "manuals/mastering_chain_node.md",
-    "project_updater_config.json",
-    "pyproject.toml",
-    "requirements.txt",
-    "seed_saver_node.py",
-    "text/TextInputNode.py"
-  ],
-  "nodes": [
-    {
-      "type": "ACE_LatentVisualizer_v04",
-      "title": "ACE Latent Visualizer v0.4 (Enhanced)",
-      "description": "ACE_LatentVisualizer_v04: Enhanced latent data visualization with advanced features!\n\nNow with batch selection, multiple visualization modes, statistical analysis,\npeak detection, and much more!",
-      "category": "MD_Nodes/Visualization",
-      "file_path": "latent/ACE_LATENT_VISUALIZER.py"
-    },
-    {
-      "type": "AceT5ConditioningAnalyzer",
-      "title": "ACE T5 Analyzer 🔍",
-      "description": "Debugging tool to inspect conditioning tensors.\n\nConnect any conditioning output to see detailed information about:\n- Tensor shape and statistics\n- Lyrics token count\n- Conditioning metadata\n- Potential quality issues\n\nUseful for troubleshooting distortion or checking if lyrics are properly encoded.",
-      "category": "MD_Nodes/Conditioning",
-      "file_path": "conditioning/ACE_T5_Conditioning_Node.py"
-    },
-    {
-      "type": "AceT5ConditioningScheduled",
-      "title": "ACE T5 Conditioning ⚡",
-      "description": "Production-ready ACE T5 conditioning with vocal control.\n\nThis node creates high-quality audio conditioning with separate control over:\n- Genre/style tags (base_tags)\n- Vocal characteristics (vocal_tags)\n- Lyrical content (lyrics)\n\nWorks with BOTH:\n• Custom ACE T5 Model Loader (best quality, no LoRAs)\n• Native DualCLIPLoader (LoRA support, slightly lower quality)\n\nRECOMMENDED: Use 'vocal_cond' output for best results!",
-      "category": "MD_Nodes/Conditioning",
-      "file_path": "conditioning/ACE_T5_Conditioning_Node.py"
-    },
-    {
-      "type": "AceT5ModelLoader",
-      "title": "ACE T5 Model Loader 🎵",
-      "description": "Loads the ACE T5 model with proper tokenizer initialization.\n\nThis is a custom CLIP loader specifically for ACE Step audio generation models.\nIt provides the highest quality conditioning but does NOT support LoRAs.\n\nFor LoRA support, use the native DualCLIPLoader instead (slightly lower quality).",
-      "category": "MD_Nodes/Loaders",
-      "file_path": "conditioning/ACE_T5_Conditioning_Node.py"
-    },
-    {
-      "type": "APGGuiderNode",
-      "title": "APG Guider (Forked v0.3.0)",
-      "description": "ComfyUI node for APG (Adaptive Projected Gradient) guidance.\n\nEnhanced fork with improved robustness, validation, and error handling.",
-      "category": "MD_Nodes/Guiders",
-      "file_path": "APG_Guider_Forked.py"
-    },
-    {
-      "type": "AdvancedAudioPreviewAndSave",
-      "title": "Advanced Audio Preview & Save",
-      "description": "Professional audio processing and export node for ComfyUI.\nHandles normalization, effects, visualization, and intelligent metadata embedding.",
-      "category": "MD_Nodes/Save",
-      "file_path": "audio/AdvancedAudioPreviewAndSave.py"
-    },
-    {
-      "type": "AdvancedMediaSave",
-      "title": "Advanced Media Save 🖼️",
-      "description": "",
-      "category": "MD_Nodes/Save",
-      "file_path": "AdvancedMediaSave.py"
-    },
-    {
-      "type": "AdvancedTextNode",
-      "title": "Advanced Text Input 📝",
-      "description": "A versatile text input node with wildcard support, file loading, and text manipulation features.",
-      "category": "MD_Nodes/Text",
-      "file_path": "text/TextInputNode.py"
-    },
-    {
-      "type": "HybridAdaptiveSigmas",
-      "title": "Hybrid Sigma Scheduler",
-      "description": "",
-      "category": "MD_Nodes/Schedulers",
-      "file_path": "Hybrid_Sigma_Scheduler.py"
-    },
-    {
-      "type": "EnhancedSeedSaverNode",
-      "title": "MD Enhanced Seed Saver",
-      "description": "",
-      "category": "MD_Nodes/Utility",
-      "file_path": "seed_saver_node.py"
-    },
-    {
-      "type": "MasteringChainNode",
-      "title": "Mastering Chain v1.3 (Enhanced)",
-      "description": "Advanced ComfyUI audio mastering chain with improved EQ and stereo-linked compression.",
-      "category": "MD_Nodes/Audio Processing",
-      "file_path": "audio/mastering_chain_node.py"
-    },
-    {
-      "type": "NoiseDecayScheduler_Custom",
-      "title": "Noise Decay Scheduler (Advanced)",
-      "description": "",
-      "category": "MD_Nodes/Schedulers",
-      "file_path": "NoiseDecayScheduler_Custom.py"
-    },
-    {
-      "type": "PingPongSamplerNode",
-      "title": "PingPong Sampler (Lite+ v0.8.21)",
-      "description": "ComfyUI node wrapper for the Lite+ v0.8.21 PingPongSampler.",
-      "category": "MD_Nodes/Samplers",
-      "file_path": "PingPongSampler_Custom.py"
-    },
-    {
-      "type": "PingPongSamplerNodeFBG",
-      "title": "PingPong Sampler v0.9.9-p4 (Stability + FBG)",
-      "description": "Enhanced ComfyUI node wrapper with stability fixes.",
-      "category": "MD_Nodes/Samplers",
-      "file_path": "PingPongSampler_Custom_FBG.py"
-    },
-    {
-      "type": "SceneGeniusAutocreator",
-      "title": "Scene Genius Autocreator",
-      "description": "A multi-stage ComfyUI node leveraging local LLMs for dynamic creative content generation.",
-      "category": "Uncategorized",
-      "file_path": "SCENE_GENIUS_AUTOCREATOR.py"
-    },
-    {
-      "type": "TextFileLoader",
-      "title": "Text File Loader 📄",
-      "description": "Load text content from files for use in workflows",
-      "category": "MD_Nodes/Text",
-      "file_path": "text/TextInputNode.py"
-    }
-  ],
-  "notes": "░▒▓ Deploy this manifest to unleash the full power. Compatibility guaranteed with your spirit. ░▒▓"
+    "version": "1.4.4",
+    "nodes": [
+        {
+            "key": "ACE_LatentVisualizer",
+            "type": "ACELatentVisualizer",
+            "title": "MD: ACE Latent Visualizer",
+            "description": "MD: ACE Latent Visualizer\n\nProvides multiple visualization modes (waveform, spectrum, heatmap, etc.)\nfor inspecting latent tensors, aiding in debugging and analysis. Includes\noptions for batch/channel selection, normalization, peak detection, and styling.",
+            "category": "MD_Nodes/Visualization",
+            "file_path": "latent/ACE_LATENT_VISUALIZER.py"
+        },
+        {
+            "key": "AceT5ConditioningAnalyzer",
+            "type": "AceT5ConditioningAnalyzer",
+            "title": "MD: ACE T5 Conditioning Analyzer",
+            "description": "MD: ACE T5 Conditioning Analyzer\n\nDebugging tool to inspect conditioning tensor statistics, lyrics token count,\nand metadata. Helps diagnose quality issues related to conditioning.",
+            "category": "MD_Nodes/Conditioning",
+            "file_path": "conditioning/ACE_T5_Conditioning_Node.py"
+        },
+        {
+            "key": "AceT5ConditioningScheduled",
+            "type": "AceT5ConditioningScheduled",
+            "title": "MD: ACE T5 Conditioning Scheduled",
+            "description": "MD: ACE T5 Conditioning Scheduled\n\nCreates high-quality audio conditioning using ACE T5, separating genre/style tags,\nvocal characteristics, and lyrical content. Supports both the custom AceT5ModelLoader\n(recommended for quality) and native ComfyUI CLIP loaders (for LoRA support).\nOutputs multiple conditioning tensors for different use cases.",
+            "category": "MD_Nodes/Conditioning",
+            "file_path": "conditioning/ACE_T5_Conditioning_Node.py"
+        },
+        {
+            "key": "AceT5ModelLoader",
+            "type": "AceT5ModelLoader",
+            "title": "MD: ACE T5 Model Loader",
+            "description": "MD: ACE T5 Model Loader\n\nLoads the custom ACE T5 model and its specialized tokenizers.\nProvides the highest quality conditioning for ACE Step audio models.\nNOTE: This custom loader does *not* support LoRAs. Use the native\nCLIPLoader/DualCLIPLoader for LoRA compatibility (may have slightly\ndifferent conditioning characteristics).",
+            "category": "MD_Nodes/Loaders",
+            "file_path": "conditioning/ACE_T5_Conditioning_Node.py"
+        },
+        {
+            "key": "APGGuiderForked",
+            "type": "APGGuiderNode",
+            "title": "MD: APG Guider",
+            "description": "ComfyUI node for APG (Adaptive Projected Gradient) guidance.\n\nEnhanced fork with improved robustness, validation, and error handling.",
+            "category": "MD_Nodes/Sampling",
+            "file_path": "APG_Guider_Forked.py"
+        },
+        {
+            "key": "AdvancedAudioPreviewAndSave",
+            "type": "AdvancedAudioPreviewAndSave",
+            "title": "MD: Advanced Audio Preview & Save",
+            "description": "Professional audio processing and export node for ComfyUI.\nHandles normalization, effects, visualization, and intelligent metadata embedding.",
+            "category": "MD_Nodes/Save",
+            "file_path": "audio/AdvancedAudioPreviewAndSave.py"
+        },
+        {
+            "key": "AdvancedMediaSave",
+            "type": "AdvancedMediaSave",
+            "title": "MD: Advanced Media Save",
+            "description": "Saves images or animations in various formats with metadata control.\nUses timestamped filenames inspired by AAPS to prevent overwrites.",
+            "category": "MD_Nodes/Save",
+            "file_path": "AdvancedMediaSave.py"
+        },
+        {
+            "key": "AdvancedTextNode",
+            "type": "AdvancedTextNode",
+            "title": "MD: Advanced Text Input",
+            "description": "A versatile text input node with seed-controlled wildcard processing,\ntext transformations, and multiple output options.",
+            "category": "MD_Nodes/Text",
+            "file_path": "text/TextInputNode.py"
+        },
+        {
+            "key": "MD_AudioAutoEQ",
+            "type": "MD_AudioAutoEQ",
+            "title": "MD: Audio Auto EQ",
+            "description": "Audio Auto EQ (MD_AudioAutoEQ)\n\nApplies automatic equalization to audio by analyzing its spectrum\nand matching it to a selected target profile using multi-band EQ.",
+            "category": "MD_Nodes/Audio Processing",
+            "file_path": "audio/auto_eq.py"
+        },
+        {
+            "key": "MD_AutoMasterNode",
+            "type": "MD_AutoMasterNode",
+            "title": "MD: Audio Auto Master Pro",
+            "description": "Audio Auto Master Pro (MD_AutoMasterNode)\n\nAn all-in-one, iterative audio mastering node. It automatically analyzes\nand processes audio to hit a target LUFS and spectral profile using a\nchain of EQ, multi-band compression, de-essing, and limiting.",
+            "category": "MD_Nodes/Audio Processing",
+            "file_path": "audio/MD_AutoMasterNode.py"
+        },
+        {
+            "key": "AutoLayoutOptimizer",
+            "type": "AutoLayoutOptimizer",
+            "title": "MD: Auto-Layout Optimizer",
+            "description": "MD: Auto-Layout Optimizer (Prototype)\n\nAnalyzes the layout structure of a ComfyUI workflow provided as JSON.\nCalculates metrics (complexity, spacing, crossings), generates optimization\nrecommendations, and optionally applies a selected auto-layout algorithm,\noutputting the modified workflow JSON.",
+            "category": "MD_Nodes/Workflow Organization",
+            "file_path": "organization/AutoLayoutOptimizer.py"
+        },
+        {
+            "key": "EnhancedAnnotationNode",
+            "type": "EnhancedAnnotationNode",
+            "title": "MD: Enhanced Annotation",
+            "description": "MD: Enhanced Annotation\n\nA highly customizable node for adding visual documentation (notes, headers,\nreminders) directly into the ComfyUI workflow graph. Supports various styles,\ncolors, fonts, and markdown. It does not perform any computations and acts\npurely as a visual aid, with no impact on generation performance.",
+            "category": "MD_Nodes/Workflow Organization",
+            "file_path": "organization/EnhancedAnnotation.py"
+        },
+        {
+            "key": "EnhancedSeedSaver",
+            "type": "EnhancedSeedSaverNode",
+            "title": "MD: Enhanced Seed Saver",
+            "description": "MD Enhanced Seed Saver\n\nAdvanced seed management node with static pass-through and dynamic action modes.\nSave, load, organize, and manage seeds efficiently within ComfyUI workflows.",
+            "category": "MD_Nodes/Utility",
+            "file_path": "seed_saver_node.py"
+        },
+        {
+            "key": "FilenameCounterNode",
+            "type": "FilenameCounterNode",
+            "title": "MD: Filename Counter",
+            "description": "MD: Filename Counter\n\nProvides a persistent, auto-incrementing counter stored in a file.\nUseful for generating sequential numbers (#0001, #0002, ...) in filenames\nacross multiple ComfyUI runs. Supports different contexts/projects.",
+            "category": "MD_Nodes/Utility",
+            "file_path": "utility/SmartFilenameBuilder.py"
+        },
+        {
+            "key": "FilenameTokenReplacer",
+            "type": "FilenameTokenReplacer",
+            "title": "MD: Filename Token Replacer",
+            "description": "MD: Filename Token Replacer\n\nReplaces predefined tokens (like {date}, {steps}, {custom1}) within a\ntemplate string to generate a filename or path prefix. Useful for creating\ncustom filename structures based on workflow parameters.",
+            "category": "MD_Nodes/Utility",
+            "file_path": "utility/SmartFilenameBuilder.py"
+        },
+        {
+            "key": "GPUTemperatureProtectionEnhanced",
+            "type": "GPUTemperatureProtectionEnhanced",
+            "title": "MD: GPU Temp Protect (Enhanced)",
+            "description": "MD: GPU Temperature Protection (Enhanced)\n\nMonitors GPU temperature, VRAM, and utilization via nvidia-smi.\nPauses the ComfyUI queue if temperature exceeds a set threshold, resuming\nonce it cools down. Includes multi-GPU support, logging, adaptive cooling,\nand specific data type pass-through. Outputs the current temperature as a string.",
+            "category": "MD_Nodes/Utility",
+            "file_path": "utility/GPUTemperatureProtection.py"
+        },
+        {
+            "key": "HybridAdaptiveSigmas",
+            "type": "HybridAdaptiveSigmas",
+            "title": "MD: Hybrid Sigma Scheduler",
+            "description": "Core node for generating advanced sigma (noise) schedules.\n\nThis node produces a SIGMAS tensor that controls the noise level at each\nstep of the diffusion process. It supports multiple mathematical curves,\nblending, slicing, and presets for fine-grained control.",
+            "category": "MD_Nodes/Scheduler",
+            "file_path": "Hybrid_Sigma_Scheduler.py"
+        },
+        {
+            "key": "LLMVRAMManager",
+            "type": "LLMVRAMManager",
+            "title": "MD: LLM VRAM Manager",
+            "description": "MD: LLM VRAM Manager\n\nUtility node to manage VRAM conflicts with local LLM servers (Ollama, LM Studio).\nProvides actions to unload models via API (Ollama) or force-stop processes\nto free GPU memory during ComfyUI workflow execution. Includes pass-through\nconnections for easy integration.",
+            "category": "MD_Nodes/Utility",
+            "file_path": "utility/llm_vram_manager.py"
+        },
+        {
+            "key": "MasteringChainNode",
+            "type": "MasteringChainNode",
+            "title": "MD: Mastering Chain",
+            "description": "Advanced ComfyUI audio mastering chain node adhering to MD_Nodes Guide v1.4.3a.\nFeatures EQ, single/multiband compression (stereo-linked), and limiting.",
+            "category": "MD_Nodes/Audio Processing",
+            "file_path": "audio/mastering_chain_node.py"
+        },
+        {
+            "key": "NoiseDecayScheduler_Custom",
+            "type": "NoiseDecayScheduler_Custom",
+            "title": "MD: Noise Decay Scheduler (Advanced)",
+            "description": "MD: Noise Decay Scheduler (Advanced)\n\nGenerates a customizable noise decay curve object based on various algorithms\n(polynomial, sigmoidal, etc.) for use with compatible custom samplers.",
+            "category": "MD_Nodes/Scheduler",
+            "file_path": "NoiseDecayScheduler_Custom.py"
+        },
+        {
+            "key": "PingPongSamplerNodeFBG",
+            "type": "PingPongSamplerNodeFBG",
+            "title": "MD: PingPong Sampler (FBG)",
+            "description": "ComfyUI node wrapper for the PingPong FBG Sampler.\n\nThis node creates and configures the PingPongSamplerCore object,\nwhich is then returned as a standard ComfyUI SAMPLER object.",
+            "category": "MD_Nodes/Sampling",
+            "file_path": "PingPongSampler_Custom_FBG.py"
+        },
+        {
+            "key": "PingPongSampler_Custom_Lite",
+            "type": "PingPongSamplerNode",
+            "title": "MD: PingPong Sampler (Lite+)",
+            "description": "ComfyUI node wrapper for the Lite+ PingPongSampler.",
+            "category": "MD_Nodes/Sampling",
+            "file_path": "PingPongSampler_Custom.py"
+        },
+        {
+            "key": "SceneGeniusAutocreator",
+            "type": "SceneGeniusAutocreator",
+            "title": "MD: Scene Genius Autocreator",
+            "description": "A multi-stage ComfyUI node leveraging local LLMs for dynamic creative content\ngeneration (genres, lyrics, duration) and technical configuration (YAMLs).",
+            "category": "MD_Nodes/Workflow Automation",
+            "file_path": "SCENE_GENIUS_AUTOCREATOR.py"
+        },
+        {
+            "key": "SmartColorPaletteManager",
+            "type": "SmartColorPaletteManager",
+            "title": "MD: Smart Color Palette Manager",
+            "description": "MD: Smart Color Palette Manager (Prototype)\n\nManages and provides color palettes for workflow organization. Select presets,\nuse auto-detection based on keywords, or define custom colors. Outputs\nindividual hex codes and a visual preview image. Complements other\nWorkflow Organization Suite nodes.",
+            "category": "MD_Nodes/Workflow Organization",
+            "file_path": "organization/SmartColorPaletteManager.py"
+        },
+        {
+            "key": "SmartFilenameBuilder",
+            "type": "SmartFilenameBuilder",
+            "title": "MD: Smart Filename Builder",
+            "description": "MD: Smart Filename Builder\n\nGenerates complex and clean filenames using presets or custom configurations.\nIncludes options for date/time formatting, component toggles (steps, seed, etc.),\nand automatic sanitization. Ideal for structured output organization,\nespecially in audio workflows.",
+            "category": "MD_Nodes/Utility",
+            "file_path": "utility/SmartFilenameBuilder.py"
+        },
+        {
+            "key": "TextFileLoader",
+            "type": "TextFileLoader",
+            "title": "MD: Text File Loader",
+            "description": "Companion node to load text content from external files.",
+            "category": "MD_Nodes/Text",
+            "file_path": "text/TextInputNode.py"
+        },
+        {
+            "key": "UniversalRoutingHubAdvanced",
+            "type": "UniversalRoutingHubAdvanced",
+            "title": "MD: Universal Routing Hub",
+            "description": "MD: Universal Routing Hub (Advanced)\n\nAn advanced signal routing node using the universal '*' type. It passes data\nfrom input slots to corresponding output slots. Optionally monitors connected\nslots, detects data types, generates a visual status map, and provides\ntextual metrics. Supports chaining hubs via status strings.",
+            "category": "MD_Nodes/Workflow Organization",
+            "file_path": "organization/UniversalRoutingHub.py"
+        },
+        {
+            "key": "WorkflowSectionOrganizer",
+            "type": "WorkflowSectionOrganizer",
+            "title": "MD: Workflow Section Organizer",
+            "description": "MD: Workflow Section Organizer (Prototype)\n\nA universal passthrough node (*) designed to act as a visual separator or\n'chapter marker' within complex ComfyUI workflows. It accepts any data type,\npasses it through completely unchanged, and displays as a customizable banner.\nHelps to visually structure large graphs into logical processing stages.",
+            "category": "MD_Nodes/Workflow Organization",
+            "file_path": "organization/WorkflowSectionOrganizer.py"
+        }
+    ],
+    "dependencies": [
+        "Jinja2",
+        "MarkupSafe",
+        "filelock",
+        "fsspec",
+        "imageio",
+        "librosa",
+        "lmstudio",
+        "matplotlib",
+        "mpmath",
+        "networkx",
+        "ollama",
+        "pedalboard",
+        "piexif",
+        "pykakasi",
+        "pyloudnorm",
+        "requests",
+        "scipy",
+        "sentencepiece",
+        "sympy",
+        "tokenizers",
+        "tqdm"
+    ],
+    "name": "ComfyUI_MD_Nodes",
+    "author": "Unknown",
+    "description": "Custom nodes for ComfyUI"
 }

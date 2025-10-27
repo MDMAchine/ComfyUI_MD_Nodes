@@ -1,10 +1,25 @@
 [project]
-name = "ComfyUI_MD_Nodes"
-version = "1.4.1"
-description = "A wild collection of custom nodes for ComfyUI including schedulers, samplers, audio tools, latent visualizers, and more — built for creative chaos."
-authors = [{ name = "MDMAchine" }]
-readme = "README.md"
-license = { text = "MIT" }
-
-[tool.comfy]
-entry_point = "MD_Nodes"
+version = "1.4.4"
+dependencies = [
+    "Jinja2",
+    "MarkupSafe",
+    "filelock",
+    "fsspec",
+    "imageio",
+    "librosa",
+    "lmstudio",
+    "matplotlib",
+    "mpmath",
+    "networkx",
+    "ollama",
+    "pedalboard",
+    "piexif",
+    "pykakasi",
+    "pyloudnorm",
+    "requests",
+    "scipy",
+    "sentencepiece",
+    "sympy",
+    "tokenizers",
+    "tqdm",
+]
