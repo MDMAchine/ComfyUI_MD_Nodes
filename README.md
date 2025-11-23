@@ -1,7 +1,7 @@
 # MD_NODES
 
 ![Synth Approved](https://img.shields.io/badge/VIBES-CHAOTIC_NEUTRAL-ff00ff?style=flat-square&logo=md&logoColor=white)
-![Node Count](https://img.shields.io/badge/NODES-28_MODULES-cyan?style=flat-square)
+![Node Count](https://img.shields.io/badge/NODES-30+_MODULES-cyan?style=flat-square)
 ![L33T MODE](https://img.shields.io/badge/L33T-MODE_ENABLED-red?style=flat-square&logo=hackaday)
 ![ComfyUI](https://img.shields.io/badge/ComfyUI-Custom_Nodes-orange?style=flat-square)
 
@@ -15,7 +15,7 @@
 ┃  ██║ ╚═╝ ██║██████╔╝      ██║ ╚████║╚██████╔╝██████╔╝███████╗███████║  ┃
 ┃  ╚═╝     ╚═╝╚═════╝       ╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚══════╝╚══════╝  ┃
 ┃                                                                        ┃
-┃         🎛️ ComfyUI Custom Node Central - v0.69.420-BETA 🎛️            ┃
+┃         🎛️ ComfyUI Custom Node Central - v1.4.5-RELEASE 🎛️             ┃
 ┃      "Latent Space Debauchery & Digital Sorcery Since 56k Days"        ┃
 ┃                                                                        ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
@@ -36,44 +36,22 @@ Packaged with ASCII-flavored love, open-source chaos, and a healthy disregard fo
 
 ## 🔥 Node Collection
 
-### 🎨 VLM & Prompt Engineering
+### 🎨 Wildcards & Prompt Engineering
 
-#### `AESTHETIC_VLM_PACK` (Dual-Node Workflow) 🆕 ⭐
-**AI-powered prompt generation meets quality control.** Two-node system using local VLMs (Ollama/LM Studio) for end-to-end prompt crafting and validation.
-
-**Node 1: Aesthetic Transformer**
-- 🎲 **V32 Random Fusion** - Creative discovery mode with randomized aesthetic elements
-- 🎨 **Stylistic Fusion** - Merge subjects with styles, invent new scenes
-- 📝 **Direct Instruction** - Clean, literal prompt passthrough
-- 🏗️ **Design_Control** - Professional contractor mode (kitchens, bathrooms, exteriors)
-  - Auto-detects current materials
-  - Rates job complexity (Simple/Medium/Complex)
-  - Generates client-ready reports
-  - Built-in safety negatives for professional use
-
-**Node 2: VLM Confirmation Gate**
-- ✅ Validates final images against original intent
-- 📊 Provides confidence scores and reasoning
-- 🚦 Non-blocking QA workflow integration
-
-**Features:**
-- Multi-image reasoning (up to 3 images)
-- Dual-model mode (separate VLM + LLM for max quality)
-- Design templates for common contractor jobs
-- Universal negative prompt system
-- Preset management with full migration support
-- Custom negative prompt override
-
-📖 **[Read the Full Documentation](link-to-your-docs)** *(Coming Soon)*
-
-**⚖️ License Note:** This node has a **proprietary license** separate from the rest of MD_Nodes. See [`aesthetic_vlm_LICENSE.md`](aesthetic_vlm_LICENSE.md) for details. **TL;DR:** Free to use as-is, but modifications/monetization require permission. Contact me for commercial licensing!
+#### `MD_WILDCARD_PROMPT_BUILDER` 🆕 ⭐
+**The ultimate multi-mode prompt generation node.**
+Far more than a simple text box, this is a seed-controlled prompt engine. It supports massive wildcard expansion, dynamic list choices, and robust string manipulation to keep your generations fresh yet controllable.
 
 ---
 
-### Scheduling & Guidance
+### 🧭 Scheduling & Guidance
+
+#### `MD_APPLY_TPG` (Token Perturbation) 🆕
+**Subtle chaos for better steering.**
+Applies Token Perturbation Guidance (TPG) by patching the model's Self-Attention. This method introduces controlled noise during the guidance phase to break repetitive patterns and improve prompt adherence without the burn of high CFG.
 
 #### `HYBRID_SIGMA_SCHEDULER`
-**Your vibe, your noise.** 10+ modes (Karras, Poly, AYS, etc.) for precision noise scheduling. Auto-detects model sigmas, supports slicing, visualization, and comparison. Your sigma sommelier.
+**Your vibe, your noise.** 10+ modes (Karras, Poly, AYS, etc.) for precision noise scheduling. Auto-detects model sigmas, supports slicing, visualization, and comparison. Your sigma sommelier. Includes `SigmaSmooth` and `SigmaConcatenate` utilities.
 
 📖 **[Read the Manual](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/Master%20Technical%20Manual_%20Hybrid%20Sigma%20Scheduler.md)**
 
@@ -99,12 +77,8 @@ Packaged with ASCII-flavored love, open-source chaos, and a healthy disregard fo
 #### `AUDIO_AUTO_EQ`
 **One-click audio shaping.** Analyzes audio spectrum (librosa) and applies multi-band EQ (pedalboard) based on 18+ target profiles (Vocal Clarity, De-esser, Podcast, Music Master, ASMR, etc.).
 
-📖 `[Manual Coming Soon]`
-
 #### `AUDIO_AUTO_MASTER_PRO`
 **Iterative mastering magic.** Automatically analyzes and processes audio using filters, iterative EQ, de-essing, 3-band compression, stereo widening, and limiting to hit target LUFS and spectral profile.
-
-📖 `[Manual Coming Soon]`
 
 #### `MASTERING_CHAIN_NODE`
 **Make your audio thicc.** Pro-grade mastering: true stereo multiband compression, surgical EQ, transparent limiting. Optimized for LUFS-normalized input. Slaps waveforms with attitude.
@@ -146,12 +120,10 @@ Packaged with ASCII-flavored love, open-source chaos, and a healthy disregard fo
 📖 **[Read the Manual](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/Master%20Technical%20Manual_%20Scene%20Genius%20Autocreator.md)**
 
 #### `ADVANCED_TEXT_INPUT` & `TEXT_FILE_LOADER`
-**Wildcard magic & external text.** Use `{option1|option2}` syntax with seed control for reproducible dynamic text. Load large prompts or configs directly from `.txt` files.
+**External text powerhouse.** Load large prompts or configs directly from `.txt` files.
 
 #### `SMART_FILENAME_BUILDER` Suite
 **Dynamic filename toolkit.** Includes `SmartFilenameBuilder` (presets, toggles), `FilenameTokenReplacer` (simple `{token}` substitution), and `FilenameCounterNode` (persistent `#0001` counters). Organize your chaos.
-
-📖 `[Manual Coming Soon]`
 
 #### `MD_ENHANCED_SEED_SAVER`
 **Professional seed management.** Save, load, search, manage seeds with subdirs, favorites, stats, backup, export/import. Features dynamic action & static pass-through modes for workflow stability.
@@ -161,12 +133,8 @@ Packaged with ASCII-flavored love, open-source chaos, and a healthy disregard fo
 #### `LLM_VRAM_MANAGER`
 **VRAM peace talks.** Unloads models from Ollama (API) or force-stops LM Studio (process kill) to prevent VRAM conflicts between ComfyUI and local LLMs directly from your workflow.
 
-📖 `[Manual Coming Soon]`
-
 #### `GPU_TEMPERATURE_PROTECTION` (Enhanced)
 **Keep your cool.** Monitors GPU temp/VRAM via `nvidia-smi` and pauses the queue if thresholds are exceeded. Multi-GPU support, logging, adaptive cooling profiles. Prevents meltdowns.
-
-📖 `[Manual Coming Soon]`
 
 ---
 
@@ -175,27 +143,17 @@ Packaged with ASCII-flavored love, open-source chaos, and a healthy disregard fo
 #### `AUTO_LAYOUT_OPTIMIZER`
 **Untangle your spaghetti.** Automatically analyzes and reorganizes ComfyUI workflows using force-directed graphs. Detects node clusters, optimizes spacing, and prevents overlaps. Makes your workflow readable again.
 
-📖 `[Manual Coming Soon]`
-
 #### `ENHANCED_ANNOTATION_NODE`
 **Notes with style.** Add styled annotations to your workflow with customizable colors, fonts, borders, and opacity. Markdown support for documentation. Make your workflow self-documenting.
-
-📖 `[Manual Coming Soon]`
 
 #### `SMART_COLOR_PALETTE_MANAGER`
 **Color-code your chaos.** Manage and apply color schemes across workflow nodes. Create, save, and load palettes. Quickly identify node types by color. Visual organization at its finest.
 
-📖 `[Manual Coming Soon]`
-
 #### `UNIVERSAL_ROUTING_HUB`
 **The traffic controller.** Advanced signal routing with multiple inputs/outputs, conditional routing, and signal transformation. Route any data type anywhere. Your workflow's nervous system.
 
-📖 `[Manual Coming Soon]`
-
 #### `WORKFLOW_SECTION_ORGANIZER`
 **Divide and conquer.** Group related nodes into labeled sections with visual boundaries. Collapse/expand sections, apply section-wide settings. Perfect for complex multi-stage workflows.
-
-📖 `[Manual Coming Soon]`
 
 ---
 
@@ -213,11 +171,27 @@ Packaged with ASCII-flavored love, open-source chaos, and a healthy disregard fo
 
 ---
 
+## 💾 Included Tools (`/tools`)
+
+We now include a suite of professional automation tools located in the `tools/` directory of this repository:
+
+1.  **Project Updater** (`ComfyUI_Project_Updater.py`):
+    * Self-maintaining script to auto-generate `__init__.py`, update requirements, and manage node metadata.
+    * Includes "Re-launch Guard" to ensure it runs in your correct Python venv.
+2.  **AIO Manager**:
+    * Launchers and management utilities for ComfyUI.
+3.  **Ace-Step Training Suite**:
+    * Full LoRA training automation tools (`lora_trainer_automation_v2.1_FINAL.py`).
+    * Audio normalization and tagging utilities.
+    * Setup checklists and best practice guides for audio model training.
+
+---
+
 ## 🧰 Installation
 
 ```bash
 cd path/to/ComfyUI/custom_nodes
-git clone https://github.com/MDMAchine/ComfyUI_MD_Nodes.git
+git clone [https://github.com/MDMAchine/ComfyUI_MD_Nodes.git](https://github.com/MDMAchine/ComfyUI_MD_Nodes.git)
 ```
 
 Or search for **MD_Nodes** in the ComfyUI Manager!
@@ -258,36 +232,10 @@ These legends walked so you could sample:
 
 ## 📜 License
 
-**MD_Nodes** uses a **dual-license** structure:
+This project is licensed under the **Apache License 2.0**.
+See [`LICENSE.md`](LICENSE.md) for details.
 
-### General Nodes (Apache 2.0)
-Most nodes in this pack are licensed under **Apache License 2.0** - free and open source.  
-See [`LICENSE.md`](LICENSE.md) for full terms.
-
-### Aesthetic VLM Pack (Proprietary)
-The **`Aesthetic_VLM_Pack.py`** file has a **separate proprietary license**:
-
-- ✅ **Free to use** in ComfyUI workflows (personal or commercial)
-- ❌ **Cannot modify** without written permission
-- ❌ **Cannot monetize derivatives** without a commercial license
-
-See [`aesthetic_vlm_LICENSE.md`](aesthetic_vlm_LICENSE.md) for full terms.
-
-**Want to modify or monetize the Aesthetic VLM Pack?**  
-Contact me for commercial licensing: **mdmachine@gmail.com**
-
----
-
-### Why Dual-License?
-
-The Aesthetic VLM Pack represents hundreds of hours of specialized development. I'm happy to share it freely for use, but I want to:
-
-1. **Protect the work** - Prevent unauthorized commercial exploitation
-2. **Maintain quality** - Ensure derivatives meet professional standards
-3. **Build partnerships** - Work with developers who see its value
-4. **Earn fairly** - Get compensated for commercial derivatives
-
-For all other nodes, Apache 2.0 applies - modify freely! 🎉
+You are free to use, modify, and distribute this software in accordance with the license terms.
 
 ---
 
@@ -312,6 +260,4 @@ For all other nodes, Apache 2.0 applies - modify freely! 🎉
 
 ---
 
-**⭐ Star this repo if it tickles your neurons**  
-**🐛 Report issues if reality breaks**  
-**🔀 PRs welcome from fellow digital shamans**
+**⭐ Star this repo if it tickles your neurons** **🐛 Report issues if reality breaks** **🔀 PRs welcome from fellow digital shamans**
