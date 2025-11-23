@@ -1,0 +1,111 @@
+{
+  "version": "3.0.0",
+  "active_comfyui_root": "C:\\Stable Diffusion\\ComfyUI_Base",
+  "custom_venv_paths": [
+    "C:\\Stable Diffusion\\venvs\\comfy_py313\\Scripts\\python.exe"
+  ],
+  "pytorch": {
+    "default_version": "stable_cu129",
+    "available_versions": {
+      "stable_cu129": {
+        "name": "Stable CUDA 12.9 (Recommended)",
+        "index_url": "https://download.pytorch.org/whl/cu129",
+        "use_extra_index": true
+      },
+      "stable_cu130": {
+        "name": "Stable CUDA 13.0",
+        "index_url": "https://download.pytorch.org/whl/cu130",
+        "use_extra_index": true
+      },
+      "nightly_cu130": {
+        "name": "Nightly CUDA 13.0 (Experimental)",
+        "index_url": "https://download.pytorch.org/whl/nightly/cu130",
+        "use_extra_index": false
+      },
+      "cpu": {
+        "name": "CPU Only",
+        "index_url": "https://download.pytorch.org/whl/cpu",
+        "use_extra_index": false
+      },
+      "pt_2_8_0_cu129": {
+        "name": "PyTorch 2.8.0 (CUDA 12.9)",
+        "index_url": "https://download.pytorch.org/whl/cu129",
+        "packages": ["torch==2.8.0", "torchvision==0.23.0", "torchaudio==2.8.0"],
+        "python_versions": ["3.11", "3.12", "3.13"],
+        "use_extra_index": false
+      },
+      "pt_2_8_0_cu128": {
+        "name": "PyTorch 2.8.0 (CUDA 12.8)",
+        "index_url": "https://download.pytorch.org/whl/cu128",
+        "packages": ["torch==2.8.0", "torchvision==0.23.0", "torchaudio==2.8.0"],
+        "python_versions": ["3.11", "3.12", "3.13"],
+        "use_extra_index": false
+      },
+      "pt_2_8_0_cu126": {
+        "name": "PyTorch 2.8.0 (CUDA 12.6)",
+        "index_url": "https://download.pytorch.org/whl/cu126",
+        "packages": ["torch==2.8.0", "torchvision==0.23.0", "torchaudio==2.8.0"],
+        "python_versions": ["3.11", "3.12", "3.13"],
+        "use_extra_index": false
+      },
+      "pt_2_7_1_cu128": {
+        "name": "PyTorch 2.7.1 (CUDA 12.8)",
+        "index_url": "https://download.pytorch.org/whl/cu128",
+        "packages": ["torch==2.7.1", "torchvision==0.22.1", "torchaudio==2.7.1"],
+        "python_versions": ["3.11", "3.12"],
+        "use_extra_index": false
+      },
+      "pt_2_7_1_cu126": {
+        "name": "PyTorch 2.7.1 (CUDA 12.6)",
+        "index_url": "https://download.pytorch.org/whl/cu126",
+        "packages": ["torch==2.7.1", "torchvision==0.22.1", "torchaudio==2.7.1"],
+        "python_versions": ["3.11", "3.12"],
+        "use_extra_index": false
+      },
+      "pt_2_7_1_cu118": {
+        "name": "PyTorch 2.7.1 (CUDA 11.8)",
+        "index_url": "https://download.pytorch.org/whl/cu118",
+        "packages": ["torch==2.7.1", "torchvision==0.22.1", "torchaudio==2.7.1"],
+        "python_versions": ["3.11", "3.12"],
+        "use_extra_index": false
+      }
+    }
+  },
+  "requirements": {
+    "ignore_patterns": [".venv", "venv", "python_embeded", "__pycache__", ".git"],
+    "ignore_packages": [
+      "comfyui-frontend-package",
+      "comfyui-workflow-templates",
+      "pytest",
+      "pytest-aiohttp",
+      "pytest-asyncio",
+      "websocket-client",
+      "comfy",
+      "attention_processor",
+      "flash_attn_interface",
+      "folder_paths",
+      "hi_diffusers",
+      "models",
+      "nodes",
+      "pipeline_hidream_image",
+      "pipeline_output",
+      "schedulers"
+    ],
+    "upgrade_only": true
+  },
+  "snapshots": {
+    "enabled": true,
+    "max_snapshots": 10,
+    "auto_create": true
+  },
+  "ui": {
+    "colors_enabled": true,
+    "show_pip_output": false
+  },
+  "structure": {
+    "stable_diffusion_root": "C:\\Stable Diffusion",
+    "comfyui_base_name": "ComfyUI_Base",
+    "venvs_dir_name": "venvs"
+  },
+  "last_active_python": "C:\\Stable Diffusion\\venvs\\comfy_py313\\Scripts\\python.exe"
+}

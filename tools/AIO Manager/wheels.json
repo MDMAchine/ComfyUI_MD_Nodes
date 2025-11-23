@@ -1,0 +1,108 @@
+{
+  "2.7.0": {
+    "cp312": {
+      "Triton": {
+        "win32": "https://github.com/woct0rdho/triton-windows/releases/download/empty/triton-3.3.0-py3-none-any.whl",
+        "linux": "https://github.com/loscrossos/lib_triton/releases/download/v3.3.0%2Bgit766f7fa9/triton-3.3.0+gitaaa9932acu129torch2.7.0-cp312-cp312-linux_x86_64.whl"
+      },
+      "Flash Attention": {
+        "linux": "https://github.com/loscrossos/lib_flashattention/releases/download/v2.7.4.post1_crossos00/flash_attn-2.7.4.post1+cu129torch2.7.0-cp312-cp312-linux_x86_64.whl",
+        "win32": "https://github.com/loscrossos/lib_flashattention/releases/download/v2.7.4.post1_crossos00/flash_attn-2.7.4.post1+cu129torch2.7.0-cp312-cp312-win_amd64.whl"
+      },
+      "Sage Attention": {
+        "win32": "https://github.com/loscrossos/lib_sageattention/releases/download/v2.2.0/sageattention-2.2.0+cu129torch270-cp312-cp312-win_amd64.whl",
+        "linux": "https://github.com/loscrossos/lib_sageattention/releases/download/v2.2.0/sageattention-2.2.0+cu129torch270-cp312-cp312-linux_x86_64.whl"
+      }
+    }
+  },
+  "2.7.1": {
+    "cp311": {
+      "Flash Attention": {
+        "win32": "https://github.com/loscrossos/lib_flashattention/releases/download/v2.8.0/flash_attn-2.8.0+cu129torch2.7.1-cp311-cp311-win_amd64.whl",
+        "linux": "https://github.com/loscrossos/lib_flashattention/releases/download/v2.8.0/flash_attn-2.8.0+cu129torch2.7.1-cp311-cp311-linux_x86_64.whl"
+      },
+      "Sage Attention": {
+        "win32": "https://github.com/loscrossos/lib_sageattention/releases/download/v2.2.0/sageattention-2.2.0+cu129torch270-cp311-cp311-win_amd64.whl",
+        "linux": "https://github.com/loscrossos/lib_sageattention/releases/download/v2.2.0/sageattention-2.2.0+cu129torch270-cp311-cp311-linux_x86_64.whl"
+      },
+      "Causal-Conv1D": {
+        "win32": "https://github.com/loscrossos/lib_causal-conv1d/releases/download/v1.5.0.post8_crossos00/causal_conv1d-1.5.0.post8+cu129torch2.7.1-cp311-cp311-win_amd64.whl",
+        "linux": "https://github.com/loscrossos/lib_causal-conv1d/releases/download/v1.5.0.post8_crossos00/causal_conv1d-1.5.0.post8+cu129torch2.7.1-cp311-cp311-linux_x86_64.whl"
+      },
+      "Mamba-SSM": {
+        "win32": "https://github.com/loscrossos/lib_mamba/releases/download/v2.2.4_crossos00/mamba_ssm-2.2.4+cu129torch2.7.1-cp311-cp311-win_amd64.whl",
+        "linux": "https://github.com/loscrossos/lib_mamba/releases/download/v2.2.4_crossos00/mamba_ssm-2.2.4+cu129torch2.7.1-cp311-cp311-linux_x86_64.whl"
+      }
+    },
+    "cp312": {
+      "Flash Attention": {
+        "linux": "https://github.com/loscrossos/lib_flashattention/releases/download/v2.8.0/flash_attn-2.8.0+cu129torch2.7.1-cp312-cp312-linux_x86_64.whl",
+        "win32": "https://github.com/loscrossos/lib_flashattention/releases/download/v2.8.0/flash_attn-2.8.0+cu129torch2.7.1-cp312-cp312-win_amd64.whl"
+      },
+      "Sage Attention": {
+        "win32": "https://github.com/loscrossos/lib_sageattention/releases/download/v2.2.0/sageattention-2.2.0+cu129torch270-cp312-cp312-win_amd64.whl",
+        "linux": "https://github.com/loscrossos/lib_sageattention/releases/download/v2.2.0/sageattention-2.2.0+cu129torch270-cp312-cp312-linux_x86_64.whl"
+      },
+      "Causal-Conv1D": {
+        "linux": "https://github.com/loscrossos/lib_causal-conv1d/releases/download/v1.5.0.post8_crossos00/causal_conv1d-1.5.0.post8+cu129torch2.7.1-cp312-cp312-linux_x86_64.whl",
+        "win32": "https://github.com/loscrossos/lib_causal-conv1d/releases/download/v1.5.0.post8_crossos00/causal_conv1d-1.5.0.post8+cu129torch2.7.1-cp312-cp312-win_amd64.whl"
+      },
+      "Mamba-SSM": {
+        "linux": "https://github.com/loscrossos/lib_mamba/releases/download/v2.2.4_crossos00/mamba_ssm-2.2.4+cu129torch2.7.1-cp312-cp312-linux_x86_64.whl",
+        "win32": "https://github.com/loscrossos/lib_mamba/releases/download/v2.2.4_crossos00/mamba_ssm-2.2.4+cu129torch2.7.1-cp312-cp312-win_amd64.whl"
+      }
+    }
+  },
+  "2.8.0": {
+    "cp311": {
+      "Triton": {
+        "win32": "https://github.com/woct0rdho/triton-windows/releases/download/empty/triton-3.3.0-py3-none-any.whl"
+      },
+      "Flash Attention": {
+        "win32": "https://github.com/loscrossos/lib_flashattention/releases/download/v2.8.3/flash_attn-2.8.3+cu129torch2.8.0-cp311-cp311-win_amd64.whl",
+        "linux": "https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.3/flash_attn-2.8.3+cu12torch2.8cxx11abiTRUE-cp311-cp311-linux_x86_64.whl"
+      }
+    },
+    "cp312": {
+      "Triton": {
+        "win32": "https://github.com/woct0rdho/triton-windows/releases/download/empty/triton-3.3.0-py3-none-any.whl"
+      },
+      "Flash Attention": {
+        "win32": "https://github.com/loscrossos/lib_flashattention/releases/download/v2.8.3/flash_attn-2.8.3+cu129torch2.8.0-cp312-cp312-win_amd64.whl",
+        "linux": "https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.3/flash_attn-2.8.3+cu12torch2.8cxx11abiTRUE-cp312-cp312-linux_x86_64.whl"
+      },
+      "Sage Attention": {
+        "win32": "https://github.com/woct0rdho/SageAttention/releases/download/v2.2.0-windows.post2/sageattention-2.2.0+cu128torch2.8.0.post2-cp39-abi3-win_amd64.whl",
+        "linux": "https://github.com/loscrossos/lib_sageattention/releases/download/v2.2.0/sageattention-2.2.0+cu129torch280-cp312-cp312-linux_x86_64.whl"
+      },
+      "Causal-Conv1D": {
+        "linux": "https://github.com/loscrossos/lib_causal-conv1d/releases/download/v1.5.2/causal_conv1d-1.5.2+cu129torch2.8.0-cp312-cp312-linux_x86_64.whl",
+        "win32": "https://github.com/loscrossos/lib_causal-conv1d/releases/download/v1.5.2/causal_conv1d-1.5.2+cu129torch2.8.0-cp312-cp312-win_amd64.whl"
+      },
+      "Mamba-SSM": {
+        "linux": "https://github.com/loscrossos/lib_mamba/releases/download/v2.2.5/mamba_ssm-2.2.5+cu129torch2.8.0-cp312-cp312-linux_x86_64.whl",
+        "win32": "https://github.com/loscrossos/lib_mamba/releases/download/v2.2.5/mamba_ssm-2.2.5+cu129torch2.8.0-cp312-cp312-win_amd64.whl"
+      }
+    },
+    "cp313": {
+      "Triton": {
+        "win32": "https://github.com/woct0rdho/triton-windows/releases/download/empty/triton-3.3.0-py3-none-any.whl"
+      },
+      "Flash Attention": {
+        "win32": "https://github.com/loscrossos/lib_flashattention/releases/download/v2.8.2/flash_attn-2.8.2+cu129torch2.8.0-cp313-cp313-win_amd64.whl",
+        "linux": "https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.3/flash_attn-2.8.3+cu12torch2.8cxx11abiTRUE-cp313-cp313-linux_x86_64.whl"
+      },
+      "Sage Attention": {
+        "linux": "https://github.com/loscrossos/lib_sageattention/releases/download/v2.2.0/sageattention-2.2.0+cu129torch280-cp313-cp313-linux_x86_64.whl"
+      },
+      "Causal-Conv1D": {
+        "win32": "https://github.com/loscrossos/lib_causal-conv1d/releases/download/v1.5.2/causal_conv1d-1.5.2+cu129torch2.8.0-cp313-cp313-win_amd64.whl",
+        "linux": "https://github.com/loscrossos/lib_causal-conv1d/releases/download/v1.5.2/causal_conv1d-1.5.2+cu129torch2.8.0-cp313-cp313-linux_x86_64.whl"
+      },
+      "Mamba-SSM": {
+        "win32": "https://github.com/loscrossos/lib_mamba/releases/download/v2.2.5/mamba_ssm-2.2.5+cu129torch2.8.0-cp313-cp313-win_amd64.whl",
+        "linux": "https://github.com/loscrossos/lib_mamba/releases/download/v2.2.5/mamba_ssm-2.2.5+cu129torch2.8.0-cp313-cp313-linux_x86_64.whl"
+      }
+    }
+  }
+}

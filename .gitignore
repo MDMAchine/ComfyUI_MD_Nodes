@@ -2,48 +2,44 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+*.egg-info/
 # Virtual environments
 venv/
 .venv/
 env/
 .env/
-
 # IDE files
 .vscode/
 .idea/
 *.swp
-
 # OS files
 .DS_Store
 Thumbs.db
-
 # Backups
 .project_backups/
-
+*.rar
+*.zip
 # ComfyUI specific
 .ipynb_checkpoints/
-
 # Large files
 *.bin
 *.safetensors
 *.ckpt
 *.pt
 *.pth
-
 # Local configs
 *.ini
 *.local
 project_updater_config.json
-UniversalGuardian.py
 updater_settings.json
-
-# Project specific folders
+# Build artifacts
+build/
+dist/
+# Project Exclusions
+.git/
+node_modules/
 misc/
 Internal/
-tools/
-
-# Other file types
-*.rar
-*.url
-*.bat
+docs/
+tests/
+testing/

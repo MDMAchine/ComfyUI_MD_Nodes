@@ -2,6 +2,14 @@
     "version": "1.4.4",
     "nodes": [
         {
+            "key": "HybridAdaptiveSigmas",
+            "type": "HybridAdaptiveSigmas",
+            "title": "Hybrid Sigma Scheduler",
+            "description": "",
+            "category": "MD_Nodes/Schedulers",
+            "file_path": "Hybrid_Sigma_Scheduler.py"
+        },
+        {
             "key": "ACE_LatentVisualizer",
             "type": "ACELatentVisualizer",
             "title": "MD: ACE Latent Visualizer",
@@ -37,7 +45,7 @@
             "key": "APGGuiderForked",
             "type": "APGGuiderNode",
             "title": "MD: APG Guider",
-            "description": "ComfyUI node for APG (Adaptive Projected Gradient) guidance.\n\nEnhanced fork with improved robustness, validation, and error handling.",
+            "description": "ComfyUI node for APG (Adaptive Projected Gradient) guidance.",
             "category": "MD_Nodes/Sampling",
             "file_path": "APG_Guider_Forked.py"
         },
@@ -61,24 +69,40 @@
             "key": "AdvancedTextNode",
             "type": "AdvancedTextNode",
             "title": "MD: Advanced Text Input",
-            "description": "A versatile text input node with seed-controlled wildcard processing,\ntext transformations, and multiple output options.",
+            "description": "A versatile text input node with seed-controlled wildcard processing,\ntext transformations, and multiple output options including text length.",
             "category": "MD_Nodes/Text",
             "file_path": "text/TextInputNode.py"
+        },
+        {
+            "key": "Aesthetic_Transformer_Node_MD",
+            "type": "Aesthetic_Transformer_Node",
+            "title": "MD: Aesthetic Transformer",
+            "description": "MD: Aesthetic Transformer (v1.7.0)\nTransforms simple user intent and/or images into complex, high-quality prompts.",
+            "category": "MD_Nodes/Workflow_Automation",
+            "file_path": "testing/Aesthetic_VLM_Pack/Aesthetic_VLM_Pack_Node1_Transformer.py"
+        },
+        {
+            "key": "MD_ApplyTPG",
+            "type": "MD_ApplyTPG",
+            "title": "MD: Apply TPG (Token Perturbation)",
+            "description": "Applies Token Perturbation Guidance (TPG) by patching the model's Self-Attention.",
+            "category": "MD_Nodes/Guidance",
+            "file_path": "guiders/MD_ApplyTPG.py"
         },
         {
             "key": "MD_AudioAutoEQ",
             "type": "MD_AudioAutoEQ",
             "title": "MD: Audio Auto EQ",
-            "description": "Audio Auto EQ (MD_AudioAutoEQ)\n\nApplies automatic equalization to audio by analyzing its spectrum\nand matching it to a selected target profile using multi-band EQ.",
-            "category": "MD_Nodes/Audio Processing",
+            "description": "Audio Auto EQ (MD_AudioAutoEQ)\nApplies automatic equalization to audio by analyzing its spectrum\nand matching it to a selected target profile using multi-band EQ.",
+            "category": "MD_Nodes/Audio",
             "file_path": "audio/auto_eq.py"
         },
         {
             "key": "MD_AutoMasterNode",
             "type": "MD_AutoMasterNode",
             "title": "MD: Audio Auto Master Pro",
-            "description": "Audio Auto Master Pro (MD_AutoMasterNode)\n\nAn all-in-one, iterative audio mastering node. It automatically analyzes\nand processes audio to hit a target LUFS and spectral profile using a\nchain of EQ, multi-band compression, de-essing, and limiting.",
-            "category": "MD_Nodes/Audio Processing",
+            "description": "Audio Auto Master Pro (MD_AutoMasterNode)\nAn all-in-one, iterative audio mastering node.",
+            "category": "MD_Nodes/Audio",
             "file_path": "audio/MD_AutoMasterNode.py"
         },
         {
@@ -88,6 +112,14 @@
             "description": "MD: Auto-Layout Optimizer (Prototype)\n\nAnalyzes the layout structure of a ComfyUI workflow provided as JSON.\nCalculates metrics (complexity, spacing, crossings), generates optimization\nrecommendations, and optionally applies a selected auto-layout algorithm,\noutputting the modified workflow JSON.",
             "category": "MD_Nodes/Workflow Organization",
             "file_path": "organization/AutoLayoutOptimizer.py"
+        },
+        {
+            "key": "MD_CLIPTokenFinder",
+            "type": "MD_CLIPTokenFinder",
+            "title": "MD: CLIP Token Finder",
+            "description": "",
+            "category": "MD_Nodes/Guidance",
+            "file_path": "testing/MD_CLIPTokenFinder.py"
         },
         {
             "key": "EnhancedAnnotationNode",
@@ -109,7 +141,7 @@
             "key": "FilenameCounterNode",
             "type": "FilenameCounterNode",
             "title": "MD: Filename Counter",
-            "description": "MD: Filename Counter\n\nProvides a persistent, auto-incrementing counter stored in a file.\nUseful for generating sequential numbers (#0001, #0002, ...) in filenames\nacross multiple ComfyUI runs. Supports different contexts/projects.",
+            "description": "MD: Filename Counter\nProvides a persistent, auto-incrementing counter stored in a JSON file.",
             "category": "MD_Nodes/Utility",
             "file_path": "utility/SmartFilenameBuilder.py"
         },
@@ -117,7 +149,7 @@
             "key": "FilenameTokenReplacer",
             "type": "FilenameTokenReplacer",
             "title": "MD: Filename Token Replacer",
-            "description": "MD: Filename Token Replacer\n\nReplaces predefined tokens (like {date}, {steps}, {custom1}) within a\ntemplate string to generate a filename or path prefix. Useful for creating\ncustom filename structures based on workflow parameters.",
+            "description": "MD: Filename Token Replacer\nReplaces predefined tokens in a template string.",
             "category": "MD_Nodes/Utility",
             "file_path": "utility/SmartFilenameBuilder.py"
         },
@@ -130,18 +162,18 @@
             "file_path": "utility/GPUTemperatureProtection.py"
         },
         {
-            "key": "HybridAdaptiveSigmas",
-            "type": "HybridAdaptiveSigmas",
-            "title": "MD: Hybrid Sigma Scheduler",
-            "description": "Core node for generating advanced sigma (noise) schedules.\n\nThis node produces a SIGMAS tensor that controls the noise level at each\nstep of the diffusion process. It supports multiple mathematical curves,\nblending, slicing, and presets for fine-grained control.",
-            "category": "MD_Nodes/Scheduler",
-            "file_path": "Hybrid_Sigma_Scheduler.py"
+            "key": "MD_InitNoiseOptimizer",
+            "type": "MD_InitNoiseOptimizer",
+            "title": "MD: Init Noise Optimizer",
+            "description": "Pre-sampling noise optimization node.",
+            "category": "MD_Nodes/Guidance",
+            "file_path": "testing/MD_InitNoiseOptimizer.py"
         },
         {
             "key": "LLMVRAMManager",
             "type": "LLMVRAMManager",
             "title": "MD: LLM VRAM Manager",
-            "description": "MD: LLM VRAM Manager\n\nUtility node to manage VRAM conflicts with local LLM servers (Ollama, LM Studio).\nProvides actions to unload models via API (Ollama) or force-stop processes\nto free GPU memory during ComfyUI workflow execution. Includes pass-through\nconnections for easy integration.",
+            "description": "MD: LLM VRAM Manager\n\nUtility node to manage VRAM conflicts with local LLM servers (Ollama, LM Studio, llama-swap).\nProvides actions to unload models via API (Ollama, llama-swap) or force-stop processes\nto free GPU memory during ComfyUI workflow execution. Includes pass-through\nconnections for easy integration.",
             "category": "MD_Nodes/Utility",
             "file_path": "utility/llm_vram_manager.py"
         },
@@ -165,7 +197,7 @@
             "key": "PingPongSamplerNodeFBG",
             "type": "PingPongSamplerNodeFBG",
             "title": "MD: PingPong Sampler (FBG)",
-            "description": "ComfyUI node wrapper for the PingPong FBG Sampler.\n\nThis node creates and configures the PingPongSamplerCore object,\nwhich is then returned as a standard ComfyUI SAMPLER object.",
+            "description": "ComfyUI node wrapper.",
             "category": "MD_Nodes/Sampling",
             "file_path": "PingPongSampler_Custom_FBG.py"
         },
@@ -178,12 +210,28 @@
             "file_path": "PingPongSampler_Custom.py"
         },
         {
+            "key": "MD_Qwen_Image_Edit_Object_Replacer_Node",
+            "type": "MD_Qwen_Image_Edit_Object_Replacer_Node",
+            "title": "MD: Qwen Object Replacer",
+            "description": "MD: Qwen Object Replacer (v1.7.1)\nVLM-enhanced inpainting pre-processor optimized for Qwen-Image-Edit models.",
+            "category": "MD_Nodes/Workflow_Automation",
+            "file_path": "testing/Aesthetic_VLM_Pack/Aesthetic_VLM_Pack_Node3_QwenReplacer.py"
+        },
+        {
             "key": "SceneGeniusAutocreator",
             "type": "SceneGeniusAutocreator",
             "title": "MD: Scene Genius Autocreator",
             "description": "A multi-stage ComfyUI node leveraging local LLMs for dynamic creative content\ngeneration (genres, lyrics, duration) and technical configuration (YAMLs).",
             "category": "MD_Nodes/Workflow Automation",
             "file_path": "SCENE_GENIUS_AUTOCREATOR.py"
+        },
+        {
+            "key": "MD_SelfCrossGuider",
+            "type": "MD_SelfCrossGuider",
+            "title": "MD: Self-Cross Separation Guider",
+            "description": "ComfyUI node for Self-Cross subject separation guidance.",
+            "category": "MD_Nodes/Guidance",
+            "file_path": "testing/MD_SelfCrossGuider.py"
         },
         {
             "key": "SmartColorPaletteManager",
@@ -197,7 +245,7 @@
             "key": "SmartFilenameBuilder",
             "type": "SmartFilenameBuilder",
             "title": "MD: Smart Filename Builder",
-            "description": "MD: Smart Filename Builder\n\nGenerates complex and clean filenames using presets or custom configurations.\nIncludes options for date/time formatting, component toggles (steps, seed, etc.),\nand automatic sanitization. Ideal for structured output organization,\nespecially in audio workflows.",
+            "description": "MD: Smart Filename Builder\nGenerates complex and clean filenames using presets or custom configurations.",
             "category": "MD_Nodes/Utility",
             "file_path": "utility/SmartFilenameBuilder.py"
         },
@@ -218,12 +266,44 @@
             "file_path": "organization/UniversalRoutingHub.py"
         },
         {
+            "key": "VLM_Confirmation_Gate_Node_MD",
+            "type": "VLM_Confirmation_Gate_Node",
+            "title": "MD: VLM Confirmation Gate",
+            "description": "MD: VLM Confirmation Gate\nValidates a generated image against the original user intent using a local VLM.",
+            "category": "MD_Nodes/Workflow_Automation",
+            "file_path": "testing/Aesthetic_VLM_Pack/Aesthetic_VLM_Pack_Node2_ConfirmationGate.py"
+        },
+        {
+            "key": "WildcardPromptBuilder",
+            "type": "WildcardPromptBuilder",
+            "title": "MD: Wildcard Prompt Builder",
+            "description": "The ultimate multi-mode prompt generation node.",
+            "category": "MD_Nodes/Prompt Generation",
+            "file_path": "WildcardPromptBuilder.py"
+        },
+        {
             "key": "WorkflowSectionOrganizer",
             "type": "WorkflowSectionOrganizer",
             "title": "MD: Workflow Section Organizer",
             "description": "MD: Workflow Section Organizer (Prototype)\n\nA universal passthrough node (*) designed to act as a visual separator or\n'chapter marker' within complex ComfyUI workflows. It accepts any data type,\npasses it through completely unchanged, and displays as a customizable banner.\nHelps to visually structure large graphs into logical processing stages.",
             "category": "MD_Nodes/Workflow Organization",
             "file_path": "organization/WorkflowSectionOrganizer.py"
+        },
+        {
+            "key": "SigmaConcatenate",
+            "type": "SigmaConcatenate",
+            "title": "Sigma Concatenate",
+            "description": "Concatenates two sigma schedules for multi-pass workflows.\nUseful for chaining different schedulers or creating custom multi-stage schedules.",
+            "category": "MD_Nodes/Schedulers/Utilities",
+            "file_path": "Hybrid_Sigma_Scheduler.py"
+        },
+        {
+            "key": "SigmaSmooth",
+            "type": "SigmaSmooth",
+            "title": "Sigma Smooth",
+            "description": "Applies smoothing to a sigma schedule to reduce harsh transitions.\nUseful for reducing artifacts caused by abrupt sigma changes.",
+            "category": "MD_Nodes/Schedulers/Utilities",
+            "file_path": "Hybrid_Sigma_Scheduler.py"
         }
     ],
     "dependencies": [
@@ -231,15 +311,23 @@
         "MarkupSafe",
         "filelock",
         "fsspec",
+        "gptqmodel",
+        "h5py",
+        "hdf5plugin",
         "imageio",
         "librosa",
         "lmstudio",
+        "loguru",
         "matplotlib",
         "mpmath",
+        "natsort",
         "networkx",
         "ollama",
+        "packaging",
         "pedalboard",
+        "peft",
         "piexif",
+        "prodigy-opt",
         "pykakasi",
         "pyloudnorm",
         "requests",

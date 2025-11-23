@@ -1,0 +1,82 @@
+  # ----------------------------------------------------------------
+  # YAML settings for PingPongSamplerNodeFBG (v1.4.2 Compliance)
+  # Tuned for Qwen Image (Standard)
+  # ----------------------------------------------------------------
+  
+  # ----------------------------------------------------------------
+  # --- Core Sampler Settings (Top Level) ---
+  # ----------------------------------------------------------------
+  step_random_mode: "step"
+  step_size: 4
+  
+  # Ancestral Steps (Now uses direct step indices, not sigma values)
+  first_ancestral_step: 0
+  last_ancestral_step: -1
+  ancestral_noise_type: "gaussian"
+  
+  start_sigma_index: 0
+  end_sigma_index: -1
+  enable_clamp_output: false
+  
+  # Blending Modes (Renamed to *function_name)
+  blend_function_name: "lerp" 
+  step_blend_function_name: "cosine" 
+  
+  # Conditional & Progressive Blending
+  conditional_blend_mode: false
+  conditional_blend_sigma_threshold: 0.3
+  conditional_blend_function_name: "lerp" # Matches existing value/name structure
+  conditional_blend_on_change: false
+  conditional_blend_change_threshold: 0.2
+  progressive_blend_mode: false
+  
+  # Noise Control
+  clamp_noise_norm: false
+  max_noise_norm: 1.5
+  adaptive_noise_scaling: false
+  noise_scale_factor: 1.0
+  
+  # Debug & Performance
+  debug_mode: 2
+  enable_profiling: true
+  gradient_norm_tracking: false # Feature disabled internally in sampler
+  early_exit_threshold: 0.000001
+  tensor_memory_optimization: true
+  
+  # FBG & K-Diffusion Settings (Simplified names)
+  eta: 0.7              # Mapped from fbg_eta
+  s_noise: 1.0          # Mapped from fbg_s_noise
+  log_posterior_ema_factor: 0.7
+  
+  
+  # ------------------------------------------------------------------
+  # --- FBG Configuration Block (NESTED: fbg_config) ---
+  # All parameters initializing the FBGConfig class must be here.
+  # ------------------------------------------------------------------
+  fbg_config:
+    # FBG Mode Selection: AUTOMATIC (t_0/t_1)
+    t_0: 0.6
+    t_1: 0.3
+    
+    # Manual FBG Tuning (Ignored by the node since t_0/t_1 are active)
+    temp: 0.0011
+    offset: -0.05
+  
+    # Core FBG Settings
+    cfg_scale: 6.0
+    initial_guidance_scale: 2.0
+    pi: 0.75
+    fbg_sampler_mode: "PINGPONG" # Mapped from original 'sampler_mode' for UI compatibility
+
+    # Sigma (Noise Level) Ranges: These remain in fbg_config
+    cfg_start_sigma: 1.0
+    cfg_end_sigma: 0.004
+    fbg_start_sigma: 1.0
+    fbg_end_sigma: 0.004
+
+    # Ceilings and Multipliers
+    max_guidance_scale: 120.0
+    max_posterior_scale: 3.0
+    initial_value: 0.0
+    fbg_guidance_multiplier: 1.0
+    guidance_max_change: 0.35

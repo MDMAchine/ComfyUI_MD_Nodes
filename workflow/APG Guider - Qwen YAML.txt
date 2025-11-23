@@ -1,0 +1,40 @@
+  # --- APG Guider v1.4.2 Configuration for Standard Qwen Models -
+  # Ensures all rules are complete and includes the mandatory infinite fallback.
+  
+  verbose: true
+  
+  rules:
+    # Rule 1: Composition Phase (High/Mid Sigma)
+    - start_sigma: 1.0
+      apg_scale: 4.2
+      cfg: 4.0
+      predict_image: true
+      # Add necessary defaults for consistency and smoothing
+      momentum: 0.75
+      norm_threshold: 2.5
+      dims: "-1, -2"
+      mode: "pure_apg"
+      
+    # Rule 2: Refinement Phase (Mid/Low Sigma)
+    - start_sigma: 0.6
+      apg_scale: 3.2
+      cfg: 3.1
+      momentum: 0.5
+      norm_threshold: 2.0
+      mode: "pure_apg"
+
+    # Rule 3: Final Touches (Low Sigma) - Still active APG
+    - start_sigma: 0.3
+      apg_scale: 2.0
+      cfg: 2.0
+      momentum: 0.3
+      norm_threshold: 1.5
+      mode: "pure_apg"
+
+    # Rule 4: MANDATORY FALLBACK (start_sigma: -1 for infinity)
+    # This ensures the guider has a setting for the very last steps (sigma < 0.3)
+    - start_sigma: -1
+      apg_scale: 0.0 # Typically disable APG entirely at the final step
+      cfg: 2.0
+      momentum: 0.0
+      norm_threshold: 0.0
