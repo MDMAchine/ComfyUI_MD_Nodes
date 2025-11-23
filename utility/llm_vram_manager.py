@@ -1,5 +1,5 @@
 # ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-# ████ MD_Nodes/LLMVRAMManager – LLM VRAM Control v3.3 ████▓▒░
+# ████ MD_Nodes/LLMVRAMManager – LLM VRAM Control v3.4 ████▓▒░
 # © 2025 MDMAchine
 # ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 # ░▒▓ ORIGIN & DEV:
@@ -10,25 +10,32 @@
 
 # ░▒▓ DESCRIPTION:
 #   A utility node to prevent VRAM conflicts between ComfyUI and local LLM
-#   servers (Ollama, LM Studio). Unloads models via API or force-stops processes
+#   servers (Ollama, LM Studio, llama-swap). Unloads models via API or force-stops processes
 #   to free up GPU memory on demand directly from your workflow.
 
 # ░▒▓ FEATURES:
 #   ✓ Unloads Ollama models gracefully using its API (`requests`).
+#   ✓ Unloads llama-swap models gracefully using its API (`requests`).
 #   ✓ Force-stops the LM Studio process (`taskkill`/`pkill`) to reclaim VRAM.
 #   ✓ Force-stops the Ollama process as a fallback.
 #   ✓ Pass-through inputs/outputs for easy workflow integration.
 #   ✓ Disables LM Studio SDK/API calls (documented as non-functional).
 
 # ░▒▓ CHANGELOG:
-#   - v3.3 (Current Release - LM Studio Fix):
+#   - v3.4 (Current Release - llama-swap Support):
+#       • ADDED: "Unload llama-swap Models (API)" action for llama-swap integration.
+#       • WORKING: "Unload Ollama Models (API)" works perfectly.
+#       • WORKING: "Unload llama-swap Models (API)" works perfectly.
+#       • DISABLED: LM Studio API/SDK unload methods (all failed tests v1.7-v3.2).
+#       • NOTE: The ONLY reliable way to free LM Studio VRAM is "Stop LM Studio Process (Force)".
+#   - v3.3 (Previous Release - LM Studio Fix):
 #       • WORKING: "Unload Ollama Models (API)" works perfectly.
 #       • DISABLED: LM Studio API/SDK unload methods (all failed tests v1.7-v3.2).
 #       • ADDED: Detailed developer notes documenting all failed LM Studio attempts.
 #       • NOTE: The ONLY reliable way to free LM Studio VRAM is "Stop LM Studio Process (Force)".
 
 # ░▒▓ CONFIGURATION:
-#   → Primary Use: Adding "Unload Ollama Models (API)" to the start of a workflow to ensure VRAM is free.
+#   → Primary Use: Adding "Unload Ollama Models (API)" or "Unload llama-swap Models (API)" to the start of a workflow to ensure VRAM is free.
 #   → Secondary Use: Using "Stop LM Studio Process (Force)" when a diffusion model fails to load due to VRAM limits.
 #   → Edge Use: Chaining this node with `trigger` disabled, connected to a Switch node to activate remotely.
 
@@ -52,11 +59,12 @@ import json
 import secrets
 import logging
 import traceback
+import time
 
 # =================================================================================
 # == Third-Party Imports                                                       ==
 # =================================================================================
-# Optional dependency: requests (for Ollama API)
+# Optional dependency: requests (for Ollama API and llama-swap API)
 try:
     import requests
 except ImportError:
@@ -64,7 +72,7 @@ except ImportError:
     print("-----------------------------------------------------------")
     print("WARNING: [LLM VRAM Manager] 'requests' library not found.")
     print("Please install it: pip install requests")
-    print("Ollama API actions will not work without it.")
+    print("Ollama API and llama-swap API actions will not work without it.")
     print("-----------------------------------------------------------")
     requests = None
 
@@ -107,14 +115,15 @@ class LLMVRAMManager:
     """
     MD: LLM VRAM Manager
 
-    Utility node to manage VRAM conflicts with local LLM servers (Ollama, LM Studio).
-    Provides actions to unload models via API (Ollama) or force-stop processes
+    Utility node to manage VRAM conflicts with local LLM servers (Ollama, LM Studio, llama-swap).
+    Provides actions to unload models via API (Ollama, llama-swap) or force-stop processes
     to free GPU memory during ComfyUI workflow execution. Includes pass-through
     connections for easy integration.
     """
     def __init__(self):
         """Initializes default settings."""
         self.ollama_host = "http://localhost:11434" # Default Ollama API endpoint
+        self.llama_swap_host = "http://host.docker.internal:11435" # Default llama-swap API endpoint
         self.is_windows = sys.platform == "win32"
 
     @classmethod
@@ -124,8 +133,9 @@ class LLMVRAMManager:
         actions = [
             "None (Do Nothing)",
             "Unload Ollama Models (API)",
+            "Unload llama-swap Models (API)",
             "Unload LM Studio Model (SDK) [DISABLED]", # Keep option but mark as disabled
-            "Unload BOTH (API/SDK) [LM Studio DISABLED]", # Keep option but mark as disabled
+            "Unload ALL (Ollama/llama-swap/LM Studio) [LM Studio DISABLED]", # Keep option but mark as disabled
             "---FORCE STOP (USE WITH CAUTION)---", # Visual separator
             "Stop Ollama Process (Force)",
             "Stop LM Studio Process (Force)",
@@ -140,6 +150,7 @@ class LLMVRAMManager:
                         "- Select the operation to manage LLM VRAM.\n\n"
                         "API METHODS (Graceful):\n"
                         "- 'Unload Ollama Models (API)': Recommended for Ollama. Uses API to unload running models.\n"
+                        "- 'Unload llama-swap Models (API)': Recommended for llama-swap. Uses API to unload running models.\n"
                         "- 'Unload LM Studio Model (SDK)': CURRENTLY DISABLED (v3.3) - No reliable SDK/API method found.\n\n"
                         "FORCE STOP METHODS (Use if API fails or for LM Studio):\n"
                         "- 'Stop Ollama Process': Force-kills the Ollama server process/service.\n"
@@ -254,6 +265,39 @@ class LLMVRAMManager:
         except Exception as e:
             msg = f"ERROR: Ollama API unload failed unexpectedly: {e}"
             logger.error(msg, exc_info=True) # Log traceback for unexpected errors
+            return msg
+
+    def _unload_llama_swap_models(self):
+        """Attempts to unload all running models via llama-swap API."""
+        if not requests:
+            msg = "SKIPPED: 'requests' library not installed. Cannot use llama-swap API."
+            logger.warning(msg)
+            return msg
+        try:
+            # Send unload request to llama-swap
+            api_url_unload = f"{self.llama_swap_host}/models/unload"
+            res_unload = requests.post(api_url_unload, timeout=10)
+            
+            if res_unload.status_code == 200:
+                msg = "SUCCESS: llama-swap models unloaded successfully."
+                logger.info(f"[LLM VRAM Manager] {msg}")
+                return msg
+            else:
+                msg = f"WARNING: llama-swap unload returned status {res_unload.status_code}."
+                logger.warning(f"[LLM VRAM Manager] {msg}")
+                return msg
+
+        except requests.ConnectionError:
+            msg = "SKIPPED: llama-swap server connection failed. Is it running?"
+            logger.warning(msg)
+            return msg
+        except requests.Timeout:
+            msg = "ERROR: llama-swap API request timed out."
+            logger.error(msg)
+            return msg
+        except Exception as e:
+            msg = f"ERROR: llama-swap API unload failed unexpectedly: {e}"
+            logger.error(msg, exc_info=True)
             return msg
 
     def _unload_lm_studio_model(self):
@@ -392,12 +436,15 @@ class LLMVRAMManager:
                 status = "INFO: No action selected."
             elif action == "Unload Ollama Models (API)":
                 status = self._unload_ollama_models()
+            elif action == "Unload llama-swap Models (API)":
+                status = self._unload_llama_swap_models()
             elif action == "Unload LM Studio Model (SDK) [DISABLED]":
                 status = self._unload_lm_studio_model() # Returns disabled message
-            elif action == "Unload BOTH (API/SDK) [LM Studio DISABLED]":
+            elif action == "Unload ALL (Ollama/llama-swap/LM Studio) [LM Studio DISABLED]":
                 ollama_status = self._unload_ollama_models()
+                llama_swap_status = self._unload_llama_swap_models()
                 lm_studio_status = self._unload_lm_studio_model()
-                status = f"Ollama: {ollama_status}\nLM Studio: {lm_studio_status}"
+                status = f"Ollama: {ollama_status}\nllama-swap: {llama_swap_status}\nLM Studio: {lm_studio_status}"
             elif action == "Stop Ollama Process (Force)":
                 # Determine process name based on OS and common variations
                 process = "ollama.exe" if self.is_windows else "ollama"

@@ -1,0 +1,83 @@
+  # ----------------------------------------------------------------
+  # --- Core Sampler Settings ---
+  # These are outside the fbg_config block.
+  # ----------------------------------------------------------------
+  step_random_mode: "step"
+  step_size: 2
+  ancestral_noise_type: "gaussian"
+  first_ancestral_step: 0
+  last_ancestral_step: -1
+  start_sigma_index: 0
+  end_sigma_index: -1
+  enable_clamp_output: false
+  
+  # Blending Modes
+  blend_function_name: "lerp" # Renamed 'blend_mode' to 'blend_function_name'
+  step_blend_function_name: "cubic" # Renamed 'step_blend_mode' to 'step_blend_function_name'
+  
+  # Conditional & Progressive Blending
+  conditional_blend_mode: false
+  conditional_blend_sigma_threshold: 0.3
+  conditional_blend_function_name: "lerp"
+  conditional_blend_on_change: false
+  conditional_blend_change_threshold: 0.2
+  progressive_blend_mode: false
+  
+  # Noise Control
+  clamp_noise_norm: false
+  max_noise_norm: 1.5
+  adaptive_noise_scaling: false
+  noise_scale_factor: 1.0
+  
+  # Debug & Performance
+  debug_mode: 2
+  enable_profiling: true
+  gradient_norm_tracking: false
+  early_exit_threshold: 0.000001
+  tensor_memory_optimization: false
+  
+  # FBG K-Diffusion Settings (These remain top-level)
+  # NOTE: The node uses fbg_eta and fbg_s_noise as separate initializers
+  eta: 0.35 # Maps to PingPongSamplerCore.eta - WAS 0.7
+  s_noise: 1.0 # Maps to PingPongSamplerCore.s_noise
+  log_posterior_ema_factor: 0.6
+  
+  # ------------------------------------------------------------------
+  # --- FBG Configuration Block (Nested) ---
+  # All FBGConfig members MUST be nested here to work with v1.4.2
+  # ------------------------------------------------------------------
+  fbg_config:
+    # FBG Mode Selection: AUTOMATIC
+    t_0: 0.3
+    t_1: 0.8
+    
+    # Manual FBG Tuning (Ignored by node if t_0/t_1 are non-zero, but included for reference)
+    temp: 0.0011
+    offset: -0.05
+    
+    # Core FBG Settings
+    cfg_scale: 1.0
+    initial_guidance_scale: 1.0
+    pi: 0.8 # Was 0.75
+    
+    # Sampler Mode (Renamed from sampler_mode)
+    fbg_sampler_mode: "PINGPONG" # Renamed 'sampler_mode' to 'fbg_sampler_mode' for clarity in the UI inputs
+    
+    # Sigma (Noise Level) Ranges
+    cfg_start_sigma: 1.0
+    cfg_end_sigma: 0.004
+    fbg_start_sigma: 1.0
+    fbg_end_sigma: 0.004
+    
+    # Deprecated Sigmas are now mapped to top-level step indices.
+    # The original YAML should be ignored/removed here.
+    # The replacement is handled by `first_ancestral_step` and `last_ancestral_step` at the top level.
+    # ancestral_start_sigma: 1.0 (REMOVED/IGNORED)
+    # ancestral_end_sigma: 0.004 (REMOVED/IGNORED)
+    
+    # Ceilings and Multipliers
+    max_guidance_scale: 2.0
+    max_posterior_scale: 3.0
+    initial_value: 0.0 # Renamed 'initial_value' to 'log_posterior_initial_value' in UI, but original works in YAML
+    fbg_guidance_multiplier: 1.0 # Was 0.9
+    guidance_max_change: 0.05

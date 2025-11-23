@@ -36,12 +36,47 @@ Packaged with ASCII-flavored love, open-source chaos, and a healthy disregard fo
 
 ## 🔥 Node Collection
 
+### 🎨 VLM & Prompt Engineering
+
+#### `AESTHETIC_VLM_PACK` (Dual-Node Workflow) 🆕 ⭐
+**AI-powered prompt generation meets quality control.** Two-node system using local VLMs (Ollama/LM Studio) for end-to-end prompt crafting and validation.
+
+**Node 1: Aesthetic Transformer**
+- 🎲 **V32 Random Fusion** - Creative discovery mode with randomized aesthetic elements
+- 🎨 **Stylistic Fusion** - Merge subjects with styles, invent new scenes
+- 📝 **Direct Instruction** - Clean, literal prompt passthrough
+- 🏗️ **Design_Control** - Professional contractor mode (kitchens, bathrooms, exteriors)
+  - Auto-detects current materials
+  - Rates job complexity (Simple/Medium/Complex)
+  - Generates client-ready reports
+  - Built-in safety negatives for professional use
+
+**Node 2: VLM Confirmation Gate**
+- ✅ Validates final images against original intent
+- 📊 Provides confidence scores and reasoning
+- 🚦 Non-blocking QA workflow integration
+
+**Features:**
+- Multi-image reasoning (up to 3 images)
+- Dual-model mode (separate VLM + LLM for max quality)
+- Design templates for common contractor jobs
+- Universal negative prompt system
+- Preset management with full migration support
+- Custom negative prompt override
+
+📖 **[Read the Full Documentation](link-to-your-docs)** *(Coming Soon)*
+
+**⚖️ License Note:** This node has a **proprietary license** separate from the rest of MD_Nodes. See [`aesthetic_vlm_LICENSE.md`](aesthetic_vlm_LICENSE.md) for details. **TL;DR:** Free to use as-is, but modifications/monetization require permission. Contact me for commercial licensing!
+
+---
+
 ### Scheduling & Guidance
 
 #### `HYBRID_SIGMA_SCHEDULER`
 **Your vibe, your noise.** 10+ modes (Karras, Poly, AYS, etc.) for precision noise scheduling. Auto-detects model sigmas, supports slicing, visualization, and comparison. Your sigma sommelier.
 
 📖 **[Read the Manual](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/Master%20Technical%20Manual_%20Hybrid%20Sigma%20Scheduler.md)**
+
 #### `NOISEDECAY_SCHEDULER` (Advanced)
 **Controlled fade into darkness.** Generate custom decay curves (polynomial, sigmoidal, gaussian, etc.) with start/end values, inversion, and smoothing. Modulate noise like a sad synth player.
 
@@ -98,7 +133,7 @@ Packaged with ASCII-flavored love, open-source chaos, and a healthy disregard fo
 #### `PINGPONG_SAMPLER` (Lite+ & FBG Variants)
 **Symphonic frequencies & lyrical chaos.** Ancestral sampler optimized for Ace-Step. Features noise behavior presets, strength/coherence control, advanced blend modes, NaN recovery. FBG variant adds dynamic Feedback Guidance.
 
-📖 **[Read the Manual (v0.9.9-p4 FBG)](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/Master%20Technical%20Manual_%20PingPong%20Sampler%20(Custom%20v0.9.9-p2%20FBG).md).md)**
+📖 **[Read the Manual (v0.9.9-p4 FBG)](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/Master%20Technical%20Manual_%20PingPong%20Sampler%20(Custom%20v0.9.9-p2%20FBG).md)**
 📖 **[Read the Manual (Lite+ v0.8.21)](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/Master%20Technical%20Manual_%20PingPong%20Sampler%20(Lite%2B%20V0.8.20).md)**
 
 ---
@@ -223,7 +258,36 @@ These legends walked so you could sample:
 
 ## 📜 License
 
-Primarily **Apache 2.0**, but check individual node headers. Some are **Public Domain** or **MIT**. Open source chaos reigns.
+**MD_Nodes** uses a **dual-license** structure:
+
+### General Nodes (Apache 2.0)
+Most nodes in this pack are licensed under **Apache License 2.0** - free and open source.  
+See [`LICENSE.md`](LICENSE.md) for full terms.
+
+### Aesthetic VLM Pack (Proprietary)
+The **`Aesthetic_VLM_Pack.py`** file has a **separate proprietary license**:
+
+- ✅ **Free to use** in ComfyUI workflows (personal or commercial)
+- ❌ **Cannot modify** without written permission
+- ❌ **Cannot monetize derivatives** without a commercial license
+
+See [`aesthetic_vlm_LICENSE.md`](aesthetic_vlm_LICENSE.md) for full terms.
+
+**Want to modify or monetize the Aesthetic VLM Pack?**  
+Contact me for commercial licensing: **mdmachine@gmail.com**
+
+---
+
+### Why Dual-License?
+
+The Aesthetic VLM Pack represents hundreds of hours of specialized development. I'm happy to share it freely for use, but I want to:
+
+1. **Protect the work** - Prevent unauthorized commercial exploitation
+2. **Maintain quality** - Ensure derivatives meet professional standards
+3. **Build partnerships** - Work with developers who see its value
+4. **Earn fairly** - Get compensated for commercial derivatives
+
+For all other nodes, Apache 2.0 applies - modify freely! 🎉
 
 ---
 
@@ -248,6 +312,6 @@ Primarily **Apache 2.0**, but check individual node headers. Some are **Public D
 
 ---
 
-**⭐ Star this repo if it tickles your neurons**
-**🐛 Report issues if reality breaks**
+**⭐ Star this repo if it tickles your neurons**  
+**🐛 Report issues if reality breaks**  
 **🔀 PRs welcome from fellow digital shamans**
