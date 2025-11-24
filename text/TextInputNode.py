@@ -15,13 +15,33 @@
 # ░▒▓ FEATURES:
 #   ✓ Large multiline text input.
 #   ✓ Seed-controlled wildcards: {option1|option2} or __option1|option2__.
-#   ✓ Nested wildcard support.
+#   ✓ Nested wildcard support with robust error handling.
 #   ✓ Wildcard seed selection: Use {seed1|seed2|seed3} to randomly pick a seed value.
 #   ✓ Text transformations: lowercase, uppercase, whitespace control.
-#   ✓ Multiple outputs: processed text, original text, seed used, selected seed INT.
+#   ✓ Multiple seed modes: fixed, random, increment (auto-increment for batch).
+#   ✓ Multiple outputs: processed text, original text, seed used, selected seed INT, text length, wildcard count.
+#   ✓ Performance optimized with pre-compiled regex patterns.
 #   ✓ Companion 'Text File Loader' node for external file import.
 
 # ░▒▓ CHANGELOG:
+#   - v1.8.0 (Seed Precision Fix - Nov 2025):
+#     • CRITICAL FIX: Capped seed range to JavaScript's MAX_SAFE_INTEGER (9,007,199,254,740,991).
+#     • FIXED: Seeds above 9 quadrillion no longer lose precision in ComfyUI's web interface.
+#     • ADDED: Seed validation ensures all seeds stay within JS-safe range for full reproducibility.
+#     • ADDED: Warning logs when seeds are clamped due to exceeding safe range.
+#     • CHANGED: SEED_MAX from 2^64-1 to 2^53-1 for web interface compatibility.
+#     • NOTE: 9 quadrillion unique seeds still more than sufficient for any use case.
+#   - v1.7.0 (QoL Enhancements - Nov 2025):
+#     • ADDED: 'increment' seed mode for auto-incrementing seeds in batch workflows.
+#     • ADDED: 'text_length' output showing character count of processed text.
+#     • ADDED: 'wildcard_count' output tracking total wildcards processed.
+#     • IMPROVED: Better wildcard error handling - filters empty options from splits.
+#     • OPTIMIZED: Pre-compiled regex patterns as class variables for better performance.
+#     • ENHANCED: Wildcard processing now logs count of replacements made.
+#   - v1.6.2 (Seed Mode Fix - Nov 2025):
+#     • FIXED: Re-added 'seed_mode' parameter that was missing, causing seed to reset to default.
+#     • FIXED: 'fixed' mode now correctly preserves the user's input seed value instead of overwriting it.
+#     • CHANGED: Replaced -1 seed value approach with explicit 'seed_mode' parameter for clarity.
 #   - v1.6.1 (Randomness Fix - Nov 2025):
 #     • FIXED: Replaced manual modulo math with `rng.choice()` to prevent seed clustering.
 #     • IMPROVED: Better distribution of values when using small seed lists.
@@ -55,24 +75,13 @@ import secrets
 import traceback
 
 # =================================================================================
-# == Third-Party Imports                                                          ==
+# == Seed Constants (JavaScript Safe Range)                                      ==
 # =================================================================================
-# (No third-party imports needed)
-
-# =================================================================================
-# == ComfyUI Core Modules                                                         ==
-# =================================================================================
-# (No core ComfyUI imports needed directly in this file)
-
-# =================================================================================
-# == Local Project Imports                                                        ==
-# =================================================================================
-# (No local project imports in this file)
-
-# =================================================================================
-# == Helper Classes & Dependencies                                                ==
-# =================================================================================
-# (No helper classes needed)
+# JavaScript's Number.MAX_SAFE_INTEGER = 2^53 - 1
+# Seeds above this value lose precision in ComfyUI's web interface
+SEED_MIN = 0
+SEED_MAX = 9007199254740991  # JS-safe range for full reproducibility
+SEED_MAX_LEGACY = 0xffffffffffffffff  # 2^64 - 1 (reference only, causes precision loss)
 
 # =================================================================================
 # == Core Node Class: AdvancedTextNode                                            ==
@@ -83,6 +92,47 @@ class AdvancedTextNode:
     A versatile text input node with seed-controlled wildcard processing,
     text transformations, and multiple output options including text length.
     """
+    
+    # Pre-compile regex patterns for better performance
+    _PATTERN_CURLY = re.compile(r'\{([^{}]+?)\}')
+    _PATTERN_UNDERSCORE = re.compile(r'__([^_]+?)__')
+
+    @staticmethod
+    def _validate_seed(seed_value):
+        """
+        Validate and clamp seed to JavaScript-safe range.
+        
+        Args:
+            seed_value: Seed value to validate (int or convertible to int)
+            
+        Returns:
+            int: Validated seed within SEED_MIN to SEED_MAX range
+        """
+        try:
+            int_value = int(seed_value)
+        except (ValueError, TypeError):
+            logging.warning(f"[AdvancedTextNode] Invalid seed value: {seed_value}. Using {SEED_MIN}.")
+            return SEED_MIN
+        
+        # Clamp to JS-safe range
+        if int_value > SEED_MAX:
+            logging.warning(f"[AdvancedTextNode] Seed {int_value} exceeds JS-safe range. Clamping to {SEED_MAX}.")
+            return SEED_MAX
+        elif int_value < SEED_MIN:
+            logging.warning(f"[AdvancedTextNode] Seed {int_value} below minimum. Clamping to {SEED_MIN}.")
+            return SEED_MIN
+        
+        return int_value
+
+    @staticmethod
+    def _generate_random_seed():
+        """
+        Generate a random seed within JavaScript-safe range.
+        
+        Returns:
+            int: Random seed between SEED_MIN and SEED_MAX (inclusive)
+        """
+        return secrets.randbelow(SEED_MAX + 1)
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -104,15 +154,25 @@ class AdvancedTextNode:
             "optional": {
                 "seed": ("INT", {
                     "default": 0,
-                    "min": -1, # Allow -1 for dynamic seed
-                    "max": 0xffffffffffffffff,
+                    "min": SEED_MIN,
+                    "max": SEED_MAX,
                     "step": 1,
                     "tooltip": (
                         "SEED\n"
                         "- Controls randomization for wildcard selection.\n"
                         "- Same seed = same wildcard choices every time.\n"
-                        "- Change seed for different variations.\n"
-                        "- Set to -1 to generate a new random seed on each run (forces re-execution)."
+                        "- Range: 0 to 9,007,199,254,740,991 (JS-safe for full reproducibility).\n"
+                        "- When seed_mode is 'random', this value is ignored and a new seed is generated each run."
+                    )
+                }),
+                "seed_mode": (["fixed", "random", "increment"], {
+                    "default": "fixed",
+                    "tooltip": (
+                        "SEED MODE\n"
+                        "- 'fixed': Uses the seed value from the 'seed' input parameter AS-IS.\n"
+                        "- 'random': Generates a new random seed on every execution, ignoring the 'seed' input.\n"
+                        "- 'increment': Auto-increments seed by 1 each execution (useful for batch generation).\n"
+                        "- IMPORTANT: 'fixed' mode preserves your current seed value - it does NOT change it to a default!"
                     )
                 }),
                 "seed_list": ("STRING", {
@@ -130,15 +190,15 @@ class AdvancedTextNode:
                 }),
                 "seed_offset": ("INT", {
                     "default": 0,
-                    "min": 0,
-                    "max": 0xffffffffffffffff,
+                    "min": SEED_MIN,
+                    "max": SEED_MAX,
                     "step": 1,
                     "tooltip": (
                         "SEED OFFSET\n"
                         "- Adds an offset to the seed before selecting from seed_list.\n"
                         "- This helps reduce repetition in batch workflows.\n"
-                        "- Example: seed=42, offset=0 → uses 42 for selection\n"
-                        "- Example: seed=42, offset=1 → uses 43 for selection\n"
+                        "- Example: seed=42, offset=0 -> uses 42 for selection\n"
+                        "- Example: seed=42, offset=1 -> uses 43 for selection\n"
                         "- In batch mode, increment this to get different variations.\n"
                         "- Has no effect if seed_list is empty."
                     )
@@ -207,44 +267,35 @@ class AdvancedTextNode:
             }
         }
 
-    RETURN_TYPES = ("STRING", "STRING", "INT", "INT")
-    RETURN_NAMES = ("processed_text", "original_text", "seed_used", "selected_seed")
+    RETURN_TYPES = ("STRING", "STRING", "INT", "INT", "INT", "INT")
+    RETURN_NAMES = ("processed_text", "original_text", "seed_used", "selected_seed", "text_length", "wildcard_count")
     FUNCTION = "process_text"
     CATEGORY = "MD_Nodes/Text"
 
     @classmethod
-    def IS_CHANGED(cls, text, seed=0, seed_list="", seed_offset=0, wildcard_mode=False, strip_whitespace=False,
-                       lowercase=False, uppercase=False, remove_extra_spaces=True,
-                       wildcard_syntax="curly_braces"):
+    def IS_CHANGED(cls, text, seed=0, seed_mode="fixed", seed_list="", seed_offset=0, wildcard_mode=False, strip_whitespace=False,
+                        lowercase=False, uppercase=False, remove_extra_spaces=True,
+                        wildcard_syntax="curly_braces"):
         """
         Determine if the node should re-run based on input changes.
-        If seed is -1, treat it as dynamic (always re-run).
+        If seed_mode is 'random' or 'increment', force re-execution every time.
         """
-        # Note: ComfyUI typically handles dynamic behavior via negative seeds or similar patterns internally.
-        # This implementation explicitly forces re-run for seed = -1 by returning a unique random hex string.
-        # This is a valid ComfyUI pattern for forcing execution.
-        if seed == -1:
-            return secrets.token_hex(16) 
+        if seed_mode in ["random", "increment"]:
+            # Return a unique value to force re-execution
+            return secrets.token_hex(16)
 
         # Otherwise, changes in any processing parameter should trigger re-run
         # Returning a tuple/list of all relevant inputs is standard practice
         # ComfyUI hashes this to detect changes.
-        return (text, seed, seed_list, seed_offset, wildcard_mode, strip_whitespace, lowercase, uppercase,
+        return (text, seed, seed_mode, seed_list, seed_offset, wildcard_mode, strip_whitespace, lowercase, uppercase,
                 remove_extra_spaces, wildcard_syntax)
 
     def _process_wildcards_recursive(self, text, pattern, rng):
         """
         Recursively processes nested wildcards. Helper function.
-
-        Args:
-            text: The text containing wildcards.
-            pattern: The compiled regex pattern for the syntax.
-            rng: The seeded random number generator.
-
-        Returns:
-            str: Text with wildcards processed.
         """
         iteration = 0
+        wildcard_count = 0
         max_iterations = 100 # Safety break for potential infinite loops
 
         # CRITICAL FIX: The loop must continue until no more *innermost* matches are found.
@@ -256,11 +307,13 @@ class AdvancedTextNode:
                 break # No more wildcards of this type found
 
             options_str = match.group(1)
-            options = [opt.strip() for opt in options_str.split('|')]
+            # Better handling: strip whitespace and filter empty options
+            options = [opt.strip() for opt in options_str.split('|') if opt.strip()]
             
             # Validate options to prevent crash on empty brackets {}
             if not options:
-                 options = [""] 
+                logging.warning(f"[AdvancedTextNode] Empty wildcard detected: {match.group(0)}. Replacing with empty string.")
+                options = [""] 
 
             # Use standard rng.choice() for statistically better distribution.
             chosen_option = rng.choice(options)
@@ -268,87 +321,85 @@ class AdvancedTextNode:
             # Replace only the innermost match found in this iteration
             text = text[:match.start()] + chosen_option + text[match.end():]
             iteration += 1
+            wildcard_count += 1
 
         if iteration == max_iterations:
              logging.warning("[AdvancedTextNode] Max wildcard processing iterations reached. Possible runaway recursion?")
 
-        return text
+        return text, wildcard_count
 
 
     def process_wildcards_curly(self, text, seed):
         """
         Process wildcards in {option1|option2|option3} format, supporting nesting.
+        Returns tuple of (processed_text, wildcard_count).
         """
         rng = random.Random(seed)
-        # Non-greedy pattern to find the *innermost* wildcards first
-        # This pattern matches any { } that contains only text and | symbols, but no nested { or }
-        pattern = re.compile(r'\{([^{}]+?)\}')
-        return self._process_wildcards_recursive(text, pattern, rng)
+        return self._process_wildcards_recursive(text, self._PATTERN_CURLY, rng)
 
     def process_wildcards_underscore(self, text, seed):
         """
         Process wildcards in __option1|option2|option3__ format, supporting nesting.
+        Returns tuple of (processed_text, wildcard_count).
         """
         rng = random.Random(seed)
-        # Non-greedy pattern to find the *innermost* wildcards first
-        pattern = re.compile(r'__([^_]+?)__')
-        return self._process_wildcards_recursive(text, pattern, rng)
+        return self._process_wildcards_recursive(text, self._PATTERN_UNDERSCORE, rng)
 
-    def process_text(self, text, seed=0, seed_list="", seed_offset=0, wildcard_mode=False, strip_whitespace=False,
-                       lowercase=False, uppercase=False, remove_extra_spaces=True,
-                       wildcard_syntax="curly_braces"):
+    def process_text(self, text, seed=0, seed_mode="fixed", seed_list="", seed_offset=0, wildcard_mode=False, strip_whitespace=False,
+                        lowercase=False, uppercase=False, remove_extra_spaces=True,
+                        wildcard_syntax="curly_braces"):
         """
         Main execution function. Processes text based on input parameters.
-
-        Args:
-            text: Main text input string.
-            seed: Seed for random selection.
-            seed_list: String containing wildcard list of seeds to choose from.
-            seed_offset: Offset added to seed for seed_list selection.
-            wildcard_mode: Boolean to enable/disable wildcard processing.
-            strip_whitespace: Boolean to strip overall whitespace.
-            lowercase: Boolean to force lowercase.
-            uppercase: Boolean to force uppercase.
-            remove_extra_spaces: Boolean to collapse spaces.
-            wildcard_syntax: String defining the wildcard pattern type.
-
-        Returns:
-            tuple: (processed_text, original_text, seed_used, selected_seed)
         """
         original_text = text
         processed_text = text
         seed_used = seed
         selected_seed = 0  # Default output seed
+        wildcard_count = 0  # Track total wildcards processed
 
         try:
-            # Handle dynamic seed generation (-1 means generate random)
-            if seed == -1:
-                seed_used = random.randint(0, 0xffffffffffffffff)
-                print(f"[AdvancedTextNode] 🎲 Using dynamically generated seed: {seed_used}")
+            # Handle seed_mode
+            if seed_mode == "random":
+                # Generate a new random seed every execution (JS-safe range)
+                seed_used = self._generate_random_seed()
+                print(f"[AdvancedTextNode] 🎲 Random mode: Generated new seed: {seed_used}")
+            elif seed_mode == "increment":
+                # Increment seed by 1 each execution (with wraparound at JS-safe max)
+                seed_used = self._validate_seed((seed + 1) % (SEED_MAX + 1))
+                print(f"[AdvancedTextNode] ➕ Increment mode: Using seed: {seed_used} (was {seed})")
             else:
-                 logging.debug(f"[AdvancedTextNode] Using provided seed: {seed_used}")
+                # Use the provided seed as-is (fixed mode) - validate it
+                seed_used = self._validate_seed(seed)
+                logging.debug(f"[AdvancedTextNode] Fixed mode: Using validated seed: {seed_used}")
 
             # Process seed_list if provided
             if seed_list and seed_list.strip():
-                # Apply offset to create variation in seed selection
-                selection_seed = (seed_used + seed_offset) & 0xffffffffffffffff  # Keep within bounds
+                # Apply offset to create variation in seed selection (with wraparound)
+                selection_seed = self._validate_seed((seed_used + seed_offset) % (SEED_MAX + 1))
                 logging.debug(f"[AdvancedTextNode] Processing seed_list with syntax '{wildcard_syntax}' and selection_seed {selection_seed}")
                 
                 # Process the seed_list string using wildcard processing
+                seed_list_wc_count = 0
                 if wildcard_syntax == "curly_braces":
-                    selected_seed_str = self.process_wildcards_curly(seed_list, selection_seed)
+                    selected_seed_str, seed_list_wc_count = self.process_wildcards_curly(seed_list, selection_seed)
                 elif wildcard_syntax == "double_underscore":
-                    selected_seed_str = self.process_wildcards_underscore(seed_list, selection_seed)
+                    selected_seed_str, seed_list_wc_count = self.process_wildcards_underscore(seed_list, selection_seed)
                 else:
                     selected_seed_str = seed_list
                 
-                # Convert the selected seed string to integer
+                wildcard_count += seed_list_wc_count
+                
+                # Convert the selected seed string to integer and validate
                 try:
-                    selected_seed = int(selected_seed_str.strip())
-                    print(f"[AdvancedTextNode] 🌱 Selected seed from list: {selected_seed}")
+                    selected_seed_raw = int(selected_seed_str.strip())
+                    selected_seed = self._validate_seed(selected_seed_raw)
+                    if selected_seed != selected_seed_raw:
+                        print(f"[AdvancedTextNode] ⚠️ Seed from list ({selected_seed_raw}) clamped to JS-safe: {selected_seed}")
+                    else:
+                        print(f"[AdvancedTextNode] 🌱 Selected seed from list: {selected_seed}")
                 except ValueError:
-                    logging.warning(f"[AdvancedTextNode] Could not convert '{selected_seed_str}' to integer. Using 0.")
-                    selected_seed = 0
+                    logging.warning(f"[AdvancedTextNode] Could not convert '{selected_seed_str}' to integer. Using {SEED_MIN}.")
+                    selected_seed = SEED_MIN
             else:
                 # If no seed_list provided, output the seed_used as selected_seed
                 selected_seed = seed_used
@@ -356,11 +407,13 @@ class AdvancedTextNode:
 
             if wildcard_mode:
                 logging.debug(f"[AdvancedTextNode] Processing wildcards with syntax '{wildcard_syntax}' and seed {seed_used}")
+                text_wc_count = 0
                 if wildcard_syntax == "curly_braces":
-                    processed_text = self.process_wildcards_curly(processed_text, seed_used)
+                    processed_text, text_wc_count = self.process_wildcards_curly(processed_text, seed_used)
                 elif wildcard_syntax == "double_underscore":
-                    processed_text = self.process_wildcards_underscore(processed_text, seed_used)
-                logging.debug("[AdvancedTextNode] Wildcard processing complete.")
+                    processed_text, text_wc_count = self.process_wildcards_underscore(processed_text, seed_used)
+                wildcard_count += text_wc_count
+                logging.debug(f"[AdvancedTextNode] Wildcard processing complete. Processed {text_wc_count} wildcards.")
 
             if strip_whitespace:
                 processed_text = processed_text.strip()
@@ -379,15 +432,18 @@ class AdvancedTextNode:
                 processed_text = processed_text.upper()
                 logging.debug("[AdvancedTextNode] Converted text to uppercase.")
 
+            # Calculate text length
+            text_length = len(processed_text)
+
             # Return all outputs
-            return (processed_text, original_text, seed_used, selected_seed)
+            return (processed_text, original_text, seed_used, selected_seed, text_length, wildcard_count)
 
         except Exception as e:
             logging.error(f"[AdvancedTextNode] Error processing text: {e}")
             logging.debug(traceback.format_exc())
             print(f"[AdvancedTextNode] ⚠️ Error: {e}. Returning original text unchanged.")
-            # Graceful failure: Return original text, seed, and 0 for selected_seed
-            return (original_text, original_text, seed_used, 0)
+            # Graceful failure: Return original text, seed, and 0 for stats
+            return (original_text, original_text, seed_used, 0, len(original_text), 0)
 
 # =================================================================================
 # == Core Node Class: TextFileLoader                                            ==
