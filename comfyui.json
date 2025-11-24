@@ -1,5 +1,5 @@
 {
-    "version": "1.4.4",
+    "version": "1.4.5",
     "nodes": [
         {
             "key": "HybridAdaptiveSigmas",
@@ -116,8 +116,8 @@
         {
             "key": "MD_CLIPTokenFinder",
             "type": "MD_CLIPTokenFinder",
-            "title": "MD: CLIP Token Finder",
-            "description": "",
+            "title": "MD: CLIP Token Finder (DIAGNOSTIC)",
+            "description": "Diagnostic version - dumps everything to console.",
             "category": "MD_Nodes/Guidance",
             "file_path": "testing/MD_CLIPTokenFinder.py"
         },
@@ -133,7 +133,7 @@
             "key": "EnhancedSeedSaver",
             "type": "EnhancedSeedSaverNode",
             "title": "MD: Enhanced Seed Saver",
-            "description": "MD Enhanced Seed Saver\n\nAdvanced seed management node with static pass-through and dynamic action modes.\nSave, load, organize, and manage seeds efficiently within ComfyUI workflows.",
+            "description": "MD Enhanced Seed Saver\n\nAdvanced seed management node with three operation modes: Pass-through for\nexternal seeds, Manual Input for direct seed entry, and Execute Action for\ndynamic seed management operations.",
             "category": "MD_Nodes/Utility",
             "file_path": "seed_saver_node.py"
         },

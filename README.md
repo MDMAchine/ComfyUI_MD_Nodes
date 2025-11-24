@@ -191,7 +191,7 @@ We now include a suite of professional automation tools located in the `tools/` 
 
 ```bash
 cd path/to/ComfyUI/custom_nodes
-git clone [https://github.com/MDMAchine/ComfyUI_MD_Nodes.git](https://github.com/MDMAchine/ComfyUI_MD_Nodes.git)
+git clone https://github.com/MDMAchine/ComfyUI_MD_Nodes.git
 ```
 
 Or search for **MD_Nodes** in the ComfyUI Manager!

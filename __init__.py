@@ -1,6 +1,6 @@
 """
 ComfyUI Custom Nodes - Auto-generated __init__.py
-Generated: 2025-11-23 13:50:04
+Generated: 2025-11-24 00:48:17
 """
 import os
 import sys
@@ -137,7 +137,7 @@ try:
 
     NODE_DISPLAY_NAME_MAPPINGS.update({
     "Aesthetic_Transformer_Node_MD": "MD: Aesthetic Transformer",
-    "MD_CLIPTokenFinder": "MD: CLIP Token Finder",
+    "MD_CLIPTokenFinder": "MD: CLIP Token Finder (DIAGNOSTIC)",
     "MD_InitNoiseOptimizer": "MD: Init Noise Optimizer",
     "MD_Qwen_Image_Edit_Object_Replacer_Node": "MD: Qwen Object Replacer",
     "MD_SelfCrossGuider": "MD: Self-Cross Separation Guider",

@@ -1,51 +1,89 @@
 # ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-# ████ MD_Nodes/EnhancedSeedSaver – Professional Seed Management v2.1.0 ████▓▒░
+# ████ MD_Nodes/EnhancedSeedSaver – Professional Seed Management v2.2.0d ████▓▒░
 # © 2025 MDMAchine
 # ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 # ░▒▓ ORIGIN & DEV:
 #   • Cast into the void by: MDMAchine (chaos wrangler)
 #   • Enhanced by: Claude (Anthropic AI Assistant)
-#   • License: Public Domain — Share the deterministic love
+#   • License: Apache 2.0 — Share the deterministic love
 #   • Original source (if applicable): [Inspired by seed management struggles]
 
 # ░▒▓ DESCRIPTION:
-#   The ultimate seed management companion for ComfyUI. Switch between a dynamic
-#   action mode for managing seeds (Save, Load, Delete, Randomize, Backup,
-#   Favorites, Stats) and a static pass-through mode for stable, cacheable
-#   workflows without needing to bypass the node.
+#   The ultimate seed management companion for ComfyUI. Features three operation
+#   modes: Pass-through for external seeds, Manual for direct seed entry without
+#   needing another seed source, and Execute Action for dynamic seed management
+#   (Save, Load, Delete, Randomize, Backup, Favorites, Stats). All seeds are
+#   constrained to JavaScript's safe integer range for full reproducibility via
+#   manual entry and UI display.
 
 # ░▒▓ FEATURES:
-#   ✓ Dual Operation Modes: "Pass-through (Static)" for stability & "Execute Action (Dynamic)" for management.
-#   ✓ Core Actions: Save, Load, Delete, Generate Random, Load Random, Load + Increment seeds.
-#   ✓ Organization: Subdirectories, Copy/Move seeds between directories.
-#   ✓ Management: Favorites list, Usage Statistics, Duplicate Seed Finder.
-#   ✓ Bulk Actions: Export All, Clear Directory (with backup), Backup Seeds, Refresh Lists.
-#   ✓ Saves seed with metadata (description, tags, timestamp).
-#   ✓ Robust file handling with backups and JSON format (legacy .txt support).
+#   ✓ Three Operation Modes: Pass-through, Manual Input, and Execute Action
+#   ✓ JavaScript-safe seed range ensures full reproducibility
+#   ✓ Dual outputs: INT for compatibility, STRING for validation
+#   ✓ Manual seed entry eliminates need for external seed source nodes
+#   ✓ Core Actions: Save, Load, Delete, Generate Random, Load Random, Load + Increment
+#   ✓ Organization: Subdirectories, Copy/Move seeds between directories
+#   ✓ Management: Favorites list, Usage Statistics, Duplicate Seed Finder
+#   ✓ Bulk Actions: Export All, Clear Directory (with backup), Backup Seeds, Refresh Lists
+#   ✓ Saves seed with metadata (description, tags, timestamp)
+#   ✓ Robust file handling with backups and JSON format (legacy .txt support)
+#   ✓ Quick Actions for common operations without mode switching
 
 # ░▒▓ CHANGELOG:
-#   - v2.1.0 (Current Release - Operation Mode Update):
-#       • ADDED: An "operation_mode" toggle ("Pass-through" vs "Execute Action").
-#       • FIXED: "Pass-through" mode is now fully cacheable and won't cause re-runs.
-#       • ENHANCED: IS_CHANGED logic is now conditional based on the selected mode.
+#   - v2.2.0d (Current Release - File Loading Fix):
+#       • FIXED: load_seed_from_file() no longer clamps large seeds from files
+#       • FIXED: Seeds beyond JS-safe range now load with their exact values
+#       • ADDED: Warning message when loading unsafe seeds
+#       • RATIONALE: Files bypass JavaScript, so they can preserve large seed values
+#       • NOTE: Large seeds work perfectly when loaded from files, just can't be manually typed
+#   - v2.2.0c (Reproducibility Fix):
+#       • CHANGED: SEED_MAX now capped at 9,007,199,254,740,991 (JavaScript safe integer)
+#       • FIXED: All generated seeds are now fully reproducible via manual entry
+#       • FIXED: No more precision loss when copying/pasting seeds
+#       • RATIONALE: Seeds beyond JS safe range cannot be accurately entered via UI
+#       • NOTE: This prevents the issue where random seeds couldn't be reproduced
+#   - v2.2.0b (Dual Output Fix):
+#       • ADDED: seed_output_str (STRING) output for full 64-bit precision
+#       • FIXED: Large seeds no longer rounded when displayed in UI or passed to other nodes
+#       • ENHANCED: Use STRING output to avoid JavaScript precision limits entirely
+#       • NOTE: INT output still provided for backward compatibility with existing workflows
+#   - v2.2.0a (Precision Fix):
+#       • FIXED: Changed manual_seed from INT to STRING to preserve full 64-bit precision
+#       • FIXED: JavaScript number rounding no longer affects large seed values
+#       • ADDED: Hex format support (0x prefix) for manual seed input
+#       • ADDED: parse_seed_string() helper for robust string-to-int conversion
+#   - v2.2.0 (Manual Input & QoL Update):
+#       • ADDED: "Manual Input" operation mode for direct seed entry
+#       • ADDED: "seed_source" selector to choose between input connection vs manual
+#       • ADDED: Quick action buttons for common operations (increment, decrement)
+#       • ADDED: Seed validation feedback in status output
+#       • ADDED: Last used seed tracking persisted to file
+#       • ENHANCED: Better status messages with seed range info
+#       • ENHANCED: More descriptive tooltips throughout
+#       • FIXED: Category separator handling in dropdown selection
+#   - v2.1.0 (Operation Mode Update):
+#       • ADDED: An "operation_mode" toggle ("Pass-through" vs "Execute Action")
+#       • FIXED: "Pass-through" mode is now fully cacheable and won't cause re-runs
+#       • ENHANCED: IS_CHANGED logic is now conditional based on the selected mode
 
 # ░▒▓ CONFIGURATION:
-#   → Primary Use: Using "Pass-through" mode to hold a static seed value within a workflow.
-#   → Secondary Use: Using "Execute Action" > "SAVE_CURRENT_SEED" to store a good result, then switching back to "Pass-through".
-#   → Edge Use: Setting "Execute Action" > "LOAD_RANDOM_SEED" to introduce controlled randomness into batch runs.
+#   → Primary Use: Using "Manual Input" mode to directly specify a seed without external nodes
+#   → Secondary Use: Using "Pass-through" mode to hold a static seed value within a workflow
+#   → Tertiary Use: Using "Execute Action" > "SAVE_CURRENT_SEED" to store a good result
+#   → Edge Use: Setting "Execute Action" > "LOAD_RANDOM_SEED" for controlled randomness
 
 # ░▒▓ WARNING:
 #   This node may trigger:
-#   ▓▒░ Accidentally hitting 'CLEAR_DIRECTORY' instead of 'BACKUP_SEEDS' and feeling that cold, 1995-era dread.
-#   ▓▒░ Spending hours organizing seeds into subdirectories like a digital hoarder.
-#   ▓▒░ An unhealthy obsession with the '⭐ Favorites' list.
-#   ▓▒░ Flashbacks to losing your `autoexec.bat` and realizing you never backed it up.
+#   ▓▒░ Accidentally hitting 'CLEAR_DIRECTORY' instead of 'BACKUP_SEEDS' and feeling that cold, 1995-era dread
+#   ▓▒░ Spending hours organizing seeds into subdirectories like a digital hoarder
+#   ▓▒░ An unhealthy obsession with the Favorites list
+#   ▓▒░ Flashbacks to losing your `autoexec.bat` and realizing you never backed it up
 #   Consult your nearest demoscene vet if hallucinations persist.
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 
 
 # =================================================================================
-# == Standard Library Imports                                                  ==
+# == Standard Library Imports                                                   ==
 # =================================================================================
 import json
 import os
@@ -60,31 +98,33 @@ import logging
 import traceback
 
 # =================================================================================
-# == Third-Party Imports                                                       ==
+# == Third-Party Imports                                                        ==
 # =================================================================================
 # (None needed)
 
 # =================================================================================
-# == ComfyUI Core Modules                                                      ==
+# == ComfyUI Core Modules                                                       ==
 # =================================================================================
 import folder_paths
 
 # =================================================================================
-# == Local Project Imports                                                     ==
+# == Local Project Imports                                                      ==
 # =================================================================================
 # (None needed)
 
 # =================================================================================
-# == Helper Classes & Dependencies                                             ==
+# == Helper Classes & Dependencies                                              ==
 # =================================================================================
 
 # --- Constants ---
 SEED_MIN = 0
-SEED_MAX = 0xffffffffffffffff
+SEED_MAX = 9007199254740991  # JavaScript's Number.MAX_SAFE_INTEGER (2^53 - 1)
+SEED_MAX_ORIGINAL = 0xffffffffffffffff  # Original 64-bit max for reference
 OUTPUT_SEEDS_DIR = os.path.join(folder_paths.get_output_directory(), "seeds")
 BACKUP_DIR = os.path.join(OUTPUT_SEEDS_DIR, "_backups")
 FAVORITES_FILE = os.path.join(OUTPUT_SEEDS_DIR, "_favorites.json")
 STATS_FILE = os.path.join(OUTPUT_SEEDS_DIR, "_statistics.json")
+LAST_SEED_FILE = os.path.join(OUTPUT_SEEDS_DIR, "_last_seed.json")
 CACHE_DURATION = 5  # seconds
 
 # --- Utility Functions ---
@@ -103,6 +143,7 @@ def sanitize_filename(name):
     sanitized = sanitized.strip('. ')
     return sanitized[:200] if sanitized else "unnamed"
 
+
 def validate_seed(seed_value):
     """
     Ensure seed is within the valid range [0, 0xffffffffffffffff].
@@ -120,6 +161,36 @@ def validate_seed(seed_value):
         return SEED_MIN
     return max(SEED_MIN, min(int_value, SEED_MAX))
 
+
+def parse_seed_string(seed_str):
+    """
+    Parse a seed value from string, supporting decimal and hex formats.
+    
+    Args:
+        seed_str: String representation of seed (decimal or hex with 0x prefix).
+    
+    Returns:
+        Validated seed value as integer.
+    """
+    if not seed_str or not isinstance(seed_str, str):
+        return 0
+    
+    seed_str = seed_str.strip()
+    
+    try:
+        # Try parsing as hex if it starts with 0x
+        if seed_str.lower().startswith('0x'):
+            int_value = int(seed_str, 16)
+        else:
+            # Otherwise parse as decimal
+            int_value = int(seed_str)
+        
+        return validate_seed(int_value)
+    except (ValueError, TypeError) as e:
+        logging.warning(f"[SeedSaver] Could not parse seed string '{seed_str}': {e}, defaulting to 0.")
+        return 0
+
+
 def get_cache_key():
     """
     Generate a simple cache key based on current time intervals.
@@ -129,6 +200,45 @@ def get_cache_key():
         An integer representing the current time interval.
     """
     return int(time() / CACHE_DURATION)
+
+
+# --- Last Seed Persistence ---
+
+def save_last_seed(seed_value):
+    """
+    Persist the last used seed to a file for session continuity.
+
+    Args:
+        seed_value: The seed value to persist.
+    """
+    try:
+        ensure_output_directory_exists()
+        data = {
+            "last_seed": seed_value,
+            "timestamp": datetime.now().isoformat()
+        }
+        with open(LAST_SEED_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=4)
+    except Exception as e:
+        logging.debug(f"[SeedSaver] Could not save last seed: {e}")
+
+
+def load_last_seed():
+    """
+    Load the last used seed from persistence file.
+
+    Returns:
+        The last seed value, or 0 if not found.
+    """
+    if os.path.exists(LAST_SEED_FILE):
+        try:
+            with open(LAST_SEED_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                return validate_seed(data.get("last_seed", 0))
+        except Exception as e:
+            logging.debug(f"[SeedSaver] Could not load last seed: {e}")
+    return 0
+
 
 # --- Directory Management ---
 
@@ -142,6 +252,7 @@ def ensure_output_directory_exists(subdirectory=""):
     target_dir = os.path.join(OUTPUT_SEEDS_DIR, subdirectory)
     os.makedirs(target_dir, exist_ok=True)
     os.makedirs(BACKUP_DIR, exist_ok=True)
+
 
 def get_seed_filepath(seed_name, subdirectory="", extension=".json"):
     """
@@ -158,10 +269,22 @@ def get_seed_filepath(seed_name, subdirectory="", extension=".json"):
     target_dir = os.path.join(OUTPUT_SEEDS_DIR, subdirectory)
     return os.path.join(target_dir, f"{seed_name}{extension}")
 
-# --- Enhanced Seed Operations (functions remain the same logic) ---
+
+# --- Enhanced Seed Operations ---
 
 def save_seed_to_file(seed_name, seed_value, subdirectory="", metadata=None):
-    """Saves seed value and metadata to a JSON file."""
+    """
+    Saves seed value and metadata to a JSON file.
+
+    Args:
+        seed_name: Name for the seed file.
+        seed_value: The seed value to save.
+        subdirectory: Optional subdirectory path.
+        metadata: Optional dict of metadata to include.
+
+    Returns:
+        True if successful, False otherwise.
+    """
     ensure_output_directory_exists(subdirectory)
     filepath = get_seed_filepath(seed_name, subdirectory)
     data_to_save = {
@@ -178,8 +301,21 @@ def save_seed_to_file(seed_name, seed_value, subdirectory="", metadata=None):
         logging.error(f"[SeedSaver] Could not save seed '{seed_name}': {e}")
         return False
 
+
 def load_seed_from_file(seed_name, subdirectory=""):
-    """Loads seed value, supporting JSON and legacy TXT."""
+    """
+    Loads seed value, supporting JSON and legacy TXT.
+    
+    IMPORTANT: Does NOT clamp large seeds from files - preserves exact value.
+    Files can store seeds beyond JS-safe range since they bypass JavaScript.
+
+    Args:
+        seed_name: Name of the seed to load.
+        subdirectory: Optional subdirectory path.
+
+    Returns:
+        The seed value if found, None otherwise.
+    """
     json_filepath = get_seed_filepath(seed_name, subdirectory, extension=".json")
     txt_filepath = get_seed_filepath(seed_name, subdirectory, extension=".txt")
     if os.path.exists(json_filepath):
@@ -188,7 +324,9 @@ def load_seed_from_file(seed_name, subdirectory=""):
                 data = json.load(f)
                 seed_value = int(data["seed"])
                 update_statistics(seed_name, 'loaded')
-                return validate_seed(seed_value)
+                # Return exact value from file WITHOUT clamping
+                # Files can store values beyond JS-safe range
+                return seed_value
         except Exception as e:
             logging.error(f"[SeedSaver] Could not load JSON seed '{seed_name}': {e}")
             return None
@@ -197,20 +335,26 @@ def load_seed_from_file(seed_name, subdirectory=""):
         try:
             with open(txt_filepath, 'r', encoding='utf-8') as f:
                 content = f.read().strip()
-                # Attempt conversion and validation
-                seed_val = validate_seed(int(content))
-                # Optionally, convert the legacy file to JSON here
-                # save_seed_to_file(seed_name, seed_val, subdirectory)
-                # os.remove(txt_filepath) # Be careful with auto-deletion
-                return seed_val
+                # Return exact value from file WITHOUT clamping
+                return int(content)
         except Exception as e:
             logging.error(f"[SeedSaver] Could not load legacy txt seed '{seed_name}': {e}")
             return None
     logging.warning(f"[SeedSaver] Seed file for '{seed_name}' not found.")
     return None
 
+
 def load_seed_metadata(seed_name, subdirectory=""):
-    """Loads the full JSON data including metadata for a seed."""
+    """
+    Loads the full JSON data including metadata for a seed.
+
+    Args:
+        seed_name: Name of the seed.
+        subdirectory: Optional subdirectory path.
+
+    Returns:
+        The full seed data dict if found, None otherwise.
+    """
     json_filepath = get_seed_filepath(seed_name, subdirectory, extension=".json")
     if os.path.exists(json_filepath):
         try:
@@ -220,8 +364,18 @@ def load_seed_metadata(seed_name, subdirectory=""):
             logging.error(f"[SeedSaver] Could not load seed metadata '{seed_name}': {e}")
     return None
 
+
 def delete_seed_file(seed_name, subdirectory=""):
-    """Deletes seed files (.json and legacy .txt)."""
+    """
+    Deletes seed files (.json and legacy .txt).
+
+    Args:
+        seed_name: Name of the seed to delete.
+        subdirectory: Optional subdirectory path.
+
+    Returns:
+        True if any files were deleted, False otherwise.
+    """
     deleted = False
     for ext in [".json", ".txt"]:
         filepath = get_seed_filepath(seed_name, subdirectory, extension=ext)
@@ -236,6 +390,7 @@ def delete_seed_file(seed_name, subdirectory=""):
         remove_from_favorites(seed_name)
         update_statistics(seed_name, 'deleted')
     return deleted
+
 
 @lru_cache(maxsize=32)
 def get_all_saved_seed_names(subdirectory="", cache_key=0):
@@ -262,16 +417,37 @@ def get_all_saved_seed_names(subdirectory="", cache_key=0):
         logging.error(f"[SeedSaver] Could not list seeds from '{target_dir}': {e}")
         return []
 
+
 def search_seeds(pattern, subdirectory=""):
-    """Filters seed names based on a search pattern."""
+    """
+    Filters seed names based on a search pattern.
+
+    Args:
+        pattern: Search pattern (case-insensitive substring match).
+        subdirectory: Optional subdirectory path.
+
+    Returns:
+        List of matching seed names.
+    """
     all_seeds = get_all_saved_seed_names(subdirectory, get_cache_key())
     if pattern == "*" or not pattern:
         return all_seeds
     pattern_lower = pattern.lower()
     return [s for s in all_seeds if pattern_lower in s.lower()]
 
+
 def copy_seed(seed_name, from_subdir, to_subdir):
-    """Copies a seed file (with metadata) to another directory."""
+    """
+    Copies a seed file (with metadata) to another directory.
+
+    Args:
+        seed_name: Name of the seed to copy.
+        from_subdir: Source subdirectory.
+        to_subdir: Destination subdirectory.
+
+    Returns:
+        True if successful, False otherwise.
+    """
     seed_value = load_seed_from_file(seed_name, from_subdir)
     if seed_value is None:
         return False
@@ -279,14 +455,34 @@ def copy_seed(seed_name, from_subdir, to_subdir):
     seed_metadata = metadata.get('metadata', {}) if metadata else {}
     return save_seed_to_file(seed_name, seed_value, to_subdir, seed_metadata)
 
+
 def move_seed(seed_name, from_subdir, to_subdir):
-    """Moves a seed file by copying then deleting the original."""
+    """
+    Moves a seed file by copying then deleting the original.
+
+    Args:
+        seed_name: Name of the seed to move.
+        from_subdir: Source subdirectory.
+        to_subdir: Destination subdirectory.
+
+    Returns:
+        True if successful, False otherwise.
+    """
     if copy_seed(seed_name, from_subdir, to_subdir):
         return delete_seed_file(seed_name, from_subdir)
     return False
 
+
 def export_all_seeds(subdirectory=""):
-    """Exports all seeds in a directory to a single JSON file."""
+    """
+    Exports all seeds in a directory to a single JSON file.
+
+    Args:
+        subdirectory: Optional subdirectory path.
+
+    Returns:
+        Tuple of (success: bool, message: str).
+    """
     seed_names = get_all_saved_seed_names(subdirectory, get_cache_key())
     if not seed_names:
         return False, "No seeds to export"
@@ -306,10 +502,18 @@ def export_all_seeds(subdirectory=""):
         logging.error(f"[SeedSaver] Export failed: {e}")
         return False, f"Export failed: {e}"
 
-# NOTE: Import function removed for brevity, assuming it exists if needed.
 
 def clear_directory(subdirectory="", keep_backups=True):
-    """Clears all seed files from a directory, optionally backing up first."""
+    """
+    Clears all seed files from a directory, optionally backing up first.
+
+    Args:
+        subdirectory: Optional subdirectory path.
+        keep_backups: If True, create backup before clearing.
+
+    Returns:
+        Tuple of (deleted_count: int, message: str).
+    """
     if keep_backups:
         backup_result = backup_seeds(subdirectory)
         if not backup_result[0]:
@@ -321,8 +525,17 @@ def clear_directory(subdirectory="", keep_backups=True):
             deleted_count += 1
     return deleted_count, f"Deleted {deleted_count} seeds"
 
+
 def backup_seeds(subdirectory=""):
-    """Creates a timestamped backup of a seed directory."""
+    """
+    Creates a timestamped backup of a seed directory.
+
+    Args:
+        subdirectory: Optional subdirectory path.
+
+    Returns:
+        Tuple of (success: bool, message: str).
+    """
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     subdir_name = subdirectory.replace('/', '_').replace('\\', '_') if subdirectory else 'root'
     backup_subdir = os.path.join(BACKUP_DIR, f"{subdir_name}_{timestamp}")
@@ -330,27 +543,42 @@ def backup_seeds(subdirectory=""):
         source_dir = os.path.join(OUTPUT_SEEDS_DIR, subdirectory)
         if os.path.exists(source_dir):
             shutil.copytree(source_dir, backup_subdir,
-                            ignore=shutil.ignore_patterns('_backups*', '_favorites*', '_statistics*'))
+                            ignore=shutil.ignore_patterns('_backups*', '_favorites*', '_statistics*', '_last_seed*'))
             return True, f"Backup created: {os.path.basename(backup_subdir)}"
         return False, "Source directory not found"
     except Exception as e:
         logging.error(f"[SeedSaver] Backup failed: {e}")
         return False, f"Backup failed: {e}"
 
+
 def load_favorites():
-    """Loads the list of favorite seed names."""
+    """
+    Loads the list of favorite seed names.
+
+    Returns:
+        List of favorite seed names.
+    """
     if os.path.exists(FAVORITES_FILE):
         try:
             with open(FAVORITES_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
                 return data if isinstance(data, list) else []
         except Exception as e:
-             logging.error(f"[SeedSaver] Error loading favorites: {e}")
-             return []
+            logging.error(f"[SeedSaver] Error loading favorites: {e}")
+            return []
     return []
 
+
 def save_favorites(favorites):
-    """Saves the list of favorite seed names."""
+    """
+    Saves the list of favorite seed names.
+
+    Args:
+        favorites: List of favorite seed names.
+
+    Returns:
+        True if successful, False otherwise.
+    """
     try:
         with open(FAVORITES_FILE, 'w', encoding='utf-8') as f:
             json.dump(favorites, f, indent=4)
@@ -359,8 +587,17 @@ def save_favorites(favorites):
         logging.error(f"[SeedSaver] Could not save favorites: {e}")
         return False
 
+
 def toggle_favorite(seed_name):
-    """Adds or removes a seed name from the favorites list."""
+    """
+    Adds or removes a seed name from the favorites list.
+
+    Args:
+        seed_name: Name of the seed to toggle.
+
+    Returns:
+        Tuple of (success: bool, message: str).
+    """
     favorites = load_favorites()
     if seed_name in favorites:
         favorites.remove(seed_name)
@@ -371,27 +608,48 @@ def toggle_favorite(seed_name):
         save_favorites(favorites)
         return True, f"Added '{seed_name}' to favorites"
 
+
 def remove_from_favorites(seed_name):
-    """Silently removes a seed name if it exists in favorites."""
+    """
+    Silently removes a seed name if it exists in favorites.
+
+    Args:
+        seed_name: Name of the seed to remove.
+    """
     favorites = load_favorites()
     if seed_name in favorites:
         favorites.remove(seed_name)
         save_favorites(favorites)
 
+
 def load_statistics():
-    """Loads seed usage statistics."""
+    """
+    Loads seed usage statistics.
+
+    Returns:
+        Dict of statistics by seed name.
+    """
     if os.path.exists(STATS_FILE):
         try:
             with open(STATS_FILE, 'r', encoding='utf-8') as f:
-                 data = json.load(f)
-                 return data if isinstance(data, dict) else {}
+                data = json.load(f)
+                return data if isinstance(data, dict) else {}
         except Exception as e:
             logging.error(f"[SeedSaver] Error loading statistics: {e}")
             return {}
     return {}
 
+
 def save_statistics(stats):
-    """Saves seed usage statistics."""
+    """
+    Saves seed usage statistics.
+
+    Args:
+        stats: Dict of statistics to save.
+
+    Returns:
+        True if successful, False otherwise.
+    """
     try:
         with open(STATS_FILE, 'w', encoding='utf-8') as f:
             json.dump(stats, f, indent=4)
@@ -400,36 +658,63 @@ def save_statistics(stats):
         logging.error(f"[SeedSaver] Could not save statistics: {e}")
         return False
 
+
 def update_statistics(seed_name, action):
-    """Updates usage statistics for a given seed and action."""
+    """
+    Updates usage statistics for a given seed and action.
+
+    Args:
+        seed_name: Name of the seed.
+        action: The action performed ('saved', 'loaded', 'deleted').
+    """
     stats = load_statistics()
     if seed_name not in stats:
         stats[seed_name] = {'saves': 0, 'loads': 0, 'deletes': 0, 'last_used': None}
-    if action == 'saved': stats[seed_name]['saves'] += 1
-    elif action == 'loaded': stats[seed_name]['loads'] += 1
-    elif action == 'deleted': stats[seed_name]['deletes'] += 1
+    if action == 'saved':
+        stats[seed_name]['saves'] += 1
+    elif action == 'loaded':
+        stats[seed_name]['loads'] += 1
+    elif action == 'deleted':
+        stats[seed_name]['deletes'] += 1
     stats[seed_name]['last_used'] = datetime.now().isoformat()
     save_statistics(stats)
 
+
 def get_seed_statistics(seed_name):
-    """Retrieves formatted usage statistics string for a seed."""
+    """
+    Retrieves formatted usage statistics string for a seed.
+
+    Args:
+        seed_name: Name of the seed.
+
+    Returns:
+        Formatted statistics string.
+    """
     stats = load_statistics()
     if seed_name in stats:
         s = stats[seed_name]
         last_used_str = s.get('last_used', 'Never')
         if last_used_str and last_used_str != 'Never':
-             try:
-                 # Attempt to parse and format ISO timestamp
-                 dt_obj = datetime.fromisoformat(last_used_str)
-                 last_used_str = dt_obj.strftime('%Y-%m-%d %H:%M:%S')
-             except ValueError:
-                 pass # Keep original string if parsing fails
+            try:
+                dt_obj = datetime.fromisoformat(last_used_str)
+                last_used_str = dt_obj.strftime('%Y-%m-%d %H:%M:%S')
+            except ValueError:
+                pass
         return (f"Saves: {s.get('saves', 0)}, Loads: {s.get('loads', 0)}, "
                 f"Last used: {last_used_str}")
     return "No statistics available"
 
+
 def find_duplicate_seeds(subdirectory=""):
-    """Finds seeds with identical values within a directory."""
+    """
+    Finds seeds with identical values within a directory.
+
+    Args:
+        subdirectory: Optional subdirectory path.
+
+    Returns:
+        Dict mapping seed values to lists of seed names with that value.
+    """
     seed_names = get_all_saved_seed_names(subdirectory, get_cache_key())
     seed_values = {}
     for name in seed_names:
@@ -440,8 +725,15 @@ def find_duplicate_seeds(subdirectory=""):
             seed_values[value].append(name)
     return {k: v for k, v in seed_values.items() if len(v) > 1}
 
+
 class SeedHistory:
-    """Simple class to keep track of recently used seeds."""
+    """
+    Simple class to keep track of recently used seeds.
+
+    Attributes:
+        max_size: Maximum number of recent seeds to store.
+        history: List of (name, value) tuples.
+    """
     def __init__(self, max_size=10):
         """
         Initialize history.
@@ -450,31 +742,45 @@ class SeedHistory:
             max_size: Maximum number of recent seeds to store.
         """
         self.max_size = max_size
-        self.history = [] # Stores tuples of (name, value)
+        self.history = []
 
     def add(self, seed_name, seed_value):
-        """Adds a seed to the history, removing duplicates and trimming."""
+        """
+        Adds a seed to the history, removing duplicates and trimming.
+
+        Args:
+            seed_name: Name of the seed.
+            seed_value: Value of the seed.
+        """
         self.history = [(n, v) for n, v in self.history if n != seed_name]
         self.history.insert(0, (seed_name, seed_value))
         self.history = self.history[:self.max_size]
 
     def get_list(self):
-        """Returns a list of seed names in the history."""
+        """
+        Returns a list of seed names in the history.
+
+        Returns:
+            List of seed names.
+        """
         return [name for name, _ in self.history]
+
 
 # Global instance for recent seeds
 seed_history = SeedHistory()
 
+
 # =================================================================================
-# == Core Node Class                                                           ==
+# == Core Node Class                                                            ==
 # =================================================================================
 
 class EnhancedSeedSaverNode:
     """
     MD Enhanced Seed Saver
 
-    Advanced seed management node with static pass-through and dynamic action modes.
-    Save, load, organize, and manage seeds efficiently within ComfyUI workflows.
+    Advanced seed management node with three operation modes: Pass-through for
+    external seeds, Manual Input for direct seed entry, and Execute Action for
+    dynamic seed management operations.
     """
     def __init__(self):
         pass
@@ -483,18 +789,18 @@ class EnhancedSeedSaverNode:
     def INPUT_TYPES(cls):
         """Define node inputs."""
         cache_key = get_cache_key()
-        # Use default subdirectory "" when fetching seed names for the dropdown
         seed_names = get_all_saved_seed_names("", cache_key)
         favorites = load_favorites()
         history = seed_history.get_list()
+        last_seed = load_last_seed()
 
         seed_options = ["(None)"]
-        valid_favorites = [f"⭐ {name}" for name in favorites if name in seed_names]
+        valid_favorites = [f"[FAV] {name}" for name in favorites if name in seed_names]
         if valid_favorites:
             seed_options.append("--- FAVORITES ---")
             seed_options.extend(valid_favorites)
 
-        valid_history = [f"🕒 {name}" for name in history[:5] if name in seed_names]
+        valid_history = [f"[REC] {name}" for name in history[:5] if name in seed_names]
         if valid_history:
             seed_options.append("--- RECENT ---")
             seed_options.extend(valid_history)
@@ -503,64 +809,146 @@ class EnhancedSeedSaverNode:
             seed_options.append("--- ALL SEEDS ---")
             seed_options.extend(seed_names)
 
-        basic_actions = ["(None)", "SAVE_CURRENT_SEED", "LOAD_SELECTED_SEED", "DELETE_SELECTED_SEED"]
-        advanced_actions = ["LOAD_LATEST_SAVED_SEED", "LOAD_RANDOM_SEED", "LOAD_AND_INCREMENT", "GENERATE_RANDOM_SEED"]
-        organization_actions = ["COPY_TO_SUBDIRECTORY", "MOVE_TO_SUBDIRECTORY", "TOGGLE_FAVORITE", "SHOW_STATISTICS", "FIND_DUPLICATES"]
-        bulk_actions = ["EXPORT_ALL_SEEDS", "CLEAR_DIRECTORY", "BACKUP_SEEDS", "REFRESH_LISTS"]
+        # Action categories
+        basic_actions = [
+            "(None)",
+            "SAVE_CURRENT_SEED",
+            "LOAD_SELECTED_SEED",
+            "DELETE_SELECTED_SEED"
+        ]
+        advanced_actions = [
+            "LOAD_LATEST_SAVED_SEED",
+            "LOAD_RANDOM_SEED",
+            "LOAD_AND_INCREMENT",
+            "GENERATE_RANDOM_SEED"
+        ]
+        organization_actions = [
+            "COPY_TO_SUBDIRECTORY",
+            "MOVE_TO_SUBDIRECTORY",
+            "TOGGLE_FAVORITE",
+            "SHOW_STATISTICS",
+            "FIND_DUPLICATES"
+        ]
+        bulk_actions = [
+            "EXPORT_ALL_SEEDS",
+            "CLEAR_DIRECTORY",
+            "BACKUP_SEEDS",
+            "REFRESH_LISTS"
+        ]
         all_actions = basic_actions + advanced_actions + organization_actions + bulk_actions
+
+        # Quick actions for common operations
+        quick_actions = [
+            "(None)",
+            "INCREMENT_BY_1",
+            "DECREMENT_BY_1",
+            "INCREMENT_BY_10",
+            "DECREMENT_BY_10",
+            "INCREMENT_BY_100",
+            "DECREMENT_BY_100",
+            "RANDOMIZE",
+            "RESET_TO_ZERO",
+            "USE_LAST_SEED"
+        ]
 
         return {
             "required": {
-                "seed_input": ("INT", {
-                    "default": 0, "min": SEED_MIN, "max": SEED_MAX, "forceInput": True,
-                    "tooltip": (
-                        "INPUT SEED\n"
-                        "- Connect the seed value you want to manage or pass through.\n"
-                        "- This is the primary seed value used when saving or acting as a base."
-                    )
-                }),
-                "operation_mode": (["Pass-through (Static)", "Execute Action (Dynamic)"], {
-                    "default": "Pass-through (Static)", # Default to safer static mode
+                "operation_mode": ([
+                    "Pass-through (External Seed)",
+                    "Manual Input (Direct Entry)",
+                    "Execute Action (Dynamic)"
+                ], {
+                    "default": "Manual Input (Direct Entry)",
                     "tooltip": (
                         "OPERATION MODE\n"
-                        "- Determines the node's behavior and caching.\n"
-                        "- 'Pass-through (Static)': Simply passes 'seed_input' to 'seed_output'. Does NOT perform actions. Cacheable and stable for consistent workflows.\n"
-                        "- 'Execute Action (Dynamic)': Performs the selected 'action' (Save, Load, etc.) during execution. This mode forces re-runs and prevents caching."
+                        "Determines the node's behavior and caching:\n\n"
+                        "- 'Pass-through (External Seed)': Uses seed from connected input. "
+                        "Cacheable and stable for consistent workflows.\n\n"
+                        "- 'Manual Input (Direct Entry)': Uses the 'manual_seed' value directly. "
+                        "No external seed source needed. Cacheable.\n\n"
+                        "- 'Execute Action (Dynamic)': Performs the selected action (Save, Load, etc.). "
+                        "Forces re-runs and prevents caching."
                     )
                 }),
             },
             "optional": {
+                "seed_input": ("INT", {
+                    "default": 0,
+                    "min": SEED_MIN,
+                    "max": SEED_MAX,
+                    "forceInput": True,
+                    "tooltip": (
+                        "EXTERNAL SEED INPUT\n"
+                        "- Connect a seed value from another node.\n"
+                        "- Used when operation_mode is 'Pass-through' or 'Execute Action'.\n"
+                        "- Ignored when using 'Manual Input' mode."
+                    )
+                }),
+                "manual_seed": ("STRING", {
+                    "default": str(last_seed),
+                    "multiline": False,
+                    "tooltip": (
+                        "MANUAL SEED VALUE\n"
+                        "- Enter a seed value directly without needing an external node.\n"
+                        "- Used when operation_mode is 'Manual Input'.\n"
+                        "- Valid range: 0 to 9,007,199,254,740,991 (JavaScript safe range).\n"
+                        "- Accepts decimal or hex (0x prefix) format.\n"
+                        "- All generated seeds stay within this range for reproducibility.\n"
+                        "- Defaults to last used seed for convenience."
+                    )
+                }),
+                "quick_action": (quick_actions, {
+                    "default": "(None)",
+                    "tooltip": (
+                        "QUICK ACTION\n"
+                        "Apply a quick modification to the seed without switching modes:\n\n"
+                        "- INCREMENT/DECREMENT: Add or subtract from current seed.\n"
+                        "- RANDOMIZE: Generate a new random seed.\n"
+                        "- RESET_TO_ZERO: Set seed to 0.\n"
+                        "- USE_LAST_SEED: Load the previously used seed.\n\n"
+                        "Note: Quick actions apply AFTER mode selection but BEFORE main actions."
+                    )
+                }),
                 "action": (all_actions, {
                     "default": "(None)",
                     "tooltip": (
-                        "ACTION (Dynamic Mode Only)\n"
-                        "- The operation to perform when 'operation_mode' is 'Execute Action'.\n"
-                        "- (None): Does nothing, outputs 'seed_input'.\n"
-                        "- SAVE_CURRENT_SEED: Saves 'seed_input' using 'seed_name_input'.\n"
-                        "- LOAD_SELECTED_SEED: Loads seed from 'seed_to_load_name'.\n"
-                        "- ... (See guide for full list and descriptions)"
+                        "ACTION (Execute Action Mode Only)\n"
+                        "The operation to perform when in 'Execute Action' mode:\n\n"
+                        "BASIC:\n"
+                        "- SAVE_CURRENT_SEED: Save seed with name from 'seed_name_input'.\n"
+                        "- LOAD_SELECTED_SEED: Load seed from 'seed_to_load_name'.\n"
+                        "- DELETE_SELECTED_SEED: Delete the selected seed file.\n\n"
+                        "ADVANCED:\n"
+                        "- LOAD_LATEST_SAVED_SEED: Load most recently modified seed.\n"
+                        "- LOAD_RANDOM_SEED: Load a random seed from the directory.\n"
+                        "- LOAD_AND_INCREMENT: Load seed and add 1.\n"
+                        "- GENERATE_RANDOM_SEED: Create new random seed value."
                     )
                 }),
                 "seed_name_input": ("STRING", {
-                    "default": "", "multiline": False, "placeholder": "Enter seed name...",
+                    "default": "",
+                    "multiline": False,
+                    "placeholder": "Enter seed name...",
                     "tooltip": (
                         "NAME FOR SAVING\n"
                         "- Enter the desired name when using SAVE_CURRENT_SEED.\n"
                         "- Invalid filename characters will be replaced.\n"
-                        "- Auto-generates name if left blank."
+                        "- Auto-generates timestamped name if left blank."
                     )
                 }),
                 "seed_to_load_name": (seed_options, {
                     "default": "(None)",
                     "tooltip": (
                         "SELECT SEED\n"
-                        "- Choose a saved seed for actions like LOAD, DELETE, COPY, MOVE, FAVORITE, STATS.\n"
-                        "- Organized by Favorites ⭐, Recent 🕒, and All.\n"
-                        "- Use REFRESH_LISTS action if dropdown is outdated."
+                        "- Choose a saved seed for Load, Delete, Copy, Move, Favorite, or Stats.\n"
+                        "- Organized by: [FAV] Favorites, [REC] Recent, and All.\n"
+                        "- Use REFRESH_LISTS action if dropdown appears outdated."
                     )
                 }),
                 "subdirectory": ("STRING", {
-                    "default": "", "multiline": False, "placeholder": "Optional: folder/subfolder",
+                    "default": "",
+                    "multiline": False,
+                    "placeholder": "Optional: folder/subfolder",
                     "tooltip": (
                         "SUBDIRECTORY\n"
                         "- Specify a subfolder within the main 'seeds' output directory.\n"
@@ -570,90 +958,170 @@ class EnhancedSeedSaverNode:
                     )
                 }),
                 "search_pattern": ("STRING", {
-                    "default": "*", "multiline": False, "placeholder": "Search pattern (*=all)",
+                    "default": "*",
+                    "multiline": False,
+                    "placeholder": "Search pattern (*=all)",
                     "tooltip": (
                         "SEARCH PATTERN\n"
-                        "- Filters seeds in 'SELECT SEED' dropdown (case-insensitive).\n"
-                        "- Use '*' to show all.\n"
-                        "- Also affects actions like LOAD_RANDOM_SEED."
+                        "- Filters seeds shown in dropdown (case-insensitive substring match).\n"
+                        "- Use '*' or leave empty to show all.\n"
+                        "- Also affects LOAD_RANDOM_SEED (picks from filtered list)."
                     )
                 }),
                 "description": ("STRING", {
-                    "default": "", "multiline": True, "placeholder": "Optional: Add notes...",
+                    "default": "",
+                    "multiline": True,
+                    "placeholder": "Optional: Add notes about this seed...",
                     "tooltip": (
                         "DESCRIPTION / NOTES\n"
                         "- Add optional text notes when saving a seed.\n"
-                        "- Stored in the JSON file."
+                        "- Stored in the JSON file's metadata section.\n"
+                        "- Useful for remembering why a seed was saved."
                     )
                 }),
                 "tags": ("STRING", {
-                    "default": "", "multiline": False, "placeholder": "Optional: tag1, tag2,...",
+                    "default": "",
+                    "multiline": False,
+                    "placeholder": "Optional: tag1, tag2, ...",
                     "tooltip": (
                         "TAGS\n"
                         "- Add optional comma-separated tags when saving.\n"
                         "- Example: 'style_test, character_A, good_result'.\n"
-                        "- Stored in the JSON metadata."
+                        "- Stored in the JSON metadata for future filtering."
                     )
                 }),
                 "target_subdirectory": ("STRING", {
-                    "default": "", "multiline": False, "placeholder": "For copy/move actions",
+                    "default": "",
+                    "multiline": False,
+                    "placeholder": "For copy/move actions",
                     "tooltip": (
                         "TARGET SUBDIRECTORY\n"
                         "- Specify the destination subfolder for COPY or MOVE actions.\n"
-                        "- Use forward slashes."
+                        "- Use forward slashes (e.g., 'archive/good_seeds')."
                     )
                 }),
             }
         }
 
     @classmethod
-    def IS_CHANGED(cls, seed_input, operation_mode, **kwargs):
+    def IS_CHANGED(cls, operation_mode, **kwargs):
         """
         Controls caching based on the operation mode.
-        Static mode is cacheable based on inputs, Dynamic mode always re-runs.
+        Static modes are cacheable, Dynamic mode always re-runs.
+
+        Args:
+            operation_mode: The selected operation mode.
+            **kwargs: All other node inputs.
+
+        Returns:
+            "static" for cacheable modes, random token for dynamic mode.
         """
         if operation_mode == "Execute Action (Dynamic)":
-            # In action mode, we must re-run every time to perform the action.
-            # Using secrets ensures a unique value each time, preventing caching.
             return secrets.token_hex(16)
         else:
-            # In pass-through mode, the output only depends on the input seed and mode.
-            # Returning a constant string allows ComfyUI to cache based on inputs.
-            return "static" # Corrected based on guide Section 8.1
+            return "static"
 
-    RETURN_TYPES = ("INT", "STRING")
-    RETURN_NAMES = ("seed_output", "status_info")
+    RETURN_TYPES = ("INT", "STRING", "STRING")
+    RETURN_NAMES = ("seed_output", "seed_output_str", "status_info")
     FUNCTION = "execute"
     CATEGORY = "MD_Nodes/Utility"
-    OUTPUT_NODE = True # Indicates this node primarily performs actions/outputs info
+    OUTPUT_NODE = True
 
-    def execute(self, seed_input, operation_mode, action="(None)", seed_name_input="",
-                seed_to_load_name="(None)", subdirectory="", search_pattern="*",
-                description="", tags="", target_subdirectory=""):
+    def execute(self, operation_mode, seed_input=None, manual_seed="0", quick_action="(None)",
+                action="(None)", seed_name_input="", seed_to_load_name="(None)",
+                subdirectory="", search_pattern="*", description="", tags="",
+                target_subdirectory=""):
         """
-        Main execution function. Handles both pass-through and action modes.
+        Main execution function. Handles all three operation modes.
+
+        Args:
+            operation_mode: Selected mode (Pass-through, Manual Input, or Execute Action).
+            seed_input: External seed value from connected node.
+            manual_seed: Direct seed value for Manual Input mode.
+            quick_action: Quick modification to apply.
+            action: Main action for Execute Action mode.
+            seed_name_input: Name for saving seeds.
+            seed_to_load_name: Selected seed from dropdown.
+            subdirectory: Working subdirectory.
+            search_pattern: Filter pattern for seed lists.
+            description: Metadata description for saving.
+            tags: Metadata tags for saving.
+            target_subdirectory: Destination for copy/move.
+
+        Returns:
+            Tuple of (seed_output, status_info).
         """
         try:
-            output_seed = validate_seed(seed_input)
+            # Parse manual_seed from string to handle full 64-bit precision
+            manual_seed_int = parse_seed_string(manual_seed)
+            
+            # Determine base seed based on operation mode
+            if operation_mode == "Manual Input (Direct Entry)":
+                output_seed = manual_seed_int
+                base_mode = "Manual Input"
+            elif operation_mode == "Pass-through (External Seed)":
+                if seed_input is not None:
+                    output_seed = validate_seed(seed_input)
+                else:
+                    output_seed = manual_seed_int
+                    logging.warning("[SeedSaver] No seed_input connected in Pass-through mode, using manual_seed")
+                base_mode = "Pass-through"
+            else:  # Execute Action (Dynamic)
+                if seed_input is not None:
+                    output_seed = validate_seed(seed_input)
+                else:
+                    output_seed = manual_seed_int
+                base_mode = "Execute Action"
+
             status_message = ""
 
-            if operation_mode == "Pass-through (Static)":
-                status_message = (f"Mode: Pass-through\n"
-                                  f"Input Seed: {seed_input}\n"
-                                  f"Output Seed: {output_seed}")
-                # Ensure the correct tuple format is returned
-                return (output_seed, status_message)
+            # Apply quick action if selected
+            if quick_action != "(None)":
+                original_seed = output_seed
+                if quick_action == "INCREMENT_BY_1":
+                    output_seed = validate_seed(output_seed + 1)
+                elif quick_action == "DECREMENT_BY_1":
+                    output_seed = validate_seed(output_seed - 1)
+                elif quick_action == "INCREMENT_BY_10":
+                    output_seed = validate_seed(output_seed + 10)
+                elif quick_action == "DECREMENT_BY_10":
+                    output_seed = validate_seed(output_seed - 10)
+                elif quick_action == "INCREMENT_BY_100":
+                    output_seed = validate_seed(output_seed + 100)
+                elif quick_action == "DECREMENT_BY_100":
+                    output_seed = validate_seed(output_seed - 100)
+                elif quick_action == "RANDOMIZE":
+                    output_seed = secrets.randbelow(SEED_MAX + 1)
+                elif quick_action == "RESET_TO_ZERO":
+                    output_seed = 0
+                elif quick_action == "USE_LAST_SEED":
+                    output_seed = load_last_seed()
 
-            # --- The rest of the logic is for "Execute Action (Dynamic)" mode ---
+                if quick_action != "(None)":
+                    status_message += f"Quick Action: {quick_action}\n"
+                    status_message += f"  {original_seed} -> {output_seed}\n\n"
+
+            # Handle Pass-through and Manual Input modes (no main action execution)
+            if operation_mode != "Execute Action (Dynamic)":
+                status_message += (
+                    f"Mode: {base_mode}\n"
+                    f"Seed Value: {output_seed}\n"
+                    f"Seed Range: 0 to {SEED_MAX:,} (JS safe range)"
+                )
+                save_last_seed(output_seed)
+                print(f"[SeedSaver] Output seed = {output_seed}")
+                return (output_seed, str(output_seed), status_message)
+
+            # --- Execute Action (Dynamic) mode logic ---
 
             # Clean up selected seed name from dropdown prefixes
             clean_seed_name = seed_to_load_name
-            for prefix in ["⭐ ", "🕒 "]:
+            for prefix in ["[FAV] ", "[REC] "]:
                 if clean_seed_name.startswith(prefix):
                     clean_seed_name = clean_seed_name[len(prefix):]
             # Ignore category headers or (None)
             if clean_seed_name.startswith("---") or clean_seed_name == "(None)":
-                clean_seed_name = "" # Treat as no selection
+                clean_seed_name = ""
 
             # Get list of seeds based on search pattern and subdirectory
             current_seeds = []
@@ -663,24 +1131,24 @@ class EnhancedSeedSaverNode:
                 current_seeds = get_all_saved_seed_names(subdirectory, get_cache_key())
 
             num_seeds = len(current_seeds)
+            dir_display = os.path.join('seeds', subdirectory) if subdirectory else 'seeds/root'
 
-            # Initial status message for dynamic mode
-            status_message = (
+            status_message += (
                 f"Mode: Execute Action\n"
                 f"Action: {action}\n"
-                f"Input Seed: {seed_input}\n"
-                f"Directory: '{os.path.join('seeds', subdirectory) if subdirectory else 'seeds/root'}'\n"
+                f"Input Seed: {output_seed}\n"
+                f"Directory: '{dir_display}'\n"
                 f"Seeds Found (matching '{search_pattern}'): {num_seeds}"
             )
 
-            print(f"[SeedSaver] Action='{action}', Input={seed_input}, Subdir='{subdirectory}'")
+            print(f"[SeedSaver] Action='{action}', Input={output_seed}, Subdir='{subdirectory}'")
 
             # --- Action Handling Logic ---
             if action == "SAVE_CURRENT_SEED":
                 save_name = sanitize_filename(seed_name_input.strip())
                 if not save_name:
                     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-                    save_name = f"seed_{seed_input}_{timestamp}"
+                    save_name = f"seed_{output_seed}_{timestamp}"
                     status_message += f"\nAuto-named: '{save_name}'"
 
                 duplicates = find_duplicate_seeds(subdirectory)
@@ -688,19 +1156,21 @@ class EnhancedSeedSaverNode:
 
                 if existing_value is not None and existing_value != output_seed:
                     status_message += f"\n⚠️ Warning: Overwriting different value ({existing_value} -> {output_seed})"
-                elif output_seed in duplicates and save_name not in duplicates[output_seed]:
-                     status_message += f"\n⚠️ Note: Value {output_seed} already exists as: {', '.join(duplicates[output_seed])}"
+                elif output_seed in duplicates and save_name not in duplicates.get(output_seed, []):
+                    status_message += f"\n⚠️ Note: Value {output_seed} already exists as: {', '.join(duplicates[output_seed])}"
 
                 metadata = {
                     "description": description.strip() if description else "",
                     "tags": [t.strip() for t in tags.split(",") if t.strip()],
-                    "workflow": "ComfyUI", # Example metadata
+                    "workflow": "ComfyUI",
                 }
                 if save_seed_to_file(save_name, output_seed, subdirectory, metadata):
                     status_message += f"\n✅ SAVED: '{save_name}' = {output_seed}"
                     seed_history.add(save_name, output_seed)
-                    if metadata["description"]: status_message += f"\n  Description: {metadata['description'][:50]}..."
-                    if metadata["tags"]: status_message += f"\n  Tags: {', '.join(metadata['tags'])}"
+                    if metadata["description"]:
+                        status_message += f"\n  Description: {metadata['description'][:50]}..."
+                    if metadata["tags"]:
+                        status_message += f"\n  Tags: {', '.join(metadata['tags'])}"
                 else:
                     status_message += f"\n❌ Error: Failed to save seed '{save_name}'"
 
@@ -710,12 +1180,20 @@ class EnhancedSeedSaverNode:
                     if loaded_seed is not None:
                         output_seed = loaded_seed
                         status_message += f"\n✅ LOADED: '{clean_seed_name}' = {loaded_seed}"
+                        
+                        # Warn if seed exceeds JS-safe range
+                        if loaded_seed > SEED_MAX:
+                            status_message += f"\n⚠️ WARNING: Seed exceeds JS-safe range ({SEED_MAX:,})"
+                            status_message += f"\n   This seed will work but cannot be manually re-entered accurately"
+                        
                         seed_history.add(clean_seed_name, loaded_seed)
                         data = load_seed_metadata(clean_seed_name, subdirectory)
                         if data and data.get('metadata'):
                             meta = data['metadata']
-                            if meta.get('description'): status_message += f"\n  Description: {meta['description'][:50]}..."
-                            if meta.get('tags'): status_message += f"\n  Tags: {', '.join(meta['tags'])}"
+                            if meta.get('description'):
+                                status_message += f"\n  Description: {meta['description'][:50]}..."
+                            if meta.get('tags'):
+                                status_message += f"\n  Tags: {', '.join(meta['tags'])}"
                     else:
                         status_message += f"\n❌ Error: Seed '{clean_seed_name}' not found"
                 else:
@@ -731,15 +1209,17 @@ class EnhancedSeedSaverNode:
                     status_message += "\nℹ️ No seed selected for deletion"
 
             elif action == "LOAD_LATEST_SAVED_SEED":
-                all_seeds_in_dir = get_all_saved_seed_names(subdirectory, get_cache_key()) # Needs full list
+                all_seeds_in_dir = get_all_saved_seed_names(subdirectory, get_cache_key())
                 if all_seeds_in_dir:
                     target_dir = os.path.join(OUTPUT_SEEDS_DIR, subdirectory)
                     files_with_times = []
                     for filename in os.listdir(target_dir):
                         if filename.endswith((".json", ".txt")) and not filename.startswith("_"):
                             filepath = os.path.join(target_dir, filename)
-                            try: files_with_times.append((filepath, os.path.getmtime(filepath)))
-                            except OSError: pass # Ignore files that might disappear
+                            try:
+                                files_with_times.append((filepath, os.path.getmtime(filepath)))
+                            except OSError:
+                                pass
                     if files_with_times:
                         files_with_times.sort(key=lambda x: x[1], reverse=True)
                         latest_path = files_with_times[0][0]
@@ -752,12 +1232,12 @@ class EnhancedSeedSaverNode:
                         else:
                             status_message += f"\n❌ Error loading latest seed file: {latest_name}"
                     else:
-                         status_message += "\nℹ️ No valid seed files found to determine latest"
+                        status_message += "\nℹ️ No valid seed files found to determine latest"
                 else:
                     status_message += "\nℹ️ No seeds in directory"
 
             elif action == "LOAD_RANDOM_SEED":
-                if current_seeds: # Uses the potentially filtered list
+                if current_seeds:
                     random_name = secrets.choice(current_seeds)
                     loaded_seed = load_seed_from_file(random_name, subdirectory)
                     if loaded_seed is not None:
@@ -775,14 +1255,14 @@ class EnhancedSeedSaverNode:
                     if loaded_seed is not None:
                         output_seed = validate_seed(loaded_seed + 1)
                         status_message += f"\n✅ LOADED + 1: '{clean_seed_name}' {loaded_seed} -> {output_seed}"
-                        seed_history.add(clean_seed_name, loaded_seed) # Add original loaded name to history
+                        seed_history.add(clean_seed_name, loaded_seed)
                     else:
                         status_message += f"\n❌ Error: Seed '{clean_seed_name}' not found for increment"
                 else:
                     status_message += "\nℹ️ No seed selected for increment"
 
             elif action == "GENERATE_RANDOM_SEED":
-                output_seed = secrets.randbelow(SEED_MAX + 1) # Ensure max value is inclusive
+                output_seed = secrets.randbelow(SEED_MAX + 1)
                 status_message += f"\n✅ GENERATED RANDOM SEED: {output_seed}"
 
             elif action == "COPY_TO_SUBDIRECTORY":
@@ -790,37 +1270,45 @@ class EnhancedSeedSaverNode:
                 if clean_seed_name and target_sub:
                     if copy_seed(clean_seed_name, subdirectory, target_sub):
                         status_message += f"\n✅ COPIED: '{clean_seed_name}' from '{subdirectory or 'root'}' -> '{target_sub}'"
-                    else: status_message += f"\n❌ Error: Copy failed (seed exists? source missing?)"
-                else: status_message += "\nℹ️ Need seed name and valid target subdirectory"
+                    else:
+                        status_message += f"\n❌ Error: Copy failed (seed exists? source missing?)"
+                else:
+                    status_message += "\nℹ️ Need seed name and valid target subdirectory"
 
             elif action == "MOVE_TO_SUBDIRECTORY":
                 target_sub = target_subdirectory.strip()
                 if clean_seed_name and target_sub:
                     if move_seed(clean_seed_name, subdirectory, target_sub):
                         status_message += f"\n✅ MOVED: '{clean_seed_name}' from '{subdirectory or 'root'}' -> '{target_sub}'"
-                    else: status_message += f"\n❌ Error: Move failed (seed exists? permissions? source missing?)"
-                else: status_message += "\nℹ️ Need seed name and valid target subdirectory"
+                    else:
+                        status_message += f"\n❌ Error: Move failed (seed exists? permissions? source missing?)"
+                else:
+                    status_message += "\nℹ️ Need seed name and valid target subdirectory"
 
             elif action == "TOGGLE_FAVORITE":
                 if clean_seed_name:
                     success, msg = toggle_favorite(clean_seed_name)
                     status_message += f"\n{'✅' if success else '❌'} {msg}"
-                else: status_message += "\nℹ️ No seed selected for favorites"
+                else:
+                    status_message += "\nℹ️ No seed selected for favorites"
 
             elif action == "SHOW_STATISTICS":
                 if clean_seed_name:
                     stats_info = get_seed_statistics(clean_seed_name)
                     status_message += f"\n📊 Statistics for '{clean_seed_name}':\n  {stats_info}"
-                else: status_message += "\nℹ️ No seed selected for statistics"
+                else:
+                    status_message += "\nℹ️ No seed selected for statistics"
 
             elif action == "FIND_DUPLICATES":
                 duplicates = find_duplicate_seeds(subdirectory)
                 if duplicates:
                     status_message += f"\n🔍 Found {len(duplicates)} duplicate value(s):"
-                    for value, names in list(duplicates.items())[:5]: # Show first 5
+                    for value, names in list(duplicates.items())[:5]:
                         status_message += f"\n  Value {value}: {', '.join(names)}"
-                    if len(duplicates) > 5: status_message += f"\n  ... and {len(duplicates) - 5} more"
-                else: status_message += "\n✅ No duplicate seeds found"
+                    if len(duplicates) > 5:
+                        status_message += f"\n  ... and {len(duplicates) - 5} more"
+                else:
+                    status_message += "\n✅ No duplicate seeds found"
 
             elif action == "EXPORT_ALL_SEEDS":
                 success, msg = export_all_seeds(subdirectory)
@@ -840,11 +1328,14 @@ class EnhancedSeedSaverNode:
 
             # Final output info for dynamic mode
             status_message += f"\n\n📤 Output Seed: {output_seed}"
-            if action not in ["(None)", "LOAD_SELECTED_SEED", "LOAD_LATEST_SAVED_SEED", "LOAD_RANDOM_SEED", "LOAD_AND_INCREMENT", "GENERATE_RANDOM_SEED", "SHOW_STATISTICS", "FIND_DUPLICATES"]:
-                 status_message += "\n💡 Tip: Use REFRESH_LISTS action if dropdowns seem outdated after changes."
+            if action not in ["(None)", "LOAD_SELECTED_SEED", "LOAD_LATEST_SAVED_SEED",
+                              "LOAD_RANDOM_SEED", "LOAD_AND_INCREMENT", "GENERATE_RANDOM_SEED",
+                              "SHOW_STATISTICS", "FIND_DUPLICATES"]:
+                status_message += "\n💡 Tip: Use REFRESH_LISTS action if dropdowns seem outdated after changes."
 
+            save_last_seed(output_seed)
             print(f"[SeedSaver] Output seed = {output_seed}")
-            return (output_seed, status_message)
+            return (output_seed, str(output_seed), status_message)
 
         except Exception as e:
             logging.error(f"[EnhancedSeedSaver] Execution failed: {e}")
@@ -852,11 +1343,12 @@ class EnhancedSeedSaverNode:
             error_msg = f"❌ [EnhancedSeedSaver] Error: {e}\n{traceback.format_exc()}"
             print(f"[EnhancedSeedSaver] ⚠️ Error encountered, passing through input seed.")
             # Graceful failure: return input seed and error message
-            return (validate_seed(seed_input), error_msg)
+            fallback_seed = validate_seed(seed_input) if seed_input is not None else parse_seed_string(manual_seed)
+            return (fallback_seed, str(fallback_seed), error_msg)
 
 
 # =================================================================================
-# == Node Registration                                                         ==
+# == Node Registration                                                          ==
 # =================================================================================
 
 # Ensure directories exist on ComfyUI load/script execution
@@ -866,23 +1358,28 @@ NODE_CLASS_MAPPINGS = {
     "EnhancedSeedSaver": EnhancedSeedSaverNode
 }
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "EnhancedSeedSaver": "MD: Enhanced Seed Saver" # Added MD: prefix, removed emoji
+    "EnhancedSeedSaver": "MD: Enhanced Seed Saver"
 }
 
 # --- Initial Load Messages ---
-# Removed version number from print statement
 print(f"MD Enhanced Seed Saver node loaded. Seed storage directory: {OUTPUT_SEEDS_DIR}")
 try:
-    initial_seed_names = get_all_saved_seed_names() # Check root directory on load
+    initial_seed_names = get_all_saved_seed_names()
     favorites = load_favorites()
+    last_seed = load_last_seed()
     if initial_seed_names:
         print("Currently saved seeds (in root directory):")
-        for name in initial_seed_names[:10]: # Limit initial printout
-            prefix = "⭐ " if name in favorites else "  " # Keep favorite indicator here is okay
-            print(f"{prefix}- {name}")
-        if len(initial_seed_names) > 10: print(f"  ... and {len(initial_seed_names) - 10} more")
-    else: print("No seeds currently saved in the root directory.")
-    if favorites: print(f"Favorite seeds found: {len(favorites)}")
+        for name in initial_seed_names[:10]:
+            prefix = "[FAV] " if name in favorites else "      "
+            print(f"{prefix}{name}")
+        if len(initial_seed_names) > 10:
+            print(f"      ... and {len(initial_seed_names) - 10} more")
+    else:
+        print("No seeds currently saved in the root directory.")
+    if favorites:
+        print(f"Favorite seeds found: {len(favorites)}")
+    if last_seed != 0:
+        print(f"Last used seed: {last_seed}")
 except Exception as e:
     print(f"[EnhancedSeedSaver] Warning: Could not list initial seeds on load: {e}")
 print("-" * 30)
