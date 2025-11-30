@@ -1,305 +1,330 @@
 # ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-# ████ MD_Nodes/utils/self_cross_utils.py – Self-Cross Specific Logic ████▓▒░
+# ████ MD_Nodes/utils/self_cross_utils – Self-Cross Components ████▓▒░
 # © 2025 MDMAchine
 # ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 # ░▒▓ DESCRIPTION:
-#   Utilities specific to Self-Cross Diffusion Guidance (Qiu et al., CVPR 2025).
-#   Includes attention storage, Otsu thresholding, and overlap loss.
+#   Self-Cross specific components: config, attention storage, loss computation.
+#   Built on the universal guidance engine (guidance_core.py).
 #
-# ░▒▓ KEY FEATURE:
-#   Audio-Safe 1D Otsu thresholding (no sqrt assumption).
-#   Works for spectrograms (Time x Freq), images (H x W), and video.
+# ░▒▓ CHANGELOG:
+#   - v1.1.0 (Current - CRITICAL FIX):
+#       FIXED: __post_init__ no longer calls super().__post_init__() (doesn't exist)
+#       WORKING: Proper validation without inheritance issues
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 
 import torch
 import torch.nn.functional as F
-import math
 import logging
-from dataclasses import dataclass
-from typing import List, Tuple, Optional
+from dataclasses import dataclass, field
+from typing import List, Dict, Tuple, Optional
 
-# Import base guidance infrastructure
-from .guidance_core import GuidanceConfig, BaseGuidanceLoss, GuidanceContext
+# =================================================================================
+# == Imports from guidance_core
+# =================================================================================
+try:
+    from .guidance_core import GuidanceConfig, GuidanceContext, BaseGuidanceLoss
+except ImportError:
+    from guidance_core import GuidanceConfig, GuidanceContext, BaseGuidanceLoss
 
 # =================================================================================
 # == Self-Cross Configuration
 # =================================================================================
 @dataclass
 class SelfCrossConfig(GuidanceConfig):
-    """
-    Configuration for Self-Cross Diffusion Guidance.
-    Extends base GuidanceConfig with Self-Cross specific parameters.
-    """
-    # Subject identification
-    subject_indices: List[int] = None  # Token indices for subjects (e.g., [2, 5])
+    """Configuration for Self-Cross Guidance."""
     
-    # Guidance strength
+    # Subject-specific settings
+    subject_indices: List[int] = field(default_factory=list)
     guidance_scale: float = 10.0
-    param_lambda: float = 0.3  # Weight for Attend-and-Excite term
+    param_lambda: float = 0.3  # Attend-and-Excite weight
     
-    # Layer selection (performance critical)
-    target_layers: Optional[List[str]] = None
-    min_resolution: int = 8     # Audio-friendly (fewer freq bins)
-    max_resolution: int = 256   # Audio-friendly (long time sequences)
+    # Attention filtering
+    target_layers: List[str] = field(default_factory=lambda: ["middle", "output_4", "output_5"])
+    min_resolution: int = 8
+    max_resolution: int = 256
     
-    # Thresholding mode
-    use_2d_otsu: bool = False   # False = 1D (audio-safe), True = 2D (images)
-    threshold: float = 0.2      # Fallback if Otsu fails
+    # Otsu settings
+    use_2d_otsu: bool = False  # Use 1D by default (audio-safe)
     
     def __post_init__(self):
-        super().__post_init__()
-        if self.target_layers is None:
-            self.target_layers = ["middle", "output_4", "output_5"]
-        if self.subject_indices is None:
-            self.subject_indices = []
+        """Validate configuration (FIXED - no super() call)."""
+        # CRITICAL FIX: Don't call super().__post_init__() - parent class doesn't have it
+        
+        # Validation
+        if not self.subject_indices:
+            raise ValueError(
+                "subject_indices cannot be empty. "
+                "Use MD_CLIPTokenFinder to get token indices."
+            )
+        
+        if len(self.subject_indices) < 2:
+            raise ValueError(
+                f"Need at least 2 subject indices for separation, got {len(self.subject_indices)}"
+            )
+        
+        if self.guidance_scale <= 0:
+            raise ValueError(f"guidance_scale must be positive, got {self.guidance_scale}")
+        
+        if self.max_iters < 0:
+            raise ValueError(f"max_iters must be non-negative, got {self.max_iters}")
+        
+        if self.param_lambda < 0 or self.param_lambda > 1:
+            raise ValueError(f"param_lambda must be in [0, 1], got {self.param_lambda}")
+        
+        if self.learning_rate <= 0:
+            raise ValueError(f"learning_rate must be positive, got {self.learning_rate}")
+        
+        logging.info(
+            f"[SelfCross] Config validated: {len(self.subject_indices)} subjects, "
+            f"scale={self.guidance_scale}, iters={self.max_iters}"
+        )
 
 # =================================================================================
-# == Otsu Thresholding (Audio-Safe)
+# == Otsu Thresholding (Audio-Safe 1D Version)
 # =================================================================================
-def torch_otsu_threshold(tensor: torch.Tensor, normalize: bool = True) -> torch.Tensor:
+def torch_otsu_threshold(attention_map: torch.Tensor, use_2d: bool = False) -> torch.Tensor:
     """
-    Fast Otsu thresholding on GPU (1D-safe for audio).
-    Returns binary mask.
+    Audio-safe Otsu thresholding.
+    
+    Args:
+        attention_map: Attention values, shape [H, W] or [tokens]
+        use_2d: If True, treat as 2D image. If False, use 1D (audio-safe)
+    
+    Returns:
+        Binary mask
     """
-    if tensor.numel() == 0:
-        return torch.zeros_like(tensor, dtype=torch.bool)
+    if use_2d and attention_map.dim() == 2:
+        # 2D Otsu (for square images)
+        flat = attention_map.flatten()
+    else:
+        # 1D Otsu (audio-safe, works for any shape)
+        flat = attention_map.flatten()
     
-    flat = tensor.flatten()
+    # Normalize to [0, 255]
+    flat_norm = ((flat - flat.min()) / (flat.max() - flat.min() + 1e-8) * 255).long()
+    flat_norm = torch.clamp(flat_norm, 0, 255)
     
-    if normalize:
-        min_val, max_val = flat.min(), flat.max()
-        if min_val == max_val:
-            return torch.zeros_like(tensor, dtype=torch.bool)
-        flat = (flat - min_val) / (max_val - min_val + 1e-8)
+    # Compute histogram
+    hist = torch.zeros(256, device=flat.device)
+    hist = hist.scatter_add(0, flat_norm, torch.ones_like(flat_norm, dtype=torch.float32))
     
-    scaled = (flat * 255).long().clamp(0, 255)
-    hist = torch.bincount(scaled, minlength=256).float()
-    bin_centers = torch.arange(256, device=tensor.device, dtype=torch.float32)
+    # Otsu algorithm
+    total = flat_norm.numel()
+    sum_total = torch.sum(torch.arange(256, device=flat.device).float() * hist)
     
-    weight1 = hist.cumsum(0)
-    weight2 = hist.sum() - weight1
-    weight1 = torch.clamp(weight1, min=1e-8)
-    weight2 = torch.clamp(weight2, min=1e-8)
+    sum_background = 0.0
+    weight_background = 0.0
+    max_variance = 0.0
+    threshold = 0
     
-    mean1 = (hist * bin_centers).cumsum(0) / weight1
-    mean2 = ((hist * bin_centers).sum() - (hist * bin_centers).cumsum(0)) / weight2
+    for t in range(256):
+        weight_background += hist[t]
+        if weight_background == 0:
+            continue
+        
+        weight_foreground = total - weight_background
+        if weight_foreground == 0:
+            break
+        
+        sum_background += t * hist[t]
+        
+        mean_background = sum_background / weight_background
+        mean_foreground = (sum_total - sum_background) / weight_foreground
+        
+        variance = weight_background * weight_foreground * (mean_background - mean_foreground) ** 2
+        
+        if variance > max_variance:
+            max_variance = variance
+            threshold = t
     
-    variance = weight1 * weight2 * (mean1 - mean2) ** 2
-    threshold_idx = variance.argmax()
-    threshold_val = threshold_idx.float() / 255.0
-    
-    return tensor > threshold_val
+    # Apply threshold
+    mask = (flat_norm > threshold).float()
+    return mask.reshape(attention_map.shape)
 
 # =================================================================================
 # == Attention Storage
 # =================================================================================
 class AttentionStore:
-    """Stores attention maps with filtering."""
+    """Stores attention maps from model forward pass."""
     
     def __init__(self, config: SelfCrossConfig):
         self.config = config
-        self.self_attn: List[torch.Tensor] = []
-        self.cross_attn: List[torch.Tensor] = []
-        self.layer_names: List[str] = []
+        self.attention_maps: Dict[str, List[torch.Tensor]] = {
+            'self': [],
+            'cross': []
+        }
+        self.step_index = 0
     
-    def add_self_attn(self, attn: torch.Tensor, layer_name: str):
-        """Add self-attention map if it passes filters."""
-        tokens = attn.shape[-2]
-        if tokens < (self.config.min_resolution ** 2):
+    def append(self, attn_type: str, attn_map: torch.Tensor, layer_name: str):
+        """Store attention map with filtering."""
+        # Extract resolution from layer name if possible
+        resolution = self._extract_resolution(attn_map)
+        
+        # Filter by resolution
+        if resolution < self.config.min_resolution or resolution > self.config.max_resolution:
             return
-        if tokens > (self.config.max_resolution ** 2):
+        
+        # Filter by layer name
+        if not any(target in layer_name for target in self.config.target_layers):
             return
-        if self.config.target_layers:
-            if not any(t in layer_name for t in self.config.target_layers):
-                return
-        self.self_attn.append(attn.detach())
-        self.layer_names.append(layer_name)
+        
+        self.attention_maps[attn_type].append(attn_map.detach())
     
-    def add_cross_attn(self, attn: torch.Tensor, layer_name: str):
-        """Add cross-attention map with same filtering."""
-        tokens = attn.shape[-2]
-        if tokens < (self.config.min_resolution ** 2):
-            return
-        if tokens > (self.config.max_resolution ** 2):
-            return
-        if self.config.target_layers:
-            if not any(t in layer_name for t in self.config.target_layers):
-                return
-        self.cross_attn.append(attn.detach())
+    def _extract_resolution(self, attn_map: torch.Tensor) -> int:
+        """Extract approximate resolution from attention map shape."""
+        if attn_map.dim() >= 3:
+            # Shape like [batch, tokens, tokens] or [batch, heads, tokens, tokens]
+            token_dim = attn_map.shape[-1]
+            # Approximate spatial resolution (sqrt for square, or use directly for audio)
+            return int(token_dim ** 0.5) if token_dim > 16 else token_dim
+        return 0
+    
+    def get_attention(self, attn_type: str) -> Optional[torch.Tensor]:
+        """Get last (deepest) attention map of specified type."""
+        maps = self.attention_maps.get(attn_type, [])
+        if not maps:
+            return None
+        return maps[-1]  # Return most recent/deepest layer
     
     def reset(self):
-        """Clear storage (call between timesteps)."""
-        self.self_attn.clear()
-        self.cross_attn.clear()
-        self.layer_names.clear()
-    
-    def get_best_layer(self) -> Tuple[Optional[torch.Tensor], Optional[torch.Tensor]]:
-        """Returns the most semantic layer pair (last = deepest)."""
-        if not self.self_attn or not self.cross_attn:
-            return None, None
-        return self.self_attn[-1], self.cross_attn[-1]
+        """Clear stored attention maps."""
+        self.attention_maps = {'self': [], 'cross': []}
+        self.step_index += 1
 
 # =================================================================================
-# == Hook Manager
+# == Attention Hook Manager
 # =================================================================================
 class AttentionHookManager:
-    """Manages hook injection into ComfyUI's model patcher."""
+    """Manages attention hooks on model."""
     
-    def __init__(self, model_patcher, attn_store: AttentionStore):
-        self.model_patcher = model_patcher
+    def __init__(self, model, attn_store: AttentionStore):
+        self.model = model
         self.attn_store = attn_store
-        self.hooks_active = False
+        self.hooks = []
     
     def inject_hooks(self):
-        """Inject attention capture hooks into model."""
-        if self.hooks_active:
-            return
+        """Inject hooks to capture attention."""
+        def make_hook(attn_type: str, layer_name: str):
+            def hook(module, args, output):
+                # Extract attention from output
+                if isinstance(output, tuple):
+                    attn = output[0] if len(output) > 0 else None
+                else:
+                    attn = output
+                
+                if attn is not None and torch.is_tensor(attn):
+                    self.attn_store.append(attn_type, attn, layer_name)
+                
+                return output
+            return hook
         
-        def attn1_hook(q, k, v, extra_options):
-            """Self-attention hook (Attn1)."""
-            try:
-                layer_name = extra_options.get("block", "unknown")
-                scale = q.shape[-1] ** -0.5
-                sim = torch.bmm(q, k.transpose(-2, -1)) * scale
-                attn_map = F.softmax(sim, dim=-1)
-                self.attn_store.add_self_attn(attn_map, layer_name)
-            except Exception:
-                pass
-            return q, k, v
+        # Hook self-attention (attn1)
+        if hasattr(self.model, 'set_model_attn1_patch'):
+            self.model.set_model_attn1_patch(make_hook('self', 'attn1'))
+            logging.info("[Hooks] Injected self-attention (attn1) hook")
         
-        def attn2_hook(q, k, v, extra_options):
-            """Cross-attention hook (Attn2)."""
-            try:
-                layer_name = extra_options.get("block", "unknown")
-                scale = q.shape[-1] ** -0.5
-                sim = torch.bmm(q, k.transpose(-2, -1)) * scale
-                attn_map = F.softmax(sim, dim=-1)
-                self.attn_store.add_cross_attn(attn_map, layer_name)
-            except Exception:
-                pass
-            return q, k, v
-        
-        self.model_patcher.set_model_attn1_patch(attn1_hook)
-        self.model_patcher.set_model_attn2_patch(attn2_hook)
-        self.hooks_active = True
+        # Hook cross-attention (attn2)
+        if hasattr(self.model, 'set_model_attn2_patch'):
+            self.model.set_model_attn2_patch(make_hook('cross', 'attn2'))
+            logging.info("[Hooks] Injected cross-attention (attn2) hook")
     
     def remove_hooks(self):
-        """Clean up hooks (prevents memory leaks)."""
-        if not self.hooks_active:
-            return
-        
-        def noop(q, k, v, extra_options):
-            return q, k, v
-        
-        self.model_patcher.set_model_attn1_patch(noop)
-        self.model_patcher.set_model_attn2_patch(noop)
-        self.hooks_active = False
+        """Remove all hooks."""
+        if hasattr(self.model, 'set_model_attn1_patch'):
+            self.model.set_model_attn1_patch(None)
+        if hasattr(self.model, 'set_model_attn2_patch'):
+            self.model.set_model_attn2_patch(None)
+        logging.info("[Hooks] Removed attention hooks")
 
 # =================================================================================
-# == Self-Cross Loss (Audio-Safe)
+# == Self-Cross Loss Computation
 # =================================================================================
 class SelfCrossLoss(BaseGuidanceLoss):
-    """
-    Implements Self-Cross overlap loss from Qiu et al. (CVPR 2025).
-    Audio-compatible via 1D Otsu thresholding.
-    """
+    """Computes Self-Cross loss (subject overlap penalty)."""
     
     def __init__(self, config: SelfCrossConfig, attn_store: AttentionStore, 
                  latent_shape: Optional[Tuple[int, ...]] = None):
-        self.config = config
+        super().__init__(config)
+        self.config: SelfCrossConfig = config  # Type hint for IDE
         self.attn_store = attn_store
         self.latent_shape = latent_shape
-        self._aspect_ratio = None
-    
-    def _infer_aspect_ratio(self, num_tokens: int) -> Optional[Tuple[int, int]]:
-        """Infer (H, W) from token count."""
-        if self._aspect_ratio is not None:
-            return self._aspect_ratio
-        
-        if self.latent_shape is not None and len(self.latent_shape) >= 4:
-            h, w = self.latent_shape[2], self.latent_shape[3]
-            if h * w == num_tokens:
-                self._aspect_ratio = (h, w)
-                return self._aspect_ratio
-        
-        sqrt = math.sqrt(num_tokens)
-        if sqrt == int(sqrt):
-            side = int(sqrt)
-            self._aspect_ratio = (side, side)
-            return self._aspect_ratio
-        
-        return None
     
     def compute(self, context: GuidanceContext) -> torch.Tensor:
-        """Compute Self-Cross overlap loss."""
-        # Get attention maps from store
-        s_map, c_map = self.attn_store.get_best_layer()
+        """
+        Compute Self-Cross overlap loss.
         
-        if s_map is None or c_map is None:
-            return torch.tensor(0.0, device=context.z_noisy.device)
+        Loss = Σ_i,j min(Agg_Si, Cross_Sj) for all subject pairs
+        where Agg_Si = Σ_p self_attn(p,p') * cross_attn(Si,p') * mask(Si,p')
+        """
+        # Get attention maps
+        cross_attn = self.attn_store.get_attention('cross')
+        self_attn = self.attn_store.get_attention('self')
         
-        # Handle batch/head dimensions
-        if s_map.dim() > 2:
-            s_map = s_map[-1] if s_map.dim() == 3 else s_map.mean(dim=1)[-1]
-        if c_map.dim() > 2:
-            c_map = c_map[-1] if c_map.dim() == 3 else c_map.mean(dim=1)[-1]
+        if cross_attn is None or self_attn is None:
+            logging.warning("[SelfCross] No attention maps captured, returning zero loss")
+            return torch.tensor(0.0, device=context.z_noisy.device, requires_grad=True)
         
-        device = s_map.device
-        num_tokens = c_map.shape[0]
-        aspect_ratio = self._infer_aspect_ratio(num_tokens)
+        # Handle batch dimension
+        if cross_attn.dim() == 4:  # [batch, heads, tokens, text_tokens]
+            cross_attn = cross_attn[0]  # First batch
+        if cross_attn.dim() == 3:  # [heads, tokens, text_tokens]
+            cross_attn = cross_attn.mean(dim=0)  # Average over heads
+        
+        if self_attn.dim() == 4:
+            self_attn = self_attn[0]
+        if self_attn.dim() == 3:
+            self_attn = self_attn.mean(dim=0)
+        
+        # Now: cross_attn [tokens, text_tokens], self_attn [tokens, tokens]
         
         # Aggregate self-attention for each subject
-        agg_maps = {}
+        aggregated_maps = []
         
-        for idx in self.config.subject_indices:
-            if idx >= c_map.shape[-1]:
+        for subj_idx in self.config.subject_indices:
+            if subj_idx >= cross_attn.shape[1]:
+                logging.warning(f"[SelfCross] Subject index {subj_idx} out of range")
                 continue
             
-            ca_k = c_map[:, idx]
+            # Extract cross-attention for this subject
+            ca_k = cross_attn[:, subj_idx]  # [tokens]
             
-            # ═══════════════════════════════════════════════════════
-            # AUDIO FIX: 1D Otsu by default (Universal Mode)
-            # ═══════════════════════════════════════════════════════
-            if aspect_ratio is not None and self.config.use_2d_otsu:
-                try:
-                    h, w = aspect_ratio
-                    ca_2d = ca_k.view(h, w)
-                    mask = torch_otsu_threshold(ca_2d, normalize=True).flatten().float()
-                except RuntimeError:
-                    mask = torch_otsu_threshold(ca_k, normalize=True).float()
-            else:
-                mask = torch_otsu_threshold(ca_k, normalize=True).float()
-            # ═══════════════════════════════════════════════════════
+            # Apply Otsu threshold
+            mask = torch_otsu_threshold(ca_k, use_2d=self.config.use_2d_otsu)
             
-            if mask.sum() < 1:
-                agg_maps[idx] = torch.zeros_like(ca_k)
-                continue
+            # Aggregate self-attention: weighted by cross-attention and mask
+            # Agg_Si = Σ_p self_attn(·,p) * ca_k(p) * mask(p)
+            weighted_sa = self_attn * (ca_k.unsqueeze(0) * mask.unsqueeze(0))
+            aggregated = weighted_sa.sum(dim=1)  # [tokens]
             
-            weights = ca_k * mask
-            weighted_sa = s_map * weights.unsqueeze(-1)
-            agg_map = weighted_sa.sum(dim=0) / (weights.sum() + 1e-8)
-            agg_maps[idx] = agg_map
+            aggregated_maps.append(aggregated)
         
-        # Compute pairwise overlap loss
-        total_loss = torch.tensor(0.0, device=device)
-        pairs = 0
+        if len(aggregated_maps) < 2:
+            logging.warning("[SelfCross] Insufficient subjects for loss computation")
+            return torch.tensor(0.0, device=context.z_noisy.device, requires_grad=True)
         
-        indices = list(agg_maps.keys())
-        for i in range(len(indices)):
-            for j in range(i + 1, len(indices)):
-                idx_i, idx_j = indices[i], indices[j]
-                overlap_ij = torch.min(agg_maps[idx_i], c_map[:, idx_j]).sum()
-                overlap_ji = torch.min(agg_maps[idx_j], c_map[:, idx_i]).sum()
-                total_loss += (overlap_ij + overlap_ji)
-                pairs += 1
+        # Compute pairwise overlap
+        loss = torch.tensor(0.0, device=context.z_noisy.device)
         
-        if pairs > 0:
-            total_loss = total_loss / pairs
+        for i in range(len(aggregated_maps)):
+            for j in range(i + 1, len(aggregated_maps)):
+                agg_i = aggregated_maps[i]
+                cross_j = cross_attn[:, self.config.subject_indices[j]]
+                
+                # Overlap = min(Agg_Si, Cross_Sj)
+                overlap = torch.min(agg_i, cross_j).sum()
+                loss = loss + overlap
         
-        return total_loss
+        # Scale by guidance_scale
+        loss = loss * self.config.guidance_scale
+        
+        # Normalize by number of pairs
+        num_pairs = len(aggregated_maps) * (len(aggregated_maps) - 1) / 2
+        loss = loss / num_pairs
+        
+        return loss
 
 # =================================================================================
-# == Export
+# == Exports
 # =================================================================================
 __all__ = [
     'SelfCrossConfig',

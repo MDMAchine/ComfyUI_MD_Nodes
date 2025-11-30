@@ -1,6 +1,6 @@
 """
 ComfyUI Custom Nodes - Auto-generated __init__.py
-Generated: 2025-11-24 00:48:17
+Generated: 2025-11-29 22:53:39
 """
 import os
 import sys
@@ -25,6 +25,10 @@ from .audio.AdvancedAudioPreviewAndSave import AdvancedAudioPreviewAndSave
 from .audio.MD_AutoMasterNode import MD_AutoMasterNode
 from .audio.auto_eq import MD_AudioAutoEQ
 from .audio.mastering_chain_node import MasteringChainNode
+from .audio.mastering_chain_node import MasteringCompressorNode
+from .audio.mastering_chain_node import MasteringEQNode
+from .audio.mastering_chain_node import MasteringGainNode
+from .audio.mastering_chain_node import MasteringLimiterNode
 from .conditioning.ACE_T5_Conditioning_Node import AceT5ConditioningAnalyzer
 from .conditioning.ACE_T5_Conditioning_Node import AceT5ConditioningScheduled
 from .conditioning.ACE_T5_Conditioning_Node import AceT5ModelLoader
@@ -65,6 +69,10 @@ NODE_CLASS_MAPPINGS = {
     "MD_ApplyTPG": MD_ApplyTPG,
     "MD_AudioAutoEQ": MD_AudioAutoEQ,
     "MD_AutoMasterNode": MD_AutoMasterNode,
+    "MD_Mastering_Compressor": MasteringCompressorNode,
+    "MD_Mastering_EQ": MasteringEQNode,
+    "MD_Mastering_Gain": MasteringGainNode,
+    "MD_Mastering_Limiter": MasteringLimiterNode,
     "MasteringChainNode": MasteringChainNode,
     "NoiseDecayScheduler_Custom": NoiseDecayScheduler_Custom,
     "PingPongSamplerNodeFBG": PingPongSamplerNodeFBG,
@@ -100,10 +108,14 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "MD_ApplyTPG": "MD: Apply TPG (Token Perturbation)",
     "MD_AudioAutoEQ": "MD: Audio Auto EQ",
     "MD_AutoMasterNode": "MD: Audio Auto Master Pro",
-    "MasteringChainNode": "MD: Mastering Chain",
+    "MD_Mastering_Compressor": "MD: Mastering Compressor",
+    "MD_Mastering_EQ": "MD: Mastering EQ & Filters",
+    "MD_Mastering_Gain": "MD: Mastering Gain",
+    "MD_Mastering_Limiter": "MD: Mastering Limiter",
+    "MasteringChainNode": "MD: Mastering Chain (Full)",
     "NoiseDecayScheduler_Custom": "MD: Noise Decay Scheduler (Advanced)",
-    "PingPongSamplerNodeFBG": "MD: PingPong Sampler (FBG)",
-    "PingPongSampler_Custom_Lite": "MD: PingPong Sampler (Lite+)",
+    "PingPongSamplerNodeFBG": "PingPong Sampler (FBG v1.5.0)",
+    "PingPongSampler_Custom_Lite": "PingPong Sampler (Lite+ v1.5.0) \ud83c\udfd3",
     "SceneGeniusAutocreator": "MD: Scene Genius Autocreator",
     "SigmaConcatenate": "Sigma Concatenate",
     "SigmaSmooth": "Sigma Smooth",
@@ -123,6 +135,7 @@ try:
     from .testing.Aesthetic_VLM_Pack.Aesthetic_VLM_Pack_Node3_QwenReplacer import MD_Qwen_Image_Edit_Object_Replacer_Node
     from .testing.MD_CLIPTokenFinder import MD_CLIPTokenFinder
     from .testing.MD_InitNoiseOptimizer import MD_InitNoiseOptimizer
+    from .testing.MD_SamplerDebug import MD_SamplerDebug
     from .testing.MD_SelfCrossGuider import MD_SelfCrossGuider
 
     # Update Mappings if import succeeds
@@ -131,15 +144,17 @@ try:
         "MD_CLIPTokenFinder": MD_CLIPTokenFinder,
         "MD_InitNoiseOptimizer": MD_InitNoiseOptimizer,
         "MD_Qwen_Image_Edit_Object_Replacer_Node": MD_Qwen_Image_Edit_Object_Replacer_Node,
+        "MD_SamplerDebug": MD_SamplerDebug,
         "MD_SelfCrossGuider": MD_SelfCrossGuider,
         "VLM_Confirmation_Gate_Node_MD": VLM_Confirmation_Gate_Node
     })
 
     NODE_DISPLAY_NAME_MAPPINGS.update({
     "Aesthetic_Transformer_Node_MD": "MD: Aesthetic Transformer",
-    "MD_CLIPTokenFinder": "MD: CLIP Token Finder (DIAGNOSTIC)",
+    "MD_CLIPTokenFinder": "MD: CLIP Token Finder",
     "MD_InitNoiseOptimizer": "MD: Init Noise Optimizer",
     "MD_Qwen_Image_Edit_Object_Replacer_Node": "MD: Qwen Object Replacer",
+    "MD_SamplerDebug": "MD: Sampler Debug",
     "MD_SelfCrossGuider": "MD: Self-Cross Separation Guider",
     "VLM_Confirmation_Gate_Node_MD": "MD: VLM Confirmation Gate"
 })

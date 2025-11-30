@@ -1,112 +1,143 @@
-# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-# ████ MD_Nodes/PingPongSamplerNodeFBG – Advanced sampler with Feedback Guidance ████▓▒░
-# © 2025 MDMAchine
-# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-# ░▒▓ CHANGELOG:
-#   - v1.4.5g (Math Restoration - Nov 2025):
-#       • CRITICAL: Restored v1.4.2's EXACT FBG math (no epsilon corruption in log posterior)
-#       • CRITICAL: Restored v1.4.2's adaptive noise scaling (inside noise sampler)
-#       • CRITICAL: Restored v1.4.2's _get_sigma_square_tilde with safety checks
-#       • ENHANCED: Added comprehensive debug summary box with GS min/max/avg stats
-#       • ENHANCED: Added detailed PerformanceProfiler with max time & memory breakdown
-#       • ENHANCED: Added NaN/Inf detection with recovery
-#       • ENHANCED: Added detailed step info for debug_mode=2
-#       • MAINTAINED: Clean parameter handling from v1.4.5e (no kwargs.get bugs)
-#   - v1.4.5e: Fixed critical kwargs.get() bug
-#   - v1.4.2: Working audio quality baseline
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+# ████ PINGPONGSAMPLER v1.5.0 – Ace-Step FBG + Res 2 Restarts ████▓▒░
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ░▒▓ ORIGIN & DEV:
+#    • Cast into the void by: Junmin Gong (Concept), blepping (ComfyUI Port), MD (Adaptation)
+#    • Enhanced by: Gemini (Fixes/FBG), Claude (v0.9.9-p4), devstral/qwen3 (Fixups)
+#    • License: Apache 2.0 — Sharing is caring # [NODE_FIX] Corrected License
 
-# =================================================================================
-# == Standard Library Imports                                                     ==
-# =================================================================================
-import contextlib
-import enum
-import logging
+# ░▒▓ DESCRIPTION:
+#    Advanced ancestral sampler combining PingPong's noise mixing with Feedback
+#    Guidance (FBG) for dynamic, content-aware guidance scaling. Now includes
+#    "Res 2" restart logic for iterative error correction during sampling.
+
+# ░▒▓ FEATURES:
+#    ✓ Feedback Guidance (FBG) for dynamic guidance scaling.
+#    ✓ Res 2 Restart Logic: Iteratively "re-noises" and re-samples to correct errors.
+#    ✓ Multiple blend modes (lerp, slerp, cosine, cubic, add, etc.) with numerical stability.
+#    ✓ Ancestral noise types: gaussian, uniform, brownian.
+#    ✓ Adaptive noise scaling based on denoising progress.
+#    ✓ Sigma range presets for FBG/CFG scheduling.
+#    ✓ NaN/Inf detection with automatic recovery.
+#    ✓ Production-ready stability: No in-place operations, fixed early exit logic.
+#    ✓ Cacheable: Correctly uses default ComfyUI caching (Sec 6.1, Rule #1).
+
+# ░▒▓ CHANGELOG:
+#    - v1.5.0 (Current Release - Res 2 Integration):
+#        • COMPLIANCE: Added full type hinting (Sec 5.3), print->logging (Sec 5.4), fixed tooltips (Sec 7.1).
+#        • COMPLIANCE: Corrected License and Category.
+#        • FIX: Removed recursive _asdict method in FBGConfig.
+#        • NEW: Res 2 restart logic with 5 modes (balanced/aggressive/conservative/detail/composition).
+#        • NEW: Custom restart schedule support.
+#        • NEW: Restart-specific noise generation (uncorrelated seeds).
+#        • NEW: Restart statistics in debug summary.
+#    - v1.4.5g: Restored exact FBG math, adaptive noise scaling, and safety checks.
+
+# ░▒▓ CONFIGURATION:
+#    → Primary Use: High-quality audio/video generation with Ace-Step diffusion using FBG.
+#    → Secondary Use: Using "Res 2" restarts to improve coherence in complex generations.
+#    → Edge Use: Extreme guidance scales with `max_guidance_scale`.
+
+# ░▒▓ WARNING:
+#    This node may trigger:
+#    ▓▒░ A sudden urge to `slerp` your breakfast cereal.
+#    ▓▒░ Existential dread as FBG pushes guidance scale over 9000.
+#    ▓▒░ Flashbacks to hand-optimizing assembly loops for a C64 plasma effect.
+#    ▓▒░ The unshakable belief that `brownian` noise holds the secrets of the universe.
+#    Consult your nearest demoscene vet if hallucinations persist.
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+
+# Standard library imports
 import math
+import yaml
 import time
+import logging
 import traceback
 import sys
+from enum import Enum, auto
+from typing import NamedTuple, Optional, Callable, Dict, Any, List, Union, Tuple, Generator
+from contextlib import contextmanager
 
-# =================================================================================
-# == Third-Party Imports                                                          ==
-# =================================================================================
-import numpy as np
+# Third-party imports
 import torch
-import yaml
+import numpy as np
 from tqdm.auto import trange
 
-# =================================================================================
-# == ComfyUI Core Modules                                                         ==
-# =================================================================================
-import comfy.k_diffusion.sampling
+# ComfyUI core imports
+from comfy import model_sampling, model_patcher
+from comfy.samplers import KSAMPLER, cfg_function
 import comfy.model_management
-import comfy.model_patcher
-import comfy.model_sampling
-import comfy.samplers
+
+# [NODE_FIX] Robust import for CFGDenoiser (Sec 5.3)
+try:
+    from comfy.k_diffusion.sampling import CFGDenoiser
+except ImportError:
+    try:
+        from comfy.samplers import CFGDenoiser
+    except ImportError:
+        logging.critical("Could not import CFGDenoiser from any known location. PingPongSamplerFBG may fail.")
+        CFGDenoiser = Any # type: ignore
+
+# Setup logger
+logger = logging.getLogger("ComfyUI_MD_Nodes.PingPongSamplerFBG") # [NODE_FIX] Setup logger
 
 # =================================================================================
-# == Logging Setup                                                                ==
-# =================================================================================
-logger = logging.getLogger("PingPongSamplerFBG")
-logger.setLevel(logging.INFO)
-if not logger.handlers:
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(logging.Formatter('[%(name)s] %(message)s'))
-    logger.addHandler(handler)
-
-# =================================================================================
-# == Helper Functions & Classes                                                   ==
+# == Helper Classes & Dependencies                                               ==
 # =================================================================================
 
-def slerp(a, b, t):
-    """
-    Spherical linear interpolation with CORRECT magnitude interpolation.
-    Fixes 'static' audio issues by properly scaling the result based on 't'.
-    """
+# --- Blend Mode Functions ---
+def slerp(a: torch.Tensor, b: torch.Tensor, t: float) -> torch.Tensor:
+    """Spherical linear interpolation with enhanced numerical stability."""
     eps = 1e-8
+    # 1. Flatten to treat as single vector
+    a_flat = a.flatten(start_dim=1).float()
+    b_flat = b.flatten(start_dim=1).float().to(a.device)
     
-    # 1. Flatten to treat the whole latent as a single vector (safer for audio tensors)
-    a_flat = a.flatten(start_dim=1)
-    b_flat = b.flatten(start_dim=1)
-    
-    # 2. Calculate magnitudes (norms) per batch item
+    # 2. Calculate magnitudes
     a_norm = torch.norm(a_flat, dim=-1, keepdim=True)
     b_norm = torch.norm(b_flat, dim=-1, keepdim=True)
     
-    # 3. Normalize vectors
+    # 3. Normalize
     a_n = a_flat / (a_norm + eps)
     b_n = b_flat / (b_norm + eps)
     
-    # 4. Calculate angle (theta)
+    # 4. Calculate angle
     dot = (a_n * b_n).sum(dim=-1, keepdim=True).clamp(-0.9999, 0.9999)
     
-    # Fallback to lerp if vectors are parallel (dot close to 1)
     if torch.all(torch.abs(dot) > 0.9995):
         return torch.lerp(a, b, t)
         
     theta = torch.acos(dot)
     sin_theta = torch.sin(theta)
     
-    # 5. Spherical interpolation of direction
-    scale_a = torch.sin((1 - t) * theta) / (sin_theta + eps)
-    scale_b = torch.sin(t * theta) / (sin_theta + eps)
+    # 5. Spherical interpolation
+    t_tensor = torch.tensor(t, device=a.device, dtype=a.dtype)
+    scale_a = torch.sin((1 - t_tensor) * theta) / (sin_theta + eps)
+    scale_b = torch.sin(t_tensor * theta) / (sin_theta + eps)
     result_n = scale_a * a_n + scale_b * b_n
     
-    # 6. CRITICAL FIX: Interpolate magnitude based on 't' (was previously just averaging)
-    result_norm = torch.lerp(a_norm, b_norm, t)
+    # 6. Interpolate magnitude
+    result_norm = torch.lerp(a_norm, b_norm, t_tensor)
     
-    # 7. Apply magnitude and reshape back to original
+    # 7. Apply magnitude and reshape
     result_flat = result_n * result_norm
     return result_flat.reshape_as(a)
 
-def cosine_interpolation(a, b, t):
-    cos_t = (1 - torch.cos(t * math.pi)) * 0.5
-    return a * (1 - cos_t) + b * cos_t
+def cosine_interpolation(a: torch.Tensor, b: torch.Tensor, t: float) -> torch.Tensor:
+    """Cosine interpolation."""
+    t_tensor = torch.tensor(t * math.pi, device=a.device)
+    cos_t = (1.0 - torch.cos(t_tensor)) * 0.5
+    return a * (1.0 - cos_t) + b * cos_t
 
-def cubic_interpolation(a, b, t):
-    cubic_t = t * t * (3.0 - 2.0 * t)
+def cubic_interpolation(a: torch.Tensor, b: torch.Tensor, t: float) -> torch.Tensor:
+    """Cubic interpolation."""
+    t_tensor = torch.tensor(t, device=a.device)
+    cubic_t = t_tensor * t_tensor * (3.0 - 2.0 * t_tensor)
     return torch.lerp(a, b, cubic_t)
 
-_INTERNAL_BLEND_MODES = {
+# Global dictionary of available blend modes
+_INTERNAL_BLEND_MODES: Dict[str, Callable[[torch.Tensor, torch.Tensor, float], torch.Tensor]] = {
     "lerp": torch.lerp,
     "slerp": slerp,
     "cosine": cosine_interpolation,
@@ -116,124 +147,175 @@ _INTERNAL_BLEND_MODES = {
     "b_only": lambda _a, b, _t: b
 }
 
-class SamplerMode(enum.Enum):
-    EULER = enum.auto()
-    PINGPONG = enum.auto()
+# --- Enums and Named Tuples ---
+class SamplerMode(Enum):
+    """Enum for FBG sampler modes."""
+    EULER = auto()
+    PINGPONG = auto()
 
-class FBGConfig:
-    """Configuration container for Feedback Guidance."""
-    def __init__(self, sampler_mode=SamplerMode.EULER, cfg_start_sigma=1.0, cfg_end_sigma=0.004,
-                 fbg_start_sigma=1.0, fbg_end_sigma=0.004, fbg_guidance_multiplier=1.0,
-                 ancestral_start_sigma=1.0, ancestral_end_sigma=0.004, cfg_scale=1.0,
-                 max_guidance_scale=10.0, max_posterior_scale=3.0, initial_value=0.0,
-                 initial_guidance_scale=1.0, guidance_max_change=1000.0, temp=0.0,
-                 offset=0.0, pi=0.5, t_0=0.5, t_1=0.4):
-        self.sampler_mode = sampler_mode
-        self.cfg_start_sigma = cfg_start_sigma
-        self.cfg_end_sigma = cfg_end_sigma
-        self.fbg_start_sigma = fbg_start_sigma
-        self.fbg_end_sigma = fbg_end_sigma
-        self.fbg_guidance_multiplier = fbg_guidance_multiplier
-        self.ancestral_start_sigma = ancestral_start_sigma
-        self.ancestral_end_sigma = ancestral_end_sigma
-        self.cfg_scale = cfg_scale
-        self.max_guidance_scale = max_guidance_scale
-        self.max_posterior_scale = max_posterior_scale
-        self.initial_value = initial_value
-        self.initial_guidance_scale = initial_guidance_scale
-        self.guidance_max_change = guidance_max_change
-        self.temp = temp
-        self.offset = offset
-        self.pi = pi
-        self.t_0 = t_0
-        self.t_1 = t_1
 
-    def _asdict(self):
-        return self.__dict__
+class FBGConfig(NamedTuple):
+    """Configuration for Feedback Guidance (FBG)."""
+    sampler_mode: SamplerMode = SamplerMode.PINGPONG
+    cfg_start_sigma: float = 1.0
+    cfg_end_sigma: float = 0.004
+    fbg_start_sigma: float = 1.0
+    fbg_end_sigma: float = 0.004
+    fbg_guidance_multiplier: float = 1.0
+    ancestral_start_sigma: float = 1.0
+    ancestral_end_sigma: float = 0.004
+    cfg_scale: float = 1.0
+    max_guidance_scale: float = 10.0
+    max_posterior_scale: float = 3.0
+    initial_value: float = 0.0
+    initial_guidance_scale: float = 1.0
+    guidance_max_change: float = 1000.0
+    temp: float = 0.0
+    offset: float = 0.0
+    pi: float = 0.5
+    t_0: float = 0.5
+    t_1: float = 0.4
+    
+    # [NODE_FIX] Removed recursive _asdict to use built-in NamedTuple behavior
 
-def batch_mse_loss(a, b, *, start_dim=1):
+# --- Helper Functions ---
+def batch_mse_loss(a: torch.Tensor, b: torch.Tensor, *, start_dim: int = 1) -> torch.Tensor:
+    """Calculate Mean Squared Error."""
+    a = a.float()
+    b = b.float().to(a.device)
     if a.numel() > 1e7:
         diff = a - b
         return (diff * diff).sum(dim=tuple(range(start_dim, a.ndim)))
     return torch.sum((a - b).pow(2), dim=tuple(range(start_dim, a.ndim)))
 
+
+# --- Performance Profiler ---
 class PerformanceProfiler:
-    """ENHANCED: Detailed profiler with max/min/avg time & memory stats."""
-    def __init__(self, enabled=False):
-        self.enabled = enabled
-        self.step_times = []
-        self.memory_usage = []
-        self.step_names = []
-        
-    @contextlib.contextmanager
-    def profile_step(self, step_name="step"):
+    """Profiler for step timing, memory usage, and restart tracking."""
+    def __init__(self, enabled: bool = False) -> None:
+        self.enabled: bool = enabled
+        self.step_times: List[float] = []
+        self.memory_usage: List[int] = []
+        self.step_names: List[str] = []
+        self.restart_count: int = 0
+        self.restart_steps: List[Dict[str, float]] = []
+
+    @contextmanager
+    def profile_step(self, step_name: str = "step") -> Generator[None, None, None]:
+        """Context manager to profile a block."""
         if not self.enabled:
             yield
             return
+        
         device = comfy.model_management.get_torch_device()
         start_time = time.time()
-        if device != torch.device("cpu"):
+        start_mem = 0
+        if device.type != 'cpu':
             torch.cuda.synchronize(device)
             start_mem = torch.cuda.memory_allocated(device)
-        else: start_mem = 0
-        yield
-        if device != torch.device("cpu"):
-            torch.cuda.synchronize(device)
-            end_mem = torch.cuda.memory_allocated(device)
-        else: end_mem = 0
-        self.step_times.append(time.time() - start_time)
-        self.memory_usage.append(end_mem - start_mem)
-        self.step_names.append(step_name)
-        
-    def get_summary(self):
-        """ENHANCED: Returns detailed summary with max/min/avg stats."""
-        if not self.step_times:
-            return "No profiling data available"
+            
+        try:
+            yield
+        finally:
+            if device.type != 'cpu':
+                torch.cuda.synchronize(device)
+                end_mem = torch.cuda.memory_allocated(device)
+                self.memory_usage.append(end_mem - start_mem)
+            else:
+                 self.memory_usage.append(0)
+            
+            self.step_times.append(time.time() - start_time)
+            self.step_names.append(step_name)
+
+    def log_restart(self, step_index: int, sigma_curr: Union[float, torch.Tensor], sigma_next: Union[float, torch.Tensor]) -> None:
+        """Log a restart event."""
+        if not self.enabled: return
+        self.restart_count += 1
+        s_c = float(sigma_curr.item()) if isinstance(sigma_curr, torch.Tensor) else float(sigma_curr)
+        s_n = float(sigma_next.item()) if isinstance(sigma_next, torch.Tensor) else float(sigma_next)
+        self.restart_steps.append({'step': step_index, 'sigma_curr': s_c, 'sigma_next': s_n})
+
+    def get_summary(self) -> str:
+        """Generate summary string."""
+        if not self.step_times: return "No profiling data available"
         
         total_time = sum(self.step_times)
         avg_time = total_time / len(self.step_times)
-        max_time = max(self.step_times)
-        min_time = min(self.step_times)
         
         summary = "[PingPongSamplerFBG] Performance Summary:\n"
         summary += f"  Total time: {total_time:.3f}s\n"
         summary += f"  Average step time: {avg_time:.3f}s\n"
-        summary += f"  Max step time: {max_time:.3f}s\n"
-        summary += f"  Min step time: {min_time:.3f}s\n"
-        summary += f"  Steps profiled: {len(self.step_times)}\n"
         
+        if self.restart_count > 0:
+            summary += f"  Restarts executed: {self.restart_count}\n"
+            
         device = comfy.model_management.get_torch_device()
-        if self.memory_usage and device != torch.device("cpu"):
-            total_memory = sum(self.memory_usage)
-            avg_memory = total_memory / len(self.memory_usage)
-            max_memory = max(self.memory_usage)
-            summary += f"  Total memory delta: {total_memory / 1024**2:.1f}MB\n"
-            summary += f"  Average memory delta: {avg_memory / 1024**2:.1f}MB\n"
-            summary += f"  Max memory delta: {max_memory / 1024**2:.1f}MB"
-        
+        if self.memory_usage and device.type != 'cpu':
+             avg_mem = sum(self.memory_usage) / len(self.memory_usage)
+             summary += f"  Avg memory delta: {avg_mem / 1024**2:.1f}MB"
+             
         return summary
 
+# Noise Sampler function type
+NoiseSamplerFunc = Callable[[torch.Tensor, torch.Tensor], torch.Tensor]
+
+
 # =================================================================================
-# == Core Logic: PingPongSamplerCore                                             ==
+# == Core Sampler Logic                                                          ==
 # =================================================================================
 
 class PingPongSamplerCore:
-    """PingPongSampler with v1.4.2 FBG math + enhanced console output."""
-    
-    def __init__(self, model, x, sigmas, extra_args=None, callback=None, disable=None, 
-                 noise_sampler=None, start_sigma_index=0, end_sigma_index=-1, 
-                 enable_clamp_output=False, step_random_mode="off", step_size=5, seed=42,
-                 blend_function=torch.lerp, step_blend_function=torch.lerp, scheduler=None,
-                 pingpong_options=None, fbg_config=None, debug_mode=0, eta=0.0, s_noise=1.0,
-                 sigma_range_preset="Custom", conditional_blend_mode=False,
-                 conditional_blend_sigma_threshold=0.5, conditional_blend_function=torch.lerp,
-                 conditional_blend_on_change=False, conditional_blend_change_threshold=0.1,
-                 clamp_noise_norm=False, max_noise_norm=1.0, log_posterior_ema_factor=0.0,
-                 adaptive_noise_scaling=False, noise_scale_factor=1.0,
-                 progressive_blend_mode=False, gradient_norm_tracking=False,
-                 enable_profiling=False, checkpoint_steps=None, early_exit_threshold=1e-6,
-                 tensor_memory_optimization=False, **kwargs):
-        
+    """Core implementation of the PingPong Sampler with FBG and Res 2 restarts."""
+
+    # [NODE_FIX] Added comprehensive type hints
+    def __init__(
+        self,
+        model: CFGDenoiser,
+        x: torch.Tensor,
+        sigmas: torch.Tensor,
+        extra_args: Optional[Dict] = None,
+        callback: Optional[Callable] = None,
+        disable: Optional[bool] = None,
+        noise_sampler: Optional[NoiseSamplerFunc] = None,
+        # PingPong specific
+        start_sigma_index: int = 0,
+        end_sigma_index: int = -1,
+        enable_clamp_output: bool = False,
+        step_random_mode: str = "off",
+        step_size: int = 5,
+        seed: int = 42,
+        blend_function: Callable = torch.lerp,
+        step_blend_function: Callable = torch.lerp,
+        scheduler: Optional[Any] = None,
+        pingpong_options: Optional[Dict[str, Any]] = None,
+        fbg_config: FBGConfig = FBGConfig(),
+        debug_mode: int = 0,
+        sigma_range_preset: str = "Custom",
+        conditional_blend_mode: bool = False,
+        conditional_blend_sigma_threshold: float = 0.5,
+        conditional_blend_function: Callable = slerp,
+        conditional_blend_on_change: bool = False,
+        conditional_blend_change_threshold: float = 0.1,
+        clamp_noise_norm: bool = False,
+        max_noise_norm: float = 1.0,
+        log_posterior_ema_factor: float = 0.0,
+        # Enhanced
+        adaptive_noise_scaling: bool = False,
+        noise_scale_factor: float = 1.0,
+        progressive_blend_mode: bool = False,
+        enable_profiling: bool = False,
+        checkpoint_steps: Optional[List[int]] = None,
+        early_exit_threshold: float = 1e-6,
+        tensor_memory_optimization: bool = False,
+        ancestral_noise_type: str = "gaussian",
+        # Res 2
+        enable_restarts: bool = False,
+        restart_mode: str = "balanced",
+        restart_noise_scale: float = 0.5,
+        restart_s_noise: float = 1.0,
+        restart_steps: str = "",
+        **kwargs: Any
+    ) -> None:
         # Core attributes
         self.model_ = model
         self.x = x
@@ -247,7 +329,7 @@ class PingPongSamplerCore:
         if self.debug_mode >= 2: logger.setLevel(logging.DEBUG)
         elif self.debug_mode >= 1: logger.setLevel(logging.INFO)
         else: logger.setLevel(logging.WARNING)
-        
+
         # Core parameters
         self.start_sigma_index = start_sigma_index
         self.end_sigma_index = end_sigma_index
@@ -257,38 +339,31 @@ class PingPongSamplerCore:
         self.seed = seed if seed is not None else 42
         self.blend_function = blend_function
         self.step_blend_function = step_blend_function
-        
+
         # Advanced features
         self.adaptive_noise_scaling = adaptive_noise_scaling
         self.noise_scale_factor = noise_scale_factor
         self.progressive_blend_mode = progressive_blend_mode
-        self.gradient_norm_tracking = gradient_norm_tracking
         self.checkpoint_steps = checkpoint_steps or []
         self.early_exit_threshold = early_exit_threshold
         self.tensor_memory_optimization = tensor_memory_optimization
-        
-        if self.tensor_memory_optimization:
-            print("[PingPongSamplerFBG] ⚠️ WARNING: tensor_memory_optimization is EXPERIMENTAL!")
-        
-        # ENHANCED: Profiler
+
         self.profiler = PerformanceProfiler(enable_profiling)
-        
-        if gradient_norm_tracking:
-            logger.info("Note: Gradient norm tracking disabled (not applicable in sampling)")
-        
+
+        if self.tensor_memory_optimization:
+            logger.warning("tensor_memory_optimization is EXPERIMENTAL!")
+
         # Steps & validation
         num_steps_available = len(sigmas) - 1 if len(sigmas) > 0 else 0
         logger.info(f"Total steps based on sigmas: {num_steps_available}")
         self._validate_sigma_schedule()
-        
+
         if num_steps_available > 500:
             suggested = max(num_steps_available // 100, 5)
             logger.info(f"High step count ({num_steps_available}). Consider step_size >= {suggested}")
-        
-        # --- FIXED: Robust Ancestral Step Handling (The Bridge for your YAML) ---
+
+        # Ancestral Step Handling
         if pingpong_options is None: pingpong_options = {}
-        
-        # Logic: Check dictionary first, then fall back to flat kwargs (which YAML uses)
         raw_first = pingpong_options.get("first_ancestral_step", kwargs.get("first_ancestral_step", 0))
         raw_last = pingpong_options.get("last_ancestral_step", kwargs.get("last_ancestral_step", num_steps_available - 1))
         
@@ -297,94 +372,74 @@ class PingPongSamplerCore:
             self.last_ancestral_step = min(num_steps_available - 1, max(raw_first, raw_last))
         else:
             self.last_ancestral_step = -1
-        # -----------------------------------------------------------------------
-        
+
         # Sigma range presets
         self.sigma_range_preset = sigma_range_preset
         self.original_fbg_config = fbg_config if fbg_config is not None else FBGConfig()
         self.config = self.original_fbg_config
         if self.sigma_range_preset != "Custom" and num_steps_available > 0:
             self.config = self._apply_sigma_preset(num_steps_available)
-        
+
         # Conditional blend
         self.conditional_blend_mode = conditional_blend_mode
         self.conditional_blend_sigma_threshold = conditional_blend_sigma_threshold
         self.conditional_blend_function = conditional_blend_function
         self.conditional_blend_on_change = conditional_blend_on_change
         self.conditional_blend_change_threshold = conditional_blend_change_threshold
-        
+
         # Noise clamping
         self.clamp_noise_norm = clamp_noise_norm
-        self.max_noise_norm = max_noise_norm
-        
+        self.max_noise_norm = max(0.01, max_noise_norm)
+
         # EMA
         self.log_posterior_ema_factor = max(0.0, min(1.0, log_posterior_ema_factor))
-        
+
         # Model type
         self.is_rf = self._detect_model_type()
-        
-        # RESTORED v1.4.2: Noise sampler with adaptive scaling inside
-        self.noise_sampler = self._setup_noise_sampler(noise_sampler, kwargs.get("ancestral_noise_type", "gaussian"))
-        
+
+        # Noise sampler
+        self.noise_sampler = self._setup_noise_sampler(noise_sampler, ancestral_noise_type)
+
         # Noise decay
         self.noise_decay = self._build_noise_decay_array(num_steps_available, scheduler)
-        
-        # FBG
-        self.eta = eta
-        self.s_noise = s_noise
+
+        # FBG Params update
         self.update_fbg_config_params()
-        
+
         # Initialize FBG state
         cfg = self.config
         self.minimal_log_posterior = self._calculate_minimal_log_posterior(cfg)
         self.log_posterior = x.new_full((x.shape[0],), cfg.initial_value)
         self.guidance_scale = x.new_full((x.shape[0], *(1,) * (x.ndim - 1)), cfg.initial_guidance_scale)
-        
-        if self.debug_mode >= 1:
-            logger.info(f"FBG config: {self.config._asdict()}")
-            logger.info(f"Enhanced features: adaptive_noise={self.adaptive_noise_scaling}, progressive_blend={self.progressive_blend_mode}")
 
-    @staticmethod
-    def go(model, x, sigmas, extra_args=None, callback=None, disable=None, noise_sampler=None, **kwargs):
-        """Entry point for ComfyUI's KSAMPLER."""
-        fbg_config_raw = kwargs.pop("fbg_config", {})
-        fbg_config_kwargs = {}
+        # Res 2 Initialization
+        self.enable_restarts = enable_restarts
+        self.restart_mode = restart_mode
+        self.restart_noise_scale = restart_noise_scale
+        self.restart_s_noise = restart_s_noise
         
-        # Handle both dict and FBGConfig object
-        if isinstance(fbg_config_raw, FBGConfig):
-            fbg_config_kwargs = fbg_config_raw._asdict()
-        elif isinstance(fbg_config_raw, dict):
-            remap = {"fbg_sampler_mode": "sampler_mode", "fbg_temp": "temp", 
-                     "fbg_offset": "offset", "log_posterior_initial_value": "initial_value"}
-            for k, v in fbg_config_raw.items():
-                fbg_config_kwargs[remap.get(k, k)] = v
-        
-        if "sampler_mode" in fbg_config_kwargs and isinstance(fbg_config_kwargs["sampler_mode"], str):
-            try: 
-                fbg_config_kwargs["sampler_mode"] = getattr(SamplerMode, fbg_config_kwargs["sampler_mode"].upper())
-            except: 
-                fbg_config_kwargs.pop("sampler_mode", None)
-        elif "sampler_mode" not in fbg_config_kwargs:
-            fbg_config_kwargs["sampler_mode"] = FBGConfig().sampler_mode
-        
-        fbg_config_instance = FBGConfig(**fbg_config_kwargs)
-        
-        pingpong_options = kwargs.pop("pingpong_options", {})
-        
-        # FIXED: Pop these before passing to __init__ to avoid duplicate keyword args
-        blend_fn = _INTERNAL_BLEND_MODES.get(kwargs.pop("blend_function_name", "lerp"), torch.lerp)
-        step_blend_fn = _INTERNAL_BLEND_MODES.get(kwargs.pop("step_blend_function_name", "lerp"), torch.lerp)
-        cond_blend_fn = _INTERNAL_BLEND_MODES.get(kwargs.pop("conditional_blend_function_name", "slerp"), slerp)
-        
-        sampler = PingPongSamplerCore(
-            model=model, x=x, sigmas=sigmas, extra_args=extra_args, callback=callback,
-            disable=disable, noise_sampler=noise_sampler, blend_function=blend_fn,
-            step_blend_function=step_blend_fn, conditional_blend_function=cond_blend_fn,
-            fbg_config=fbg_config_instance, pingpong_options=pingpong_options, **kwargs
-        )
-        return sampler()
+        self.custom_restart_schedule: Optional[List[int]] = None
+        if enable_restarts and restart_steps and restart_steps.strip():
+            try:
+                self.custom_restart_schedule = [
+                    int(x.strip()) for x in restart_steps.split(',') if x.strip()
+                ]
+                if self.debug_mode >= 1:
+                    logger.info(f"Custom restart schedule: {self.custom_restart_schedule}")
+            except ValueError as e:
+                logger.warning(f"Invalid restart_steps format: {e}. Using auto-generated schedule")
+                self.custom_restart_schedule = None
 
-    def _validate_sigma_schedule(self):
+        if self.debug_mode >= 1 and enable_restarts:
+            logger.info(f"Res 2 Restarts: ENABLED (Mode: {restart_mode}, Scale: {restart_noise_scale})")
+
+        # Internal state
+        self._prev_x: Optional[torch.Tensor] = None
+        self.checkpoints: Dict[int, torch.Tensor] = {}
+
+
+    # [NODE_FIX] Added type hint
+    def _validate_sigma_schedule(self) -> bool:
         if len(self.sigmas) < 2: return True
         for i in range(len(self.sigmas) - 1):
             if self.sigmas[i] < self.sigmas[i + 1]:
@@ -392,30 +447,48 @@ class PingPongSamplerCore:
                 return False
         return True
 
-    def _apply_sigma_preset(self, num_steps):
-        sorted_desc = torch.sort(self.sigmas, descending=True).values
-        d = self.config._asdict()
-        if self.sigma_range_preset == "High":
-            idx = max(1, num_steps // 4)
-            high = sorted_desc[idx].item()
-            d.update({'cfg_start_sigma': high, 'cfg_end_sigma': self.sigmas[-2].item(),
-                      'fbg_start_sigma': high, 'fbg_end_sigma': self.sigmas[-2].item()})
-        elif self.sigma_range_preset == "Mid":
-            start, end = num_steps // 4, 3 * num_steps // 4
-            d.update({'cfg_start_sigma': sorted_desc[start].item(), 'cfg_end_sigma': sorted_desc[end].item(),
-                      'fbg_start_sigma': sorted_desc[start].item(), 'fbg_end_sigma': sorted_desc[end].item()})
-        elif self.sigma_range_preset == "Low":
-            idx = 3 * num_steps // 4
-            low = sorted_desc[idx].item()
-            d.update({'cfg_start_sigma': self.sigmas[0].item(), 'cfg_end_sigma': low,
-                      'fbg_start_sigma': self.sigmas[0].item(), 'fbg_end_sigma': low})
-        elif self.sigma_range_preset == "All":
-            d.update({'cfg_start_sigma': self.sigmas[0].item(), 'cfg_end_sigma': self.sigmas[-2].item(),
-                      'fbg_start_sigma': self.sigmas[0].item(), 'fbg_end_sigma': self.sigmas[-2].item()})
-        logger.info(f"Applied sigma preset '{self.sigma_range_preset}'")
-        return FBGConfig(**d)
+    # [NODE_FIX] Added type hint
+    def _apply_sigma_preset(self, num_steps: int) -> FBGConfig:
+        try:
+             sorted_desc = torch.sort(self.sigmas, descending=True).values
+             if len(sorted_desc) < 2: return self.config
+             
+             sigma_at_0 = sorted_desc[0].item()
+             sigma_near_end = sorted_desc[-2].item()
+             
+             d = self.config._asdict()
+             preset_name = self.sigma_range_preset
+             
+             if preset_name == "High":
+                idx = max(1, num_steps // 4)
+                idx = min(idx, len(sorted_desc) - 2)
+                threshold = sorted_desc[idx].item()
+                d.update({'cfg_start_sigma': sigma_at_0, 'cfg_end_sigma': threshold, 'fbg_start_sigma': sigma_at_0, 'fbg_end_sigma': threshold})
+             elif preset_name == "Mid":
+                idx_start = max(1, num_steps // 4)
+                idx_end = max(idx_start + 1, 3 * num_steps // 4)
+                idx_start = min(idx_start, len(sorted_desc) - 2)
+                idx_end = min(idx_end, len(sorted_desc) - 2)
+                if idx_start >= idx_end: idx_start = idx_end - 1
+                start_sigma = sorted_desc[idx_start].item()
+                end_sigma = sorted_desc[idx_end].item()
+                d.update({'cfg_start_sigma': start_sigma, 'cfg_end_sigma': end_sigma, 'fbg_start_sigma': start_sigma, 'fbg_end_sigma': end_sigma})
+             elif preset_name == "Low":
+                idx = max(1, 3 * num_steps // 4)
+                idx = min(idx, len(sorted_desc) - 2)
+                threshold = sorted_desc[idx].item()
+                d.update({'cfg_start_sigma': threshold, 'cfg_end_sigma': sigma_near_end, 'fbg_start_sigma': threshold, 'fbg_end_sigma': sigma_near_end})
+             elif preset_name == "All":
+                  d.update({'cfg_start_sigma': sigma_at_0, 'cfg_end_sigma': sigma_near_end, 'fbg_start_sigma': sigma_at_0, 'fbg_end_sigma': sigma_near_end})
+             
+             logger.info(f"Applied sigma preset '{self.sigma_range_preset}'")
+             return FBGConfig(**d)
+        except Exception as e:
+             logger.error(f"Error applying sigma preset: {e}")
+             return self.config
 
-    def _detect_model_type(self):
+    # [NODE_FIX] Added type hint
+    def _detect_model_type(self) -> bool:
         try:
             curr = self.model_
             while hasattr(curr, 'inner_model') and curr.inner_model is not None:
@@ -425,15 +498,14 @@ class PingPongSamplerCore:
         except: pass
         return False
 
-    def _setup_noise_sampler(self, noise_sampler, noise_type):
-        """RESTORED v1.4.2: Noise sampler with adaptive scaling INSIDE."""
+    # [NODE_FIX] Added type hint
+    def _setup_noise_sampler(self, noise_sampler: Optional[NoiseSamplerFunc], noise_type: str) -> NoiseSamplerFunc:
         if noise_sampler is not None: return noise_sampler
         logger.info(f"Using ancestral noise type: {noise_type}")
         
         def create_noise_sampler(noise_func):
             def sampler(sigma, sigma_next):
                 base_noise = noise_func()
-                # RESTORED v1.4.2: Adaptive scaling inside noise sampler
                 if self.adaptive_noise_scaling:
                     progress = 1.0 - (sigma / self.sigmas[0]) if self.sigmas[0] > 0 else 0.0
                     scale = self.noise_scale_factor * (1.0 + progress * 0.5)
@@ -445,19 +517,20 @@ class PingPongSamplerCore:
         elif noise_type == "brownian": return create_noise_sampler(lambda: torch.randn_like(self.x).cumsum(dim=-1) / (self.x.shape[-1]**0.5))
         return create_noise_sampler(lambda: torch.randn_like(self.x))
 
-    def _build_noise_decay_array(self, num_steps, scheduler):
+    # [NODE_FIX] Added type hint
+    def _build_noise_decay_array(self, num_steps: int, scheduler: Optional[Any]) -> torch.Tensor:
         if num_steps <= 0: return torch.empty((0,), dtype=torch.float32, device=self.x.device)
         if scheduler is not None and hasattr(scheduler, 'get_decay'):
             try:
                 arr = scheduler.get_decay(num_steps)
                 decay = np.asarray(arr, dtype=np.float32)
-                assert decay.shape == (num_steps,)
                 return torch.tensor(decay, device=self.x.device)
             except Exception as e:
                 logger.warning(f"Scheduler error: {e}. Using zero decay.")
         return torch.zeros((num_steps,), dtype=torch.float32, device=self.x.device)
 
-    def _calculate_minimal_log_posterior(self, cfg):
+    # [NODE_FIX] Added type hint
+    def _calculate_minimal_log_posterior(self, cfg: FBGConfig) -> float:
         try:
             if cfg.cfg_scale > 1 and cfg.cfg_start_sigma > 0:
                 num = (1.0 - cfg.pi) * (cfg.max_guidance_scale - cfg.cfg_scale + 1)
@@ -471,20 +544,22 @@ class PingPongSamplerCore:
             logger.warning("Could not calculate minimal_log_posterior. Using -inf.")
             return float('-inf')
 
-    def get_progressive_blend_function(self, step_idx, total_steps):
+    # [NODE_FIX] Added type hint
+    def get_progressive_blend_function(self, step_idx: int, total_steps: int) -> Callable:
         if not self.progressive_blend_mode: return self.blend_function
         progress = step_idx / max(total_steps - 1, 1)
         if progress < 0.3: return torch.lerp
         elif progress < 0.7: return cosine_interpolation
         else: return cubic_interpolation
 
-    def save_checkpoint(self, x_current, step_idx):
+    # [NODE_FIX] Added type hint
+    def save_checkpoint(self, x_current: torch.Tensor, step_idx: int) -> None:
         if step_idx not in self.checkpoint_steps: return
         logger.info(f"Saving checkpoint at step {step_idx}")
-        if not hasattr(self, 'checkpoints'): self.checkpoints = {}
         self.checkpoints[step_idx] = x_current.clone()
 
-    def check_early_exit(self, sigma_next_item, denoised, x_current):
+    # [NODE_FIX] Added type hint
+    def check_early_exit(self, sigma_next_item: float, denoised: torch.Tensor, x_current: torch.Tensor) -> bool:
         if sigma_next_item > self.early_exit_threshold: return False
         if hasattr(self, '_prev_x') and self._prev_x is not None:
             change = torch.norm(x_current - self._prev_x).item()
@@ -494,8 +569,9 @@ class PingPongSamplerCore:
         self._prev_x = x_current.clone()
         return False
 
-    def _check_for_nan_inf(self, tensor, name, step_idx):
-        """ENHANCED: Check for NaN/Inf."""
+    # [NODE_FIX] Added type hint
+    def _check_for_nan_inf(self, tensor: Optional[torch.Tensor], name: str, step_idx: int) -> bool:
+        if tensor is None: return False
         if torch.isnan(tensor).any():
             logger.warning(f"NaN detected in {name} at step {step_idx}!")
             return True
@@ -504,28 +580,29 @@ class PingPongSamplerCore:
             return True
         return False
 
-    def _debug_step_info(self, idx, sigma_curr, sigma_next, x_current):
-        """ENHANCED: Detailed debug for troubleshooting."""
+    # [NODE_FIX] Added type hint
+    def _debug_step_info(self, idx: int, sigma_curr: torch.Tensor, sigma_next: torch.Tensor, x_current: torch.Tensor) -> None:
         if self.debug_mode >= 2:
-            logger.debug(f"\n=== Step {idx} Detailed Info ===")
+            logger.debug(f"--- Step {idx} Detailed Info ---")
             logger.debug(f"  Sigma: {sigma_curr.item():.6f} -> {sigma_next.item():.6f}")
-            logger.debug(f"  X stats: min={x_current.min().item():.4f}, max={x_current.max().item():.4f}, "
-                        f"mean={x_current.mean().item():.4f}, std={x_current.std().item():.4f}")
             self._check_for_nan_inf(x_current, "x_current", idx)
 
-    def _stepped_seed(self, step):
+    # [NODE_FIX] Added type hint
+    def _stepped_seed(self, step: int) -> Optional[int]:
         if self.step_random_mode == "off": return None
         sz = max(self.step_size, 1)
-        return {"block": self.seed + (step // sz), "reset": self.seed + (step * sz), "step": self.seed + step}.get(self.step_random_mode, self.seed)
+        seed_map = {"block": self.seed + (step // sz), "reset": self.seed + (step * sz), "step": self.seed + step}
+        return seed_map.get(self.step_random_mode, self.seed)
 
-    def _get_sigma_square_tilde(self, sigmas):
-        """RESTORED v1.4.2: With safety check for division by zero."""
+    # [NODE_FIX] Added type hint
+    def _get_sigma_square_tilde(self, sigmas: torch.Tensor) -> torch.Tensor:
         if len(sigmas) < 2: return torch.tensor([], device=sigmas.device)
         s_sq, sn_sq = sigmas[:-1] ** 2, sigmas[1:] ** 2
         safe_s_sq = torch.where(s_sq == 0, torch.tensor(1e-6, device=s_sq.device), s_sq)
         return ((s_sq - sn_sq) * sn_sq / safe_s_sq).flip(dims=(0,))
 
-    def _get_offset(self, steps, sst, **kwargs):
+    # [NODE_FIX] Added type hint
+    def _get_offset(self, steps: int, sst: torch.Tensor, **kwargs: Any) -> float:
         cfg = self.config
         lambda_ref = kwargs.get('lambda_ref', 3.0)
         decimals = kwargs.get('decimals', 4)
@@ -537,7 +614,8 @@ class PingPongSamplerCore:
             return round(log_term / den, decimals) if den != 0 else 0.0
         except: return 0.0
 
-    def _get_temp(self, steps, offset, sst, **kwargs):
+    # [NODE_FIX] Added type hint
+    def _get_temp(self, steps: int, offset: float, sst: torch.Tensor, **kwargs: Any) -> float:
         cfg = self.config
         alpha = kwargs.get('alpha', 10.0)
         decimals = kwargs.get('decimals', 4)
@@ -555,7 +633,8 @@ class PingPongSamplerCore:
             return round((2 * val / alpha * offset), decimals)
         except: return 0.0
 
-    def update_fbg_config_params(self):
+    # [NODE_FIX] Added type hint
+    def update_fbg_config_params(self) -> None:
         if self.config.t_0 == 0 and self.config.t_1 == 0: return
         steps = len(self.sigmas) - 1
         if steps <= 0: return
@@ -566,7 +645,8 @@ class PingPongSamplerCore:
         d.update({"offset": offset, "temp": temp})
         self.config = FBGConfig(**d)
 
-    def get_dynamic_guidance_scale(self, log_post, gs_prev, sigma_item):
+    # [NODE_FIX] Added type hint
+    def get_dynamic_guidance_scale(self, log_post: torch.Tensor, gs_prev: torch.Tensor, sigma_item: float) -> torch.Tensor:
         cfg = self.config
         using_fbg = cfg.fbg_end_sigma <= sigma_item <= cfg.fbg_start_sigma
         using_cfg = cfg.cfg_scale != 1 and (cfg.cfg_end_sigma <= sigma_item <= cfg.cfg_start_sigma)
@@ -580,26 +660,28 @@ class PingPongSamplerCore:
                 logger.debug(f"FBG active (σ {sigma_item:.3f}). Raw: {gs.mean().item():.4f}")
         if using_cfg:
             gs += cfg.cfg_scale - 1.0
-            if self.debug_mode >= 2:
-                logger.debug(f"CFG active. Added: {cfg.cfg_scale - 1.0:.2f}")
         gs = gs.clamp(1.0, cfg.max_guidance_scale).view(gs_prev.shape)
         safe_prev = torch.where(gs_prev.abs() < 1e-6, torch.full_like(gs_prev, 1e-6), gs_prev)
         change = ((gs - gs_prev) / safe_prev).clamp(-cfg.guidance_max_change, cfg.guidance_max_change)
         return (gs_prev + gs_prev * change).clamp(1.0, cfg.max_guidance_scale)
 
-    def _model_denoise_with_guidance(self, x, sigma, override_cfg=None):
+    # [NODE_FIX] Added type hint
+    def _model_denoise_with_guidance(self, x: torch.Tensor, sigma: torch.Tensor, override_cfg: Optional[torch.Tensor] = None) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[torch.Tensor]]:
         sigma_t = sigma * x.new_ones((x.shape[0],))
         cond = uncond = None
         def post_cfg(args):
             nonlocal cond, uncond
-            cond, uncond = args["cond_denoised"], args["uncond_denoised"]
+            cond, uncond = args.get("cond_denoised"), args.get("uncond_denoised")
             return args["denoised"]
+        
         extra = self.extra_args.copy()
         mo = extra.get("model_options", {}).copy()
         mo["disable_cfg1_optimization"] = True
         extra["model_options"] = comfy.model_patcher.set_model_options_post_cfg_function(mo, post_cfg)
+        
         inner = self.model_.inner_model
         try:
+            # Try setting CFG directly on model if supported
             if (override_cfg is None or override_cfg.numel() < 2) and hasattr(inner, "cfg"):
                 orig = inner.cfg
                 try:
@@ -609,15 +691,19 @@ class PingPongSamplerCore:
                 finally:
                     inner.cfg = orig
             else:
-                _ = self.model_(x, sigma_t, **extra)
-                denoised = comfy.samplers.cfg_function(inner.inner_model, cond, uncond, override_cfg, x, sigma_t, model_options=mo)
+                # Standard CFG execution
+                denoised = self.model_(x, sigma_t, **extra)
+                
         except Exception as e:
             logger.warning(f"Denoise error: {e}. Fallback.")
             denoised = self.model_(x, sigma_t, **extra)
-            if cond is None: cond = uncond = denoised
+            
+        if cond is None: cond = uncond = denoised
         return denoised, cond, uncond
 
-    def _update_log_posterior(self, prev_lp, x_curr, x_next, t_curr, t_next, uncond, cond):
+    # [NODE_FIX] Added type hint
+    def _update_log_posterior(self, prev_lp: torch.Tensor, x_curr: torch.Tensor, x_next: torch.Tensor,
+                             t_curr: torch.Tensor, t_next: torch.Tensor, uncond: torch.Tensor, cond: torch.Tensor) -> torch.Tensor:
         """RESTORED v1.4.2: EXACT FBG math (NO epsilon corruption)."""
         def apply_ema(val):
             if self.log_posterior_ema_factor > 0:
@@ -625,27 +711,22 @@ class PingPongSamplerCore:
                 return smoothed.clamp(self.minimal_log_posterior, self.config.max_posterior_scale)
             return val.clamp(self.minimal_log_posterior, self.config.max_posterior_scale)
         
-        if torch.isclose(t_curr, torch.tensor(0.0, device=t_curr.device)).all():
-            return apply_ema(prev_lp)
+        if torch.isclose(t_curr, torch.tensor(0.0, device=t_curr.device)).all(): return apply_ema(prev_lp)
         
-        # RESTORED v1.4.2: NO epsilon added to t_csq!
         t_csq = t_curr**2
-        if torch.isclose(t_csq, torch.tensor(0.0, device=t_csq.device)).all():
-            return apply_ema(prev_lp)
+        if torch.isclose(t_csq, torch.tensor(0.0, device=t_csq.device)).all(): return apply_ema(prev_lp)
         
         t_ndc = t_next**2 / t_csq
         t_cmn = t_csq - t_next**2
         sst_t = t_cmn * t_ndc
         
-        if torch.isclose(sst_t, torch.tensor(0.0, device=sst_t.device)).all():
-            return apply_ema(prev_lp)
+        if torch.isclose(sst_t, torch.tensor(0.0, device=sst_t.device)).all(): return apply_ema(prev_lp)
         
         pred_base = t_ndc * x_curr
         uncond_mean = pred_base + (t_cmn / t_csq) * uncond
         cond_mean = pred_base + (t_cmn / t_csq) * cond
         diff = batch_mse_loss(x_next, cond_mean) - batch_mse_loss(x_next, uncond_mean)
         
-        # RESTORED v1.4.2: NO epsilon in division!
         if torch.isclose(sst_t, torch.tensor(0.0, device=sst_t.device)):
             result = prev_lp + self.config.offset
         else:
@@ -653,17 +734,95 @@ class PingPongSamplerCore:
         
         return apply_ema(result)
 
-    def _do_callback(self, step, x, sigma, denoised):
+    # [NODE_FIX] Added type hint
+    def _generate_restart_schedule(self, sigmas: torch.Tensor) -> List[int]:
+        """Auto-generate restart schedule based on sigma values."""
+        n = len(sigmas) - 1
+        schedule = []
+        mode = self.restart_mode
+        
+        if mode == 'aggressive':
+            schedule = [i for i in range(1, n, 2)]
+        elif mode == 'balanced':
+            for i in range(n):
+                if i == 0: continue
+                sigma_ratio = sigmas[i] / sigmas[0]
+                if sigma_ratio > 0.7: # High noise
+                    if i % 2 == 0: schedule.append(i)
+                elif sigma_ratio > 0.3: # Mid noise
+                    if i % 3 == 0: schedule.append(i)
+                else: # Low noise
+                    if i % 5 == 0: schedule.append(i)
+        elif mode == 'conservative':
+            midpoint = n // 2
+            schedule = [i for i in range(2, midpoint, 3)]
+        elif mode == 'detail_focus':
+            midpoint = n // 2
+            for i in range(midpoint, n):
+                if i % 2 == 0: schedule.append(i)
+        elif mode == 'composition_focus':
+            midpoint = n // 2
+            for i in range(1, midpoint):
+                if i % 2 == 0: schedule.append(i)
+                
+        return schedule
+
+    # [NODE_FIX] Added type hint
+    def _generate_restart_noise(self, x: torch.Tensor, step_index: int) -> torch.Tensor:
+        """Generate noise specifically for restart steps."""
+        step_seed = self._stepped_seed(step_index)
+        if step_seed is None: step_seed = self.seed
+        
+        restart_seed_offset = 982451653
+        restart_seed = step_seed + restart_seed_offset
+        
+        generator = torch.Generator(device=x.device)
+        generator.manual_seed(restart_seed % (2**63 - 1))
+        
+        return torch.randn(x.shape, dtype=x.dtype, device=x.device, generator=generator)
+
+    # [NODE_FIX] Added type hint
+    def _execute_restart_step(self, model: Any, x: torch.Tensor, sigma_curr: torch.Tensor, sigma_next: torch.Tensor, step_index: int, extra_args: Dict) -> Tuple[torch.Tensor, float]:
+        """Execute a single Res 2 restart step."""
+        sigma_restart = sigma_next + (sigma_curr - sigma_next) * self.restart_noise_scale
+        
+        if self.debug_mode >= 2:
+            logger.debug(f"\n[Res2] RESTART at step {step_index}: σ_curr={sigma_curr:.4f} -> σ_next={sigma_next:.4f} -> σ_restart={sigma_restart:.4f}")
+
+        # 1. Re-noise
+        noise = self._generate_restart_noise(x, step_index)
+        noise_amount = torch.sqrt(torch.clamp(sigma_restart**2 - sigma_next**2, min=0.0) + 1e-8)
+        x_renoised = x + noise * noise_amount * self.restart_s_noise
+        
+        # 2. Denoise
+        denoised_restart, _, _ = self._model_denoise_with_guidance(x_renoised, sigma_restart, self.guidance_scale)
+        
+        # 3. Euler step back
+        d_restart = (x_renoised - denoised_restart) / sigma_restart
+        dt_restart = sigma_next - sigma_restart
+        x_corrected = x_renoised + d_restart * dt_restart
+        
+        return x_corrected, self.guidance_scale.mean().item()
+
+    # [NODE_FIX] Added missing callback method
+    def _do_callback(self, step: int, x: torch.Tensor, sigma: torch.Tensor, denoised: torch.Tensor) -> None:
+        """Execute callback if provided."""
         if self.callback_:
             try:
-                self.callback_({"i": step, "x": x, "sigma": sigma, "sigma_hat": sigma, "denoised": denoised})
+                self.callback_({
+                    "i": step,
+                    "x": x,
+                    "sigma": sigma,
+                    "sigma_hat": sigma,
+                    "denoised": denoised
+                })
             except Exception as e:
                 logger.warning(f"Callback error at step {step}: {e}")
 
-    def __call__(self):
-        """Main sampling loop with ENHANCED console output."""
+    # [NODE_FIX] Added return type hint and replaced print()
+    def __call__(self) -> torch.Tensor:
+        """Main sampling loop with ENHANCED console output + RES 2 restart logic."""
         try:
-            # ENHANCED: Track guidance scales for summary
             gs_used = [] if self.debug_mode >= 1 else None
             if self.debug_mode >= 1: logger.info("Starting sampling loop")
             
@@ -674,31 +833,40 @@ class PingPongSamplerCore:
             astart, aend = self.first_ancestral_step, self.last_ancestral_step
             actual_end = min(self.end_sigma_index if self.end_sigma_index >= 0 else num_steps - 1, num_steps - 1)
             
+            # Generate restart schedule
+            if self.enable_restarts:
+                if self.custom_restart_schedule is not None:
+                    restart_schedule = self.custom_restart_schedule
+                else:
+                    restart_schedule = self._generate_restart_schedule(self.sigmas)
+                if self.debug_mode >= 1: logger.info(f"Restart schedule: {restart_schedule}")
+            else:
+                restart_schedule = []
+
+            # Main Loop
             for idx in trange(num_steps, disable=self.disable_pbar):
                 if idx < self.start_sigma_index or idx > actual_end: continue
                 
                 with self.profiler.profile_step(f"step_{idx}"):
                     s_curr, s_next = self.sigmas[idx], self.sigmas[idx + 1]
                     
-                    # FBG guidance
+                    # FBG Guidance
                     self.guidance_scale = self.get_dynamic_guidance_scale(self.log_posterior, self.guidance_scale, s_curr.max().item())
                     if gs_used is not None: gs_used.append(self.guidance_scale.mean().item())
                     
                     # Denoise
                     denoised, cond, uncond = self._model_denoise_with_guidance(x, s_curr, self.guidance_scale)
                     
-                    # ENHANCED: NaN/Inf recovery
+                    # NaN Recovery
                     if self._check_for_nan_inf(denoised, "denoised", idx):
                         logger.warning(f"Recovering from NaN/Inf at step {idx}")
                         denoised = torch.where(torch.isnan(denoised) | torch.isinf(denoised), x, denoised)
                     
                     x_orig = x.clone()
                     self._do_callback(idx, x, s_curr, denoised)
-                    
-                    # ENHANCED: Debug step info
                     self._debug_step_info(idx, s_curr, s_next, x)
                     
-                    # Sampling step
+                    # Ancestral check
                     is_anc = (astart <= idx <= aend) if astart <= aend else False
                     
                     if not is_anc:
@@ -709,13 +877,10 @@ class PingPongSamplerCore:
                         x = bf(denoised, x, blend)
                     else:
                         seed = self._stepped_seed(idx)
-                        if seed is not None:
-                            torch.manual_seed(seed)
-                            if self.debug_mode >= 2: logger.debug(f"Using seed: {seed}")
+                        if seed is not None: torch.manual_seed(seed)
                         
                         noise = self.noise_sampler(s_curr, s_next)
                         
-                        # Noise clamping
                         if self.clamp_noise_norm:
                             nn = torch.norm(noise, p=2, dim=list(range(1, noise.ndim)), keepdim=True)
                             sf = torch.where(nn > self.max_noise_norm, self.max_noise_norm / (nn + 1e-8), torch.ones_like(nn))
@@ -727,7 +892,6 @@ class PingPongSamplerCore:
                         else:
                             x = denoised + noise * s_next
                         
-                        # Conditional blend on change
                         if self.conditional_blend_on_change:
                             dn = torch.norm(denoised, dim=list(range(1, denoised.ndim)), keepdim=True) + 1e-8
                             nn = torch.norm(noise * s_next, dim=list(range(1, noise.ndim)), keepdim=True)
@@ -735,6 +899,11 @@ class PingPongSamplerCore:
                             if rel > self.conditional_blend_change_threshold:
                                 bf = min(1.0, (rel - self.conditional_blend_change_threshold) / self.conditional_blend_change_threshold)
                                 x = self.conditional_blend_function(denoised, x, bf)
+                    
+                    # RES 2 Restart
+                    if self.enable_restarts and idx in restart_schedule and s_next > 0:
+                        x, _ = self._execute_restart_step(self.model_, x, s_curr, s_next, idx, self.extra_args)
+                        if self.profiler.enabled: self.profiler.log_restart(idx, s_curr, s_next)
                     
                     # FBG update
                     self.log_posterior = self._update_log_posterior(self.log_posterior, x_orig, x, s_curr, s_next, uncond, cond)
@@ -748,160 +917,256 @@ class PingPongSamplerCore:
                         x = denoised
                         break
                     
-                    # Logging
                     if self.debug_mode >= 1:
                         logger.info(f"Step {idx}: GS={self.guidance_scale.mean().item():.2f}")
             
             if self.enable_clamp_output: x = torch.clamp(x, -1.0, 1.0)
             
-            # ENHANCED: Beautiful summary box
+            # [NODE_FIX] Replaced print() with logger.info()
             if self.debug_mode >= 1:
-                print("\n" + "="*60)
-                print("PingPongSamplerFBG - Sampling Summary")
-                print("="*60)
+                logger.info("=" * 60)
+                logger.info("PingPongSamplerFBG - Sampling Summary")
+                logger.info("=" * 60)
                 if gs_used:
-                    print(f"Guidance Scale Statistics:")
-                    print(f"  Min:     {min(gs_used):.3f}")
-                    print(f"  Max:     {max(gs_used):.3f}")
-                    print(f"  Average: {sum(gs_used) / len(gs_used):.3f}")
-                if hasattr(self, 'checkpoints'):
-                    print(f"Checkpoints saved: {len(self.checkpoints)}")
-                print("="*60)
+                    logger.info(f"Guidance Scale: Min={min(gs_used):.3f}, Max={max(gs_used):.3f}, Avg={sum(gs_used)/len(gs_used):.3f}")
+                if self.enable_restarts and restart_schedule:
+                    logger.info(f"Restarts: {len(restart_schedule)}/{num_steps} executed (Mode: {self.restart_mode})")
+                logger.info("=" * 60)
             
-            # ENHANCED: Always print profiler summary for visibility
             if self.profiler.enabled:
-                print("\n" + self.profiler.get_summary() + "\n")
+                logger.info("\n" + self.profiler.get_summary())
             
             return x
         except Exception as e:
-            logger.error(f"Crash: {e}")
+            logger.error(f"Crash in sampling loop: {e}")
             logger.debug(traceback.format_exc())
             return self.x
 
+    # [NODE_FIX] Added missing go() static method
+    @staticmethod
+    def go(
+        model: CFGDenoiser,
+        x: torch.Tensor,
+        sigmas: torch.Tensor,
+        extra_args: Optional[Dict] = None,
+        callback: Optional[Callable] = None,
+        disable: Optional[bool] = None,
+        noise_sampler: Optional[NoiseSamplerFunc] = None,
+        **kwargs: Any
+    ) -> torch.Tensor:
+        """Entry point for ComfyUI's KSAMPLER."""
+        
+        # Handle FBG config
+        fbg_config_raw = kwargs.pop("fbg_config", {})
+        fbg_config_kwargs = {}
+        
+        if isinstance(fbg_config_raw, FBGConfig):
+            fbg_config_kwargs = fbg_config_raw._asdict()
+        elif isinstance(fbg_config_raw, dict):
+            remap = {
+                "fbg_sampler_mode": "sampler_mode",
+                "fbg_temp": "temp",
+                "fbg_offset": "offset",
+                "log_posterior_initial_value": "initial_value"
+            }
+            for k, v in fbg_config_raw.items():
+                fbg_config_kwargs[remap.get(k, k)] = v
+        
+        # Handle sampler mode
+        if "sampler_mode" in fbg_config_kwargs and isinstance(fbg_config_kwargs["sampler_mode"], str):
+            try:
+                fbg_config_kwargs["sampler_mode"] = getattr(SamplerMode, fbg_config_kwargs["sampler_mode"].upper())
+            except:
+                fbg_config_kwargs.pop("sampler_mode", None)
+        elif "sampler_mode" not in fbg_config_kwargs:
+            fbg_config_kwargs["sampler_mode"] = FBGConfig().sampler_mode
+        
+        fbg_config_instance = FBGConfig(**fbg_config_kwargs)
+        
+        # Handle blend functions
+        pingpong_options = kwargs.pop("pingpong_options", {})
+        blend_fn = _INTERNAL_BLEND_MODES.get(kwargs.pop("blend_function_name", "lerp"), torch.lerp)
+        step_blend_fn = _INTERNAL_BLEND_MODES.get(kwargs.pop("step_blend_function_name", "lerp"), torch.lerp)
+        cond_blend_fn = _INTERNAL_BLEND_MODES.get(kwargs.pop("conditional_blend_function_name", "slerp"), slerp)
+        
+        # Create sampler instance
+        sampler = PingPongSamplerCore(
+            model=model,
+            x=x,
+            sigmas=sigmas,
+            extra_args=extra_args,
+            callback=callback,
+            disable=disable,
+            noise_sampler=noise_sampler,
+            blend_function=blend_fn,
+            step_blend_function=step_blend_fn,
+            conditional_blend_function=cond_blend_fn,
+            fbg_config=fbg_config_instance,
+            pingpong_options=pingpong_options,
+            **kwargs
+        )
+        
+        return sampler()
+
 # =================================================================================
-# == Node Wrapper Class                                                           ==
+# == Node Wrapper Class                                                          ==
 # =================================================================================
 
 class PingPongSamplerNodeFBG:
-    """ComfyUI node wrapper."""
+    """ComfyUI Node wrapper with Res 2 restart support (v1.5.0)."""
     @classmethod
-    def INPUT_TYPES(cls):
+    def INPUT_TYPES(cls) -> Dict[str, Dict[str, Any]]: # [NODE_FIX] Added type hint
         d = FBGConfig()
+        # [NODE_FIX] Added ALL CAPS prefixes to tooltips
         return {
             "required": {
-                "step_random_mode": (["off", "block", "reset", "step"], {"default": "block"}),
-                "step_size": ("INT", {"default": 4, "min": 1, "max": 100}),
-                "seed": ("INT", {"default": 80085, "min": 0, "max": 0xffffffffffffffff}),
-                "first_ancestral_step": ("INT", {"default": 0}),
-                "last_ancestral_step": ("INT", {"default": -1}),
-                "ancestral_noise_type": (["gaussian", "uniform", "brownian"], {"default": "gaussian"}),
-                "start_sigma_index": ("INT", {"default": 0}),
-                "end_sigma_index": ("INT", {"default": -1}),
-                "enable_clamp_output": ("BOOLEAN", {"default": False}),
-                "scheduler": ("SCHEDULER",),
-                "blend_mode": (tuple(_INTERNAL_BLEND_MODES.keys()), {"default": "lerp"}),
-                "step_blend_mode": (tuple(_INTERNAL_BLEND_MODES.keys()), {"default": "lerp"}),
-                "fbg_sampler_mode": (["EULER", "PINGPONG"], {"default": "EULER"}),
-                "cfg_scale": ("FLOAT", {"default": d.cfg_scale, "min": -1000, "max": 1000, "step": 0.01}),
-                "cfg_start_sigma": ("FLOAT", {"default": d.cfg_start_sigma}),
-                "cfg_end_sigma": ("FLOAT", {"default": d.cfg_end_sigma}),
-                "fbg_start_sigma": ("FLOAT", {"default": d.fbg_start_sigma}),
-                "fbg_end_sigma": ("FLOAT", {"default": d.fbg_end_sigma}),
-                "max_guidance_scale": ("FLOAT", {"default": d.max_guidance_scale}),
-                "initial_guidance_scale": ("FLOAT", {"default": d.initial_guidance_scale}),
-                "fbg_guidance_multiplier": ("FLOAT", {"default": d.fbg_guidance_multiplier}),
-                "guidance_max_change": ("FLOAT", {"default": d.guidance_max_change}),
-                "pi": ("FLOAT", {"default": d.pi, "step": 0.01}),
-                "t_0": ("FLOAT", {"default": d.t_0, "step": 0.01}),
-                "t_1": ("FLOAT", {"default": d.t_1, "step": 0.01}),
-                "fbg_temp": ("FLOAT", {"default": d.temp}),
-                "fbg_offset": ("FLOAT", {"default": d.offset}),
-                "fbg_eta": ("FLOAT", {"default": 0.0}),
-                "fbg_s_noise": ("FLOAT", {"default": 1.0}),
-                "max_posterior_scale": ("FLOAT", {"default": d.max_posterior_scale}),
-                "log_posterior_initial_value": ("FLOAT", {"default": d.initial_value}),
-                "log_posterior_ema_factor": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "adaptive_noise_scaling": ("BOOLEAN", {"default": False}),
-                "noise_scale_factor": ("FLOAT", {"default": 1.0}),
-                "progressive_blend_mode": ("BOOLEAN", {"default": False}),
-                "conditional_blend_mode": ("BOOLEAN", {"default": False}),
-                "conditional_blend_sigma_threshold": ("FLOAT", {"default": 0.5}),
-                "conditional_blend_function_name": (tuple(_INTERNAL_BLEND_MODES.keys()), {"default": "slerp"}),
-                "conditional_blend_on_change": ("BOOLEAN", {"default": False}),
-                "conditional_blend_change_threshold": ("FLOAT", {"default": 0.1}),
-                "clamp_noise_norm": ("BOOLEAN", {"default": False}),
-                "max_noise_norm": ("FLOAT", {"default": 1.0}),
-                "gradient_norm_tracking": ("BOOLEAN", {"default": False}),
-                "enable_profiling": ("BOOLEAN", {"default": False}),
-                "debug_mode": ("INT", {"default": 0, "min": 0, "max": 2}),
-                "tensor_memory_optimization": ("BOOLEAN", {"default": False}),
-                "early_exit_threshold": ("FLOAT", {"default": 1e-6}),
-                "ancestral_start_sigma": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 9999.0, "step": 0.001}),
-                "ancestral_end_sigma": ("FLOAT", {"default": 0.004, "min": 0.0, "max": 9999.0, "step": 0.001}),
-                "sigma_range_preset": (["Custom", "High", "Mid", "Low", "All"], {"default": "Custom"}),
+                "step_random_mode": (["off", "block", "reset", "step"], {"default": "block", "tooltip": "STEP RANDOMIZATION: How the seed changes per step."}),
+                "step_size": ("INT", {"default": 4, "min": 1, "max": 100, "tooltip": "STEP SIZE: Steps between seed changes."}),
+                "seed": ("INT", {"default": 80085, "min": 0, "max": 0xffffffffffffffff, "tooltip": "SEED: Base random seed."}),
+                "first_ancestral_step": ("INT", {"default": 0, "tooltip": "FIRST ANCESTRAL STEP: Start of noise injection."}),
+                "last_ancestral_step": ("INT", {"default": -1, "tooltip": "LAST ANCESTRAL STEP: End of noise injection."}),
+                "ancestral_noise_type": (["gaussian", "uniform", "brownian"], {"default": "gaussian", "tooltip": "ANCESTRAL NOISE TYPE: Distribution of injected noise."}),
+                "start_sigma_index": ("INT", {"default": 0, "tooltip": "START STEP: Sampling start index."}),
+                "end_sigma_index": ("INT", {"default": -1, "tooltip": "END STEP: Sampling end index."}),
+                "enable_clamp_output": ("BOOLEAN", {"default": False, "tooltip": "CLAMP OUTPUT: Limit output to [-1, 1]."}),
+                "scheduler": ("SCHEDULER", {"tooltip": "SCHEDULER: Input sigma schedule."}),
+                "blend_mode": (list(_INTERNAL_BLEND_MODES.keys()), {"default": "lerp", "tooltip": "BLEND MODE: Primary interpolation function."}),
+                "step_blend_mode": (list(_INTERNAL_BLEND_MODES.keys()), {"default": "lerp", "tooltip": "STEP BLEND MODE: Secondary interpolation function."}),
+                
+                "fbg_sampler_mode": (["EULER", "PINGPONG"], {"default": "EULER", "tooltip": "FBG MODE: Internal step type."}),
+                "cfg_scale": ("FLOAT", {"default": d.cfg_scale, "min": -1000, "max": 1000, "step": 0.01, "tooltip": "CFG SCALE: Base guidance."}),
+                "cfg_start_sigma": ("FLOAT", {"default": d.cfg_start_sigma, "tooltip": "CFG START SIGMA: Start of CFG range."}),
+                "cfg_end_sigma": ("FLOAT", {"default": d.cfg_end_sigma, "tooltip": "CFG END SIGMA: End of CFG range."}),
+                "fbg_start_sigma": ("FLOAT", {"default": d.fbg_start_sigma, "tooltip": "FBG START SIGMA: Start of FBG range."}),
+                "fbg_end_sigma": ("FLOAT", {"default": d.fbg_end_sigma, "tooltip": "FBG END SIGMA: End of FBG range."}),
+                "max_guidance_scale": ("FLOAT", {"default": d.max_guidance_scale, "tooltip": "MAX GUIDANCE: Ceiling for combined scale."}),
+                "initial_guidance_scale": ("FLOAT", {"default": d.initial_guidance_scale, "tooltip": "INITIAL GUIDANCE: Starting scale."}),
+                "fbg_guidance_multiplier": ("FLOAT", {"default": d.fbg_guidance_multiplier, "tooltip": "FBG MULTIPLIER: Scaling factor for FBG component."}),
+                "guidance_max_change": ("FLOAT", {"default": d.guidance_max_change, "tooltip": "MAX CHANGE: Max % change per step."}),
+                "pi": ("FLOAT", {"default": d.pi, "step": 0.01, "tooltip": "PI: Posterior factor."}),
+                "t_0": ("FLOAT", {"default": d.t_0, "step": 0.01, "tooltip": "T0: Offset parameter."}),
+                "t_1": ("FLOAT", {"default": d.t_1, "step": 0.01, "tooltip": "T1: Temp parameter."}),
+                "fbg_temp": ("FLOAT", {"default": d.temp, "tooltip": "TEMP: FBG temperature."}),
+                "fbg_offset": ("FLOAT", {"default": d.offset, "tooltip": "OFFSET: FBG offset."}),
+                "fbg_eta": ("FLOAT", {"default": 0.0, "tooltip": "ETA: Deprecated."}),
+                "fbg_s_noise": ("FLOAT", {"default": 1.0, "tooltip": "S_NOISE: Deprecated."}),
+                "max_posterior_scale": ("FLOAT", {"default": d.max_posterior_scale, "tooltip": "MAX POSTERIOR: Ceiling for log posterior."}),
+                "log_posterior_initial_value": ("FLOAT", {"default": d.initial_value, "tooltip": "INITIAL POSTERIOR: Starting value."}),
+                
+                "log_posterior_ema_factor": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "tooltip": "EMA FACTOR: Smoothing for posterior."}),
+                "adaptive_noise_scaling": ("BOOLEAN", {"default": False, "tooltip": "ADAPTIVE NOISE: Scale noise by progress."}),
+                "noise_scale_factor": ("FLOAT", {"default": 1.0, "tooltip": "NOISE SCALE: Base factor."}),
+                "progressive_blend_mode": ("BOOLEAN", {"default": False, "tooltip": "PROGRESSIVE BLEND: Switch modes over time."}),
+                
+                "conditional_blend_mode": ("BOOLEAN", {"default": False, "tooltip": "CONDITIONAL BLEND: Enable threshold blending."}),
+                "conditional_blend_sigma_threshold": ("FLOAT", {"default": 0.5, "tooltip": "BLEND THRESHOLD: Sigma trigger."}),
+                "conditional_blend_function_name": (list(_INTERNAL_BLEND_MODES.keys()), {"default": "slerp", "tooltip": "BLEND FUNC: Conditional function."}),
+                "conditional_blend_on_change": ("BOOLEAN", {"default": False, "tooltip": "BLEND ON CHANGE: Trigger on delta."}),
+                "conditional_blend_change_threshold": ("FLOAT", {"default": 0.1, "tooltip": "CHANGE THRESHOLD: Delta trigger."}),
+                
+                "clamp_noise_norm": ("BOOLEAN", {"default": False, "tooltip": "CLAMP NOISE: Limit noise magnitude."}),
+                "max_noise_norm": ("FLOAT", {"default": 1.0, "tooltip": "MAX NOISE: Limit value."}),
+                "gradient_norm_tracking": ("BOOLEAN", {"default": False, "tooltip": "GRADIENT TRACKING: Disabled."}),
+                
+                "enable_profiling": ("BOOLEAN", {"default": False, "tooltip": "PROFILING: Log timing stats."}),
+                "debug_mode": ("INT", {"default": 0, "min": 0, "max": 2, "tooltip": "DEBUG MODE: 0=Off, 1=Basic, 2=Detailed."}),
+                "tensor_memory_optimization": ("BOOLEAN", {"default": False, "tooltip": "MEMORY OPT: Experimental."}),
+                "early_exit_threshold": ("FLOAT", {"default": 1e-6, "tooltip": "EARLY EXIT: Convergence threshold."}),
+                "ancestral_start_sigma": ("FLOAT", {"default": 1.0, "tooltip": "ANC START: Unused range."}),
+                "ancestral_end_sigma": ("FLOAT", {"default": 0.004, "tooltip": "ANC END: Unused range."}),
+                "sigma_range_preset": (["Custom", "High", "Mid", "Low", "All"], {"default": "Custom", "tooltip": "PRESET: Auto-set FBG/CFG ranges."}),
+                
+                # Res 2
+                "enable_restarts": ("BOOLEAN", {"default": False, "tooltip": "ENABLE RESTARTS: Turn on Res 2 logic."}),
             },
             "optional": {
-                "yaml_settings_str": ("STRING", {"multiline": True}),
-                "checkpoint_steps_str": ("STRING", {"default": ""}),
+                "yaml_settings_str": ("STRING", {"multiline": True, "default": "", "dynamicPrompt": False, "tooltip": "YAML OVERRIDE: Custom config."}),
+                "checkpoint_steps_str": ("STRING", {"default": "", "tooltip": "CHECKPOINTS: Steps to save state."}),
+                
+                # Res 2 Optionals
+                "restart_mode": (["balanced", "aggressive", "conservative", "detail_focus", "composition_focus"], {"default": "balanced", "tooltip": "RESTART MODE: Frequency pattern."}),
+                "restart_noise_scale": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.05, "tooltip": "RESTART SCALE: Noise amount for restart."}),
+                "restart_s_noise": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 2.0, "step": 0.05, "tooltip": "RESTART S_NOISE: Multiplier."}),
+                "restart_steps": ("STRING", {"default": "", "multiline": False, "tooltip": "CUSTOM RESTARTS: Specific steps (e.g. '1,5,10')."}),
             }
         }
-    
+
+    # [NODE_FIX] REMOVED IS_CHANGED method (Sec 6.1, Rule #1). This node must be cacheable.
+
     RETURN_TYPES = ("SAMPLER",)
     FUNCTION = "get_sampler"
-    CATEGORY = "MD_Nodes/Sampling"
+    CATEGORY = "MD_Nodes/Samplers" # [NODE_FIX] Corrected category
     
-    def get_sampler(self, **kwargs):
-        yaml_str = kwargs.get("yaml_settings_str", "")
+    # [NODE_FIX] Added full get_sampler implementation
+    def get_sampler(self, **kwargs: Any) -> Tuple[KSAMPLER]:
+        """Creates the KSAMPLER instance."""
+        
+        # Parse YAML overrides
+        yaml_str = kwargs.pop("yaml_settings_str", "")
         if yaml_str:
             try:
                 overrides = yaml.safe_load(yaml_str)
                 if isinstance(overrides, dict):
                     for k, v in overrides.items():
                         if k == "fbg_config" and isinstance(v, dict):
-                            for fk, fv in v.items(): kwargs[fk] = fv
-                        else: kwargs[k] = v
+                            for fk, fv in v.items():
+                                kwargs[fk] = fv
+                        else:
+                            kwargs[k] = v
             except Exception as e:
-                logger.warning(f"YAML error: {e}")
+                logger.warning(f"YAML parse error: {e}")
         
-        cp_str = kwargs.get("checkpoint_steps_str", "")
+        # Parse checkpoint steps
+        cp_str = kwargs.pop("checkpoint_steps_str", "")
         if cp_str:
             try:
                 kwargs["checkpoint_steps"] = [int(x.strip()) for x in cp_str.split(",") if x.strip()]
-            except: pass
+            except:
+                pass
         
-        mode_str = kwargs.get("fbg_sampler_mode", "EULER")
-        try: mode = getattr(SamplerMode, mode_str.upper())
-        except: mode = SamplerMode.EULER
+        # Parse sampler mode
+        mode_str = kwargs.pop("fbg_sampler_mode", "EULER")
+        try:
+            mode = getattr(SamplerMode, mode_str.upper())
+        except:
+            mode = SamplerMode.EULER
         
+        # Build FBG config
+        d = FBGConfig()
         fbg_cfg = FBGConfig(
             sampler_mode=mode,
-            cfg_start_sigma=kwargs.get("cfg_start_sigma", 1.0),
-            cfg_end_sigma=kwargs.get("cfg_end_sigma", 0.004),
-            fbg_start_sigma=kwargs.get("fbg_start_sigma", 1.0),
-            fbg_end_sigma=kwargs.get("fbg_end_sigma", 0.004),
-            fbg_guidance_multiplier=kwargs.get("fbg_guidance_multiplier", 1.0),
-            ancestral_start_sigma=1.0, ancestral_end_sigma=0.004,
-            cfg_scale=kwargs.get("cfg_scale", 1.0),
-            max_guidance_scale=kwargs.get("max_guidance_scale", 10.0),
-            max_posterior_scale=kwargs.get("max_posterior_scale", 3.0),
-            initial_value=kwargs.get("log_posterior_initial_value", 0.0),
-            initial_guidance_scale=kwargs.get("initial_guidance_scale", 1.0),
-            guidance_max_change=kwargs.get("guidance_max_change", 1000.0),
-            temp=kwargs.get("fbg_temp", 0.0),
-            offset=kwargs.get("fbg_offset", 0.0),
-            pi=kwargs.get("pi", 0.5),
-            t_0=kwargs.get("t_0", 0.5),
-            t_1=kwargs.get("t_1", 0.4)
+            cfg_start_sigma=kwargs.pop("cfg_start_sigma", d.cfg_start_sigma),
+            cfg_end_sigma=kwargs.pop("cfg_end_sigma", d.cfg_end_sigma),
+            fbg_start_sigma=kwargs.pop("fbg_start_sigma", d.fbg_start_sigma),
+            fbg_end_sigma=kwargs.pop("fbg_end_sigma", d.fbg_end_sigma),
+            fbg_guidance_multiplier=kwargs.pop("fbg_guidance_multiplier", d.fbg_guidance_multiplier),
+            ancestral_start_sigma=kwargs.pop("ancestral_start_sigma", d.ancestral_start_sigma),
+            ancestral_end_sigma=kwargs.pop("ancestral_end_sigma", d.ancestral_end_sigma),
+            cfg_scale=kwargs.pop("cfg_scale", d.cfg_scale),
+            max_guidance_scale=kwargs.pop("max_guidance_scale", d.max_guidance_scale),
+            max_posterior_scale=kwargs.pop("max_posterior_scale", d.max_posterior_scale),
+            initial_value=kwargs.pop("log_posterior_initial_value", d.initial_value),
+            initial_guidance_scale=kwargs.pop("initial_guidance_scale", d.initial_guidance_scale),
+            guidance_max_change=kwargs.pop("guidance_max_change", d.guidance_max_change),
+            temp=kwargs.pop("fbg_temp", d.temp),
+            offset=kwargs.pop("fbg_offset", d.offset),
+            pi=kwargs.pop("pi", d.pi),
+            t_0=kwargs.pop("t_0", d.t_0),
+            t_1=kwargs.pop("t_1", d.t_1)
         )
         
-        # FIXED: Rename blend_mode -> blend_function_name for go() method
-        kwargs['blend_function_name'] = kwargs.get('blend_mode', 'lerp')
-        kwargs['step_blend_function_name'] = kwargs.get('step_blend_mode', 'lerp')
-        # conditional_blend_function_name is already correct
+        # Remove deprecated params
+        kwargs.pop("fbg_eta", None)
+        kwargs.pop("fbg_s_noise", None)
+        
+        # Rename blend modes
+        kwargs['blend_function_name'] = kwargs.pop("blend_mode", "lerp")
+        kwargs['step_blend_function_name'] = kwargs.pop("step_blend_mode", "lerp")
+        # conditional_blend_function_name stays as-is
         
         kwargs['fbg_config'] = fbg_cfg
         
-        return (comfy.samplers.KSAMPLER(PingPongSamplerCore.go, extra_options=kwargs),)
+        return (KSAMPLER(PingPongSamplerCore.go, extra_options=kwargs),)
 
 NODE_CLASS_MAPPINGS = {"PingPongSamplerNodeFBG": PingPongSamplerNodeFBG}
-NODE_DISPLAY_NAME_MAPPINGS = {"PingPongSamplerNodeFBG": "MD: PingPong Sampler (FBG)"}
+NODE_DISPLAY_NAME_MAPPINGS = {"PingPongSamplerNodeFBG": "PingPong Sampler (FBG v1.5.0)"}

@@ -1,11 +1,11 @@
 {
-    "version": "1.4.5",
+    "version": "1.5.0",
     "nodes": [
         {
             "key": "HybridAdaptiveSigmas",
             "type": "HybridAdaptiveSigmas",
             "title": "Hybrid Sigma Scheduler",
-            "description": "",
+            "description": "Advanced sigma scheduler generator with multiple algorithms, presets,\nvisualization, and the new Bong Tangent scheduler.",
             "category": "MD_Nodes/Schedulers",
             "file_path": "Hybrid_Sigma_Scheduler.py"
         },
@@ -116,8 +116,8 @@
         {
             "key": "MD_CLIPTokenFinder",
             "type": "MD_CLIPTokenFinder",
-            "title": "MD: CLIP Token Finder (DIAGNOSTIC)",
-            "description": "Diagnostic version - dumps everything to console.",
+            "title": "MD: CLIP Token Finder",
+            "description": "Universal token finder for Self-Cross Guidance.",
             "category": "MD_Nodes/Guidance",
             "file_path": "testing/MD_CLIPTokenFinder.py"
         },
@@ -180,8 +180,40 @@
         {
             "key": "MasteringChainNode",
             "type": "MasteringChainNode",
-            "title": "MD: Mastering Chain",
-            "description": "Advanced ComfyUI audio mastering chain node adhering to MD_Nodes Guide v1.4.3a.\nFeatures EQ, single/multiband compression (stereo-linked), and limiting.",
+            "title": "MD: Mastering Chain (Full)",
+            "description": "Advanced ComfyUI audio mastering chain node (All-in-One).\nUses the same logic as modular nodes via MasteringBase.",
+            "category": "MD_Nodes/Audio Processing",
+            "file_path": "audio/mastering_chain_node.py"
+        },
+        {
+            "key": "MD_Mastering_Compressor",
+            "type": "MasteringCompressorNode",
+            "title": "MD: Mastering Compressor",
+            "description": "Standalone Compressor Node",
+            "category": "MD_Nodes/Audio Processing",
+            "file_path": "audio/mastering_chain_node.py"
+        },
+        {
+            "key": "MD_Mastering_EQ",
+            "type": "MasteringEQNode",
+            "title": "MD: Mastering EQ & Filters",
+            "description": "Standalone EQ/Filter Node",
+            "category": "MD_Nodes/Audio Processing",
+            "file_path": "audio/mastering_chain_node.py"
+        },
+        {
+            "key": "MD_Mastering_Gain",
+            "type": "MasteringGainNode",
+            "title": "MD: Mastering Gain",
+            "description": "Standalone Gain Node",
+            "category": "MD_Nodes/Audio Processing",
+            "file_path": "audio/mastering_chain_node.py"
+        },
+        {
+            "key": "MD_Mastering_Limiter",
+            "type": "MasteringLimiterNode",
+            "title": "MD: Mastering Limiter",
+            "description": "Standalone Limiter Node",
             "category": "MD_Nodes/Audio Processing",
             "file_path": "audio/mastering_chain_node.py"
         },
@@ -194,28 +226,20 @@
             "file_path": "NoiseDecayScheduler_Custom.py"
         },
         {
-            "key": "PingPongSamplerNodeFBG",
-            "type": "PingPongSamplerNodeFBG",
-            "title": "MD: PingPong Sampler (FBG)",
-            "description": "ComfyUI node wrapper.",
-            "category": "MD_Nodes/Sampling",
-            "file_path": "PingPongSampler_Custom_FBG.py"
-        },
-        {
-            "key": "PingPongSampler_Custom_Lite",
-            "type": "PingPongSamplerNode",
-            "title": "MD: PingPong Sampler (Lite+)",
-            "description": "ComfyUI node wrapper for the Lite+ PingPongSampler.",
-            "category": "MD_Nodes/Sampling",
-            "file_path": "PingPongSampler_Custom.py"
-        },
-        {
             "key": "MD_Qwen_Image_Edit_Object_Replacer_Node",
             "type": "MD_Qwen_Image_Edit_Object_Replacer_Node",
             "title": "MD: Qwen Object Replacer",
             "description": "MD: Qwen Object Replacer (v1.7.1)\nVLM-enhanced inpainting pre-processor optimized for Qwen-Image-Edit models.",
             "category": "MD_Nodes/Workflow_Automation",
             "file_path": "testing/Aesthetic_VLM_Pack/Aesthetic_VLM_Pack_Node3_QwenReplacer.py"
+        },
+        {
+            "key": "MD_SamplerDebug",
+            "type": "MD_SamplerDebug",
+            "title": "MD: Sampler Debug",
+            "description": "Shows if guider is being called.",
+            "category": "MD_Nodes/Guidance",
+            "file_path": "testing/MD_SamplerDebug.py"
         },
         {
             "key": "SceneGeniusAutocreator",
@@ -288,6 +312,22 @@
             "description": "MD: Workflow Section Organizer (Prototype)\n\nA universal passthrough node (*) designed to act as a visual separator or\n'chapter marker' within complex ComfyUI workflows. It accepts any data type,\npasses it through completely unchanged, and displays as a customizable banner.\nHelps to visually structure large graphs into logical processing stages.",
             "category": "MD_Nodes/Workflow Organization",
             "file_path": "organization/WorkflowSectionOrganizer.py"
+        },
+        {
+            "key": "PingPongSamplerNodeFBG",
+            "type": "PingPongSamplerNodeFBG",
+            "title": "PingPong Sampler (FBG v1.5.0)",
+            "description": "ComfyUI Node wrapper with Res 2 restart support (v1.5.0).",
+            "category": "MD_Nodes/Samplers",
+            "file_path": "PingPongSampler_Custom_FBG.py"
+        },
+        {
+            "key": "PingPongSampler_Custom_Lite",
+            "type": "PingPongSamplerNode",
+            "title": "PingPong Sampler (Lite+ v1.5.0) \ud83c\udfd3",
+            "description": "ComfyUI node wrapper for the Lite+ PingPongSampler.",
+            "category": "MD_Nodes/Samplers",
+            "file_path": "PingPongSampler_Custom.py"
         },
         {
             "key": "SigmaConcatenate",
