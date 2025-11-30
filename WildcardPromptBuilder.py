@@ -21,6 +21,14 @@
 #   ✓ Hybrid Mode: Uses LLM to intelligently select from the massive internal lists.
 
 # ░▒▓ CHANGELOG:
+#   - v1.3.0 (Direct Input & Random Files):
+#       • ADDED: Custom template inputs now bypass mode selection (direct text output).
+#       • ADDED: "Random" option for file loaders - picks random file from folder.
+#       • ADDED: expand_custom_templates toggle for wildcard processing in custom inputs.
+#       • CHANGED: Custom inputs now take absolute priority over mode-based generation.
+#   - v1.2.2 (Template Fix):
+#       • FIXED: Custom template inputs now work correctly (was being overwritten).
+#       • FIXED: Template resolution order now properly: File > Custom > Default.
 #   - v1.2.1 (Compliance Polish):
 #       • FIXED: Added tooltips to all inputs.
 #       • FIXED: Robust IS_CHANGED widget validation.
@@ -270,15 +278,18 @@ If concept suggests instrumental, output ONLY: [instrumental]"""
 
     @classmethod
     def _get_files_from_dir(cls, subfolder):
-        """Scans for .txt files in a subfolder relative to the node."""
+        """
+        Scans for .txt files in a subfolder relative to the node.
+        Returns list with "None" and "Random" options prepended.
+        """
         current_dir = os.path.dirname(os.path.realpath(__file__))
         target_dir = os.path.join(current_dir, "wildcards", subfolder)
         
         if not os.path.exists(target_dir):
-            return ["None"]
+            return ["None", "Random"]
             
         files = [os.path.basename(f) for f in glob.glob(os.path.join(target_dir, "*.txt"))]
-        return ["None"] + sorted(files)
+        return ["None", "Random"] + sorted(files)
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -336,29 +347,33 @@ If concept suggests instrumental, output ONLY: [instrumental]"""
                 # File Loaders
                 "load_genre_file": (genre_files, {
                     "default": "None", 
-                    "tooltip": "LOAD GENRE FILE\n- Select .txt file from wildcards/genre folder."
+                    "tooltip": "LOAD GENRE FILE\n- Select .txt file from wildcards/genre folder.\n- 'Random' picks a random file using the seed."
                 }),
                 "load_vocal_file": (vocal_files, {
                     "default": "None", 
-                    "tooltip": "LOAD VOCAL FILE\n- Select .txt file from wildcards/vocal folder."
+                    "tooltip": "LOAD VOCAL FILE\n- Select .txt file from wildcards/vocal folder.\n- 'Random' picks a random file using the seed."
                 }),
                 "load_lyrics_file": (lyrics_files, {
                     "default": "None", 
-                    "tooltip": "LOAD LYRICS FILE\n- Select .txt file from wildcards/lyrics folder."
+                    "tooltip": "LOAD LYRICS FILE\n- Select .txt file from wildcards/lyrics folder.\n- 'Random' picks a random file using the seed."
                 }),
 
                 # Custom Overrides
                 "custom_genre_template": ("STRING", {
                     "multiline": True, "default": "",
-                    "tooltip": "CUSTOM GENRE\n- Manual wildcard template override."
+                    "tooltip": "CUSTOM GENRE\n- Direct text input (bypasses mode selection).\n- Supports wildcards like {option1|option2}."
                 }),
                 "custom_vocal_template": ("STRING", {
                     "multiline": True, "default": "",
-                    "tooltip": "CUSTOM VOCAL\n- Manual wildcard template override."
+                    "tooltip": "CUSTOM VOCAL\n- Direct text input (bypasses mode selection).\n- Supports wildcards like {option1|option2}."
                 }),
                 "custom_lyrics_template": ("STRING", {
                     "multiline": True, "default": "",
-                    "tooltip": "CUSTOM LYRICS\n- Manual wildcard template override."
+                    "tooltip": "CUSTOM LYRICS\n- Direct text input (bypasses mode selection).\n- Supports wildcards like {option1|option2}."
+                }),
+                "expand_custom_templates": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": "EXPAND CUSTOM WILDCARDS\n- If True, wildcards in custom inputs are expanded.\n- If False, custom inputs used as literal text."
                 }),
                 
                 # Toggles
@@ -443,6 +458,37 @@ If concept suggests instrumental, output ONLY: [instrumental]"""
         except Exception as e:
             logging.error(f"[Wildcard] Failed to read {path}: {e}")
             return ""
+
+    def _read_random_file_content(self, subfolder, seed):
+        """
+        Randomly selects and loads a file from the wildcard subfolder.
+        Uses seed for reproducibility.
+        
+        Args:
+            subfolder: Subfolder name ('genre', 'vocal', 'lyrics')
+            seed: Random seed for selection
+            
+        Returns:
+            File content as string, or empty string if no files found
+        """
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        target_dir = os.path.join(current_dir, "wildcards", subfolder)
+        
+        if not os.path.exists(target_dir):
+            logging.warning(f"[WildcardPromptBuilder] Random file: directory not found: {target_dir}")
+            return ""
+        
+        files = [os.path.basename(f) for f in glob.glob(os.path.join(target_dir, "*.txt"))]
+        
+        if not files:
+            logging.warning(f"[WildcardPromptBuilder] Random file: no .txt files in {subfolder}/")
+            return ""
+        
+        rng = random.Random(seed)
+        selected = rng.choice(files)
+        logging.info(f"[WildcardPromptBuilder] Random selection: {subfolder}/{selected}")
+        
+        return self._read_file_content(subfolder, selected)
 
     def _call_llm(self, backend, api_url, model, prompt):
         """Unified LLM Caller."""
@@ -610,72 +656,119 @@ If concept suggests instrumental, output ONLY: [instrumental]"""
             concept = kwargs.get("concept", "")
             expander = WildcardExpander(seed)
 
-            # --- Template Resolution ---
-            # Genre
-            genre_tmpl = self._read_file_content("genre", kwargs.get("load_genre_file"))
-            if not genre_tmpl: genre_tmpl = kwargs.get("custom_genre_template")
-            if not genre_tmpl: genre_tmpl = self._generate_default_genre_template()
-
-            # Vocal
-            vocal_tmpl = self._read_file_content("vocal", kwargs.get("load_vocal_file"))
-            if not vocal_tmpl: vocal_tmpl = kwargs.get("custom_vocal_template")
-            if not vocal_tmpl: vocal_tmpl = self._generate_default_vocal_template()
-
-            # Lyrics
-            lyrics_tmpl = self._read_file_content("lyrics", kwargs.get("load_lyrics_file"))
-            if not lyrics_tmpl: lyrics_tmpl = kwargs.get("custom_lyrics_template")
-            if not lyrics_tmpl: lyrics_tmpl = self.DEFAULT_LYRICS_TEMPLATE
-
-            # Duration
-            dur_tmpl = kwargs.get("duration_template", "{120|180}")
-
-            # --- Generation Logic ---
+            # --- Template Resolution & Generation ---
+            # NEW LOGIC: Custom inputs bypass mode selection entirely
+            
+            expand_customs = kwargs.get("expand_custom_templates", True)
             genre_out, vocal_out, lyrics_out = "", "", ""
             
-            # LLM Settings
+            # LLM Settings (for mode-based generation)
             backend = kwargs.get("llm_backend")
             url = kwargs.get("ollama_api_url") if backend == "ollama" else kwargs.get("lm_studio_api_url")
             model = kwargs.get("ollama_model") if backend == "ollama" else kwargs.get("lm_studio_model")
 
-            # 1. DURATION
+            # 1. DURATION (always uses wildcard expansion)
+            dur_tmpl = kwargs.get("duration_template", "{120|180}")
             duration_out = expander.expand(dur_tmpl)
 
             # 2. GENRE
             if kwargs.get("generate_genre", True):
-                if mode == "hybrid":
-                    genre_out = self._generate_hybrid_genre(concept, seed, backend, url, model)
-                elif mode == "llm":
-                    prompt = f"Generate 5 descriptive music genre tags for: {concept}. Comma separated."
-                    try: genre_out = self._call_llm(backend, url, model, prompt)
-                    except: genre_out = expander.expand(genre_tmpl)
-                else: # Wildcard
-                    genre_out = expander.expand(genre_tmpl)
+                # Check custom input FIRST
+                custom_genre = kwargs.get("custom_genre_template", "")
+                if custom_genre.strip():
+                    # Custom input takes absolute priority
+                    genre_out = expander.expand(custom_genre) if expand_customs else custom_genre
+                    logging.info(f"[WildcardPromptBuilder] Using custom genre input (expand={expand_customs})")
+                else:
+                    # No custom input, use file/mode-based generation
+                    loaded_file = kwargs.get("load_genre_file")
+                    if loaded_file == "Random":
+                        genre_tmpl = self._read_random_file_content("genre", seed)
+                    elif loaded_file and loaded_file != "None":
+                        genre_tmpl = self._read_file_content("genre", loaded_file)
+                    else:
+                        genre_tmpl = None
+                    
+                    if not genre_tmpl:
+                        genre_tmpl = self._generate_default_genre_template()
+                    
+                    # Apply mode-based generation
+                    if mode == "hybrid":
+                        genre_out = self._generate_hybrid_genre(concept, seed, backend, url, model)
+                    elif mode == "llm":
+                        prompt = f"Generate 5 descriptive music genre tags for: {concept}. Comma separated."
+                        try: 
+                            genre_out = self._call_llm(backend, url, model, prompt)
+                        except: 
+                            genre_out = expander.expand(genre_tmpl)
+                    else:  # Wildcard mode
+                        genre_out = expander.expand(genre_tmpl)
 
-            # 3. VOCALS & LYRICS
+            # 3. VOCALS
             force_inst = kwargs.get("force_instrumental", False)
             
             if force_inst:
                 vocal_out = ""
                 lyrics_out = "[Instrumental]"
             else:
+                # VOCALS
                 if kwargs.get("generate_vocals", True):
-                    if mode == "hybrid":
-                        vocal_out = self._generate_hybrid_vocal(concept, seed, backend, url, model)
-                    elif mode == "llm":
-                        prompt = f"Generate 3 vocal style tags for: {concept}. Comma separated."
-                        try: vocal_out = self._call_llm(backend, url, model, prompt)
-                        except: vocal_out = expander.expand(vocal_tmpl)
+                    custom_vocal = kwargs.get("custom_vocal_template", "")
+                    if custom_vocal.strip():
+                        # Custom input takes priority
+                        vocal_out = expander.expand(custom_vocal) if expand_customs else custom_vocal
+                        logging.info(f"[WildcardPromptBuilder] Using custom vocal input (expand={expand_customs})")
                     else:
-                        vocal_out = expander.expand(vocal_tmpl)
+                        # No custom, use file/mode-based
+                        loaded_file = kwargs.get("load_vocal_file")
+                        if loaded_file == "Random":
+                            vocal_tmpl = self._read_random_file_content("vocal", seed)
+                        elif loaded_file and loaded_file != "None":
+                            vocal_tmpl = self._read_file_content("vocal", loaded_file)
+                        else:
+                            vocal_tmpl = None
+                        
+                        if not vocal_tmpl:
+                            vocal_tmpl = self._generate_default_vocal_template()
+                        
+                        if mode == "hybrid":
+                            vocal_out = self._generate_hybrid_vocal(concept, seed, backend, url, model)
+                        elif mode == "llm":
+                            prompt = f"Generate 3 vocal style tags for: {concept}. Comma separated."
+                            try: 
+                                vocal_out = self._call_llm(backend, url, model, prompt)
+                            except: 
+                                vocal_out = expander.expand(vocal_tmpl)
+                        else:
+                            vocal_out = expander.expand(vocal_tmpl)
 
+                # LYRICS
                 if kwargs.get("generate_lyrics", True):
-                    if mode in ["llm", "hybrid"]:
-                        try:
-                            lyrics_out = self._call_llm(backend, url, model, self.PROMPT_LLM_LYRICS.format(concept=concept))
-                        except:
-                            lyrics_out = expander.expand(lyrics_tmpl)
+                    custom_lyrics = kwargs.get("custom_lyrics_template", "")
+                    if custom_lyrics.strip():
+                        # Custom input takes priority
+                        lyrics_out = expander.expand(custom_lyrics) if expand_customs else custom_lyrics
+                        logging.info(f"[WildcardPromptBuilder] Using custom lyrics input (expand={expand_customs})")
                     else:
-                        lyrics_out = expander.expand(lyrics_tmpl)
+                        # No custom, use file/mode-based
+                        loaded_file = kwargs.get("load_lyrics_file")
+                        if loaded_file == "Random":
+                            lyrics_tmpl = self._read_random_file_content("lyrics", seed)
+                        elif loaded_file and loaded_file != "None":
+                            lyrics_tmpl = self._read_file_content("lyrics", loaded_file)
+                        else:
+                            lyrics_tmpl = None
+                        
+                        if not lyrics_tmpl:
+                            lyrics_tmpl = self.DEFAULT_LYRICS_TEMPLATE
+                        
+                        if mode in ["llm", "hybrid"]:
+                            try:
+                                lyrics_out = self._call_llm(backend, url, model, self.PROMPT_LLM_LYRICS.format(concept=concept))
+                            except:
+                                lyrics_out = expander.expand(lyrics_tmpl)
+                        else:
+                            lyrics_out = expander.expand(lyrics_tmpl)
 
             # --- Visualization ---
             preview_image = self._render_text_preview(genre_out, vocal_out, lyrics_out, duration_out, seed)

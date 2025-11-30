@@ -1,122 +1,80 @@
 # ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-# ████ MD_Nodes/utils/guidance_core.py – Universal Guidance Engine ████▓▒░
+# ████ MD_Nodes/utils/guidance_core – Universal Guidance Engine ████▓▒░
 # © 2025 MDMAchine
 # ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 # ░▒▓ DESCRIPTION:
-#   Core optimization infrastructure for guided diffusion sampling.
-#   Implements iterative latent refinement for:
-#     • Self-Cross Guidance (Qiu et al., CVPR 2025)
-#     • Universal Guidance (Bansal et al., CVPR 2023) [FUTURE]
-#     • Custom guidance methods
+#   Universal optimization engine for diffusion guidance.
+#   Separates optimization mechanics (HOW) from loss computation (WHAT).
 #
-# ░▒▓ ARCHITECTURE:
-#   Separates "How to optimize" (this file) from "What to optimize" (loss functions).
-#   Loss functions subclass BaseGuidanceLoss and implement compute().
+# ░▒▓ CHANGELOG:
+#   - v1.1.0 (Current - CRITICAL FIX):
+#       FIXED: BaseGuidanceLoss now has proper __init__ accepting config
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 
 import torch
 import logging
+from dataclasses import dataclass
+from typing import Optional, Callable, Dict, Any
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
-from typing import Optional, Dict, Any, Callable
 
 # =================================================================================
-# == Base Configuration
+# == Configuration Base Class
 # =================================================================================
 @dataclass
 class GuidanceConfig:
-    """
-    Universal configuration for iterative guidance optimization.
-    All guidance methods inherit from this.
-    """
-    # Optimization parameters
-    max_iters: int = 3              # Number of refinement steps per timestep
-    learning_rate: float = 0.01     # Step size for gradient descent
-    loss_threshold: float = 1e-4    # Stop if loss < this (early stopping)
-    gradient_clip: float = 1.0      # Clip gradients to prevent explosion
-    
-    # Adaptive learning rate (optional)
-    use_adaptive_lr: bool = False   # Scale LR by sigma (noise level)
-    lr_scale_factor: float = 1.0    # Multiplier for adaptive LR
-    
-    # Logging
-    verbose: bool = False           # Log per-iteration loss values
-    log_prefix: str = "[Guidance]"  # Prefix for log messages
+    """Base configuration for guidance methods."""
+    max_iters: int = 3
+    learning_rate: float = 0.01
+    loss_threshold: float = 1e-4
+    gradient_clip: float = 1.0
+    adaptive_lr: bool = True  # Scale LR by sigma
 
 # =================================================================================
-# == Guidance Context (Data Container)
+# == Guidance Context
 # =================================================================================
 @dataclass
 class GuidanceContext:
-    """
-    Container for all data passed to loss functions.
-    Allows loss functions to access whatever they need.
-    """
-    # Required fields
-    z_noisy: torch.Tensor           # Current noisy latent [B, C, H, W] or [B, C, T, F]
-    sigma: torch.Tensor             # Current noise level (scalar or [B])
-    timestep: Optional[int] = None  # Current diffusion timestep (optional)
-    
-    # Model outputs (optional, populated by optimizer)
-    noise_pred: Optional[torch.Tensor] = None       # ε_θ(z_t, t, c)
-    x_0_pred: Optional[torch.Tensor] = None         # Predicted clean sample
-    v_pred: Optional[torch.Tensor] = None           # Velocity prediction (SD3, etc.)
-    
-    # Attention maps (optional, for attention-based guidance)
-    self_attn_maps: Optional[Dict[str, torch.Tensor]] = None
-    cross_attn_maps: Optional[Dict[str, torch.Tensor]] = None
-    
-    # Custom fields (extensible)
-    extras: Dict[str, Any] = field(default_factory=dict)
+    """Data container passed to loss functions."""
+    z_noisy: torch.Tensor
+    sigma: torch.Tensor
+    noise_pred: Optional[torch.Tensor] = None
+    x_0_pred: Optional[torch.Tensor] = None
+    attention_maps: Optional[Dict[str, torch.Tensor]] = None
+    extras: Optional[Dict[str, Any]] = None
 
 # =================================================================================
-# == Abstract Base Loss
+# == Base Loss Class
 # =================================================================================
 class BaseGuidanceLoss(ABC):
-    """
-    Abstract base class for all guidance loss functions.
+    """Abstract base class for guidance loss functions."""
     
-    Subclass this to implement custom guidance methods.
-    The optimizer calls compute() in each iteration.
-    """
+    def __init__(self, config: GuidanceConfig):
+        """
+        Initialize loss function with configuration.
+        
+        Args:
+            config: Guidance configuration (subclass of GuidanceConfig)
+        """
+        self.config = config
     
     @abstractmethod
     def compute(self, context: GuidanceContext) -> torch.Tensor:
         """
-        Compute the guidance loss for the current latent state.
+        Compute guidance loss.
         
         Args:
-            context: GuidanceContext with z_noisy, sigma, model outputs, etc.
+            context: Current optimization context
         
         Returns:
-            Scalar loss tensor (must support .backward())
-        """
-        pass
-    
-    def pre_optimization_hook(self, context: GuidanceContext) -> None:
-        """
-        Optional hook called BEFORE optimization starts.
-        Useful for setup (e.g., initializing buffers).
-        """
-        pass
-    
-    def post_optimization_hook(self, context: GuidanceContext) -> None:
-        """
-        Optional hook called AFTER optimization completes.
-        Useful for cleanup or logging final state.
+            Scalar loss tensor with gradient
         """
         pass
 
 # =================================================================================
-# == Universal Guidance Optimizer
+# == Universal Optimizer
 # =================================================================================
 class GuidanceOptimizer:
-    """
-    Universal optimization loop for guided diffusion.
-    
-    Powers Self-Cross, Universal Classifier Guidance, and future methods.
-    Handles gradient computation, clipping, adaptive LR, and early stopping.
-    """
+    """Universal optimization loop for diffusion guidance."""
     
     def __init__(self, config: GuidanceConfig):
         self.config = config
@@ -127,127 +85,81 @@ class GuidanceOptimizer:
         sigma: torch.Tensor,
         loss_fn: BaseGuidanceLoss,
         model_forward: Optional[Callable] = None,
-        timestep: Optional[int] = None,
-        populate_context: Optional[Callable] = None,
+        populate_context: Optional[Callable[[GuidanceContext], None]] = None
     ) -> torch.Tensor:
         """
-        Optimize a noisy latent via iterative gradient descent.
+        Universal optimization loop.
         
         Args:
-            z: Initial noisy latent [B, C, H, W]
-            sigma: Noise level (scalar or [B])
-            loss_fn: Guidance loss function (subclass of BaseGuidanceLoss)
-            model_forward: Optional function to run model (for x_0 prediction)
-            timestep: Optional timestep index
-            populate_context: Optional function to add custom data to context
+            z: Noisy latent to optimize
+            sigma: Current noise level
+            loss_fn: Loss function to minimize
+            model_forward: Optional model forward pass function
+            populate_context: Optional callback to populate context (e.g., capture attention)
         
         Returns:
-            Optimized latent (same shape as z)
-        
-        Algorithm:
-            for iter in range(max_iters):
-                1. Create context (with model outputs if model_forward provided)
-                2. Compute loss = loss_fn.compute(context)
-                3. Backprop: grad = ∂loss/∂z
-                4. Update: z = z - lr * grad
-                5. Check early stopping
+            Optimized latent
         """
-        # Enable gradients on latent
+        if self.config.max_iters == 0:
+            return z
+        
+        # Enable gradients
         z_opt = z.detach().clone().requires_grad_(True)
         
-        # Pre-optimization hook
-        initial_context = GuidanceContext(z_noisy=z_opt, sigma=sigma, timestep=timestep)
-        loss_fn.pre_optimization_hook(initial_context)
+        # Adaptive learning rate
+        if self.config.adaptive_lr and sigma is not None:
+            lr = self.config.learning_rate * sigma.item() if sigma.numel() == 1 else self.config.learning_rate
+        else:
+            lr = self.config.learning_rate
         
-        # Optimization loop
-        for iter_idx in range(self.config.max_iters):
-            
-            # ═══════════════════════════════════════════════════════
-            # STEP 1: Build Context
-            # ═══════════════════════════════════════════════════════
+        for iteration in range(self.config.max_iters):
+            # Build context
             context = GuidanceContext(
                 z_noisy=z_opt,
-                sigma=sigma,
-                timestep=timestep
+                sigma=sigma
             )
             
-            # Optional: Run model to populate predictions
+            # Optional: Run model forward pass
             if model_forward is not None:
                 with torch.enable_grad():
-                    model_output = model_forward(z_opt, sigma)
-                    
-                    # Parse model output (format varies by sampler)
-                    if isinstance(model_output, dict):
-                        context.noise_pred = model_output.get('noise_pred')
-                        context.x_0_pred = model_output.get('x_0_pred')
-                        context.v_pred = model_output.get('v_pred')
-                    else:
-                        # Assume it's noise prediction
-                        context.noise_pred = model_output
+                    noise_pred = model_forward(z_opt, sigma)
+                    context.noise_pred = noise_pred
             
-            # Optional: Custom context population (e.g., attention maps)
+            # Optional: Populate context (e.g., capture attention maps)
             if populate_context is not None:
                 populate_context(context)
             
-            # ═══════════════════════════════════════════════════════
-            # STEP 2: Compute Loss
-            # ═══════════════════════════════════════════════════════
-            with torch.enable_grad():
-                loss = loss_fn.compute(context)
-                
-                if self.config.verbose:
-                    logging.info(f"{self.config.log_prefix} Iter {iter_idx+1}/{self.config.max_iters}: loss={loss.item():.6f}")
-                
-                # Early stopping
-                if loss.item() < self.config.loss_threshold:
-                    if self.config.verbose:
-                        logging.info(f"{self.config.log_prefix} Early stop (loss < {self.config.loss_threshold})")
-                    break
-                
-                # ═══════════════════════════════════════════════════════
-                # STEP 3: Backprop
-                # ═══════════════════════════════════════════════════════
-                grad = torch.autograd.grad(
-                    outputs=loss,
-                    inputs=z_opt,
-                    retain_graph=False,
-                    create_graph=False
-                )[0]
-                
-                # Gradient clipping (prevent instability)
-                if self.config.gradient_clip > 0:
-                    grad = torch.clamp(
-                        grad,
-                        -self.config.gradient_clip,
-                        self.config.gradient_clip
-                    )
-                
-                # ═══════════════════════════════════════════════════════
-                # STEP 4: Update Latent
-                # ═══════════════════════════════════════════════════════
-                with torch.no_grad():
-                    # Compute learning rate (adaptive or fixed)
-                    if self.config.use_adaptive_lr:
-                        # Scale LR by noise level (higher noise = larger steps)
-                        sigma_val = sigma[0].item() if sigma.numel() > 1 else sigma.item()
-                        lr = self.config.learning_rate * sigma_val * self.config.lr_scale_factor
-                    else:
-                        lr = self.config.learning_rate
-                    
-                    # Gradient descent step
-                    z_opt = z_opt - lr * grad
-                    
-                    # Re-enable grad for next iteration
-                    z_opt = z_opt.detach().requires_grad_(True)
-        
-        # Post-optimization hook
-        final_context = GuidanceContext(z_noisy=z_opt.detach(), sigma=sigma, timestep=timestep)
-        loss_fn.post_optimization_hook(final_context)
+            # Compute loss
+            loss = loss_fn.compute(context)
+            
+            if not loss.requires_grad:
+                logging.warning(f"[Guidance] Loss has no gradient at iter {iteration}")
+                break
+            
+            # Compute gradients
+            grad = torch.autograd.grad(loss, z_opt, create_graph=False)[0]
+            
+            # Clip gradients
+            if self.config.gradient_clip > 0:
+                grad = torch.clamp(grad, -self.config.gradient_clip, self.config.gradient_clip)
+            
+            # Update latent
+            with torch.no_grad():
+                z_opt = z_opt - lr * grad
+                z_opt.requires_grad_(True)
+            
+            # Logging
+            logging.info(f"[Guidance] Iter {iteration+1}/{self.config.max_iters}: loss={loss.item():.6f}")
+            
+            # Early stopping
+            if loss.item() < self.config.loss_threshold:
+                logging.info(f"[Guidance] Early stop at iter {iteration+1}")
+                break
         
         return z_opt.detach()
 
 # =================================================================================
-# == Export Public API
+# == Exports
 # =================================================================================
 __all__ = [
     'GuidanceConfig',
