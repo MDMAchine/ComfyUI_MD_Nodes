@@ -1,5 +1,5 @@
 {
-    "version": "1.5.0",
+    "version": "1.5.1",
     "nodes": [
         {
             "key": "HybridAdaptiveSigmas",
@@ -122,6 +122,22 @@
             "file_path": "testing/MD_CLIPTokenFinder.py"
         },
         {
+            "key": "MD_CustomNoiseGenerator",
+            "type": "MD_CustomNoiseGenerator",
+            "title": "MD: Custom Noise Generator",
+            "description": "Creates a standalone NOISE object for SamplerCustomAdvanced using\nselectable algorithms (Gaussian, Perlin, Collatz, etc.).",
+            "category": "MD_Nodes/Noise",
+            "file_path": "noise/CustomNoise.py"
+        },
+        {
+            "key": "MD_EmptyLatentRatioSelector",
+            "type": "MD_EmptyLatentRatioSelector",
+            "title": "MD: Empty Latent Ratio Select",
+            "description": "Generates empty latents based on Aspect Ratio and Target Megapixels.\nCalculates precise W/H dimensions to match total pixel count area.",
+            "category": "MD_Nodes/Utilities",
+            "file_path": "utility/EmptyLatentRatioSelector.py"
+        },
+        {
             "key": "EnhancedAnnotationNode",
             "type": "EnhancedAnnotationNode",
             "title": "MD: Enhanced Annotation",
@@ -160,6 +176,14 @@
             "description": "MD: GPU Temperature Protection (Enhanced)\n\nMonitors GPU temperature, VRAM, and utilization via nvidia-smi.\nPauses the ComfyUI queue if temperature exceeds a set threshold, resuming\nonce it cools down. Includes multi-GPU support, logging, adaptive cooling,\nand specific data type pass-through. Outputs the current temperature as a string.",
             "category": "MD_Nodes/Utility",
             "file_path": "utility/GPUTemperatureProtection.py"
+        },
+        {
+            "key": "MD_GlobalUpdateManager",
+            "type": "MD_GlobalUpdateManager",
+            "title": "MD: Global Update Fixer (v1.7.1)",
+            "description": "Manages custom nodes. Includes Repair Tool for converting manual installs to Git repos.",
+            "category": "MD_Nodes/Utilities",
+            "file_path": "utility/GlobalUpdateManager.py"
         },
         {
             "key": "MD_InitNoiseOptimizer",
@@ -218,6 +242,14 @@
             "file_path": "audio/mastering_chain_node.py"
         },
         {
+            "key": "MD_MultiNoiseBlender",
+            "type": "MD_MultiNoiseBlender",
+            "title": "MD: Noise Blender (5-Layer)",
+            "description": "Combines up to 5 Noise sources sequentially into a single NOISE object.\nInspired by Bleppings Sonar suite.",
+            "category": "MD_Nodes/Noise",
+            "file_path": "noise/CustomNoise.py"
+        },
+        {
             "key": "NoiseDecayScheduler_Custom",
             "type": "NoiseDecayScheduler_Custom",
             "title": "MD: Noise Decay Scheduler (Advanced)",
@@ -226,12 +258,36 @@
             "file_path": "NoiseDecayScheduler_Custom.py"
         },
         {
+            "key": "MD_OptimizerSelector",
+            "type": "MD_OptimizerSelector",
+            "title": "MD: Optimizer Selector",
+            "description": "Configures an Optimizer Factory for use in advanced sampling or training nodes.",
+            "category": "MD_Nodes/Optimization",
+            "file_path": "optimization/OptimizerSelector.py"
+        },
+        {
+            "key": "PingPongSamplerNodeFBG",
+            "type": "PingPongSamplerNodeFBG",
+            "title": "MD: PingPong Sampler (FBG v1.5.0)",
+            "description": "ComfyUI Node wrapper with Res 2 restart support (v1.5.0).",
+            "category": "MD_Nodes/Samplers",
+            "file_path": "PingPongSampler_Custom_FBG.py"
+        },
+        {
             "key": "MD_Qwen_Image_Edit_Object_Replacer_Node",
             "type": "MD_Qwen_Image_Edit_Object_Replacer_Node",
             "title": "MD: Qwen Object Replacer",
             "description": "MD: Qwen Object Replacer (v1.7.1)\nVLM-enhanced inpainting pre-processor optimized for Qwen-Image-Edit models.",
             "category": "MD_Nodes/Workflow_Automation",
             "file_path": "testing/Aesthetic_VLM_Pack/Aesthetic_VLM_Pack_Node3_QwenReplacer.py"
+        },
+        {
+            "key": "MD_RepoMaintenance",
+            "type": "MD_RepoMaintenance",
+            "title": "MD: Repo Fortress (v2.2.1)",
+            "description": "Manages updates for MD_Nodes. Includes Fortress safeguards (Disk Space, Race Conditions).",
+            "category": "MD_Nodes/Utilities",
+            "file_path": "utility/RepoMaintenance.py"
         },
         {
             "key": "MD_SamplerDebug",
@@ -282,6 +338,22 @@
             "file_path": "text/TextInputNode.py"
         },
         {
+            "key": "MD_WorkflowContextBus",
+            "type": "MD_WorkflowContextBus",
+            "title": "MD: Universal Context Bus",
+            "description": "Universal Context Bus.\nAggregates inputs into a dictionary and outputs them individually.",
+            "category": "MD_Nodes/Workflow",
+            "file_path": "organization/WorkflowContextBus.py"
+        },
+        {
+            "key": "UniversalGuardian",
+            "type": "UniversalGuardian",
+            "title": "MD: Universal Guardian",
+            "description": "MD Universal Guardian\n\nEvaluates generated outputs (latent, image) against quality metrics.\nOptionally retries generation with enhanced prompts if quality is below threshold,\nusing Ollama, LM Studio, or keywords.",
+            "category": "MD_Nodes/Workflow",
+            "file_path": "testing/UniversalGuardian.py"
+        },
+        {
             "key": "UniversalRoutingHubAdvanced",
             "type": "UniversalRoutingHubAdvanced",
             "title": "MD: Universal Routing Hub",
@@ -314,17 +386,9 @@
             "file_path": "organization/WorkflowSectionOrganizer.py"
         },
         {
-            "key": "PingPongSamplerNodeFBG",
-            "type": "PingPongSamplerNodeFBG",
-            "title": "PingPong Sampler (FBG v1.5.0)",
-            "description": "ComfyUI Node wrapper with Res 2 restart support (v1.5.0).",
-            "category": "MD_Nodes/Samplers",
-            "file_path": "PingPongSampler_Custom_FBG.py"
-        },
-        {
             "key": "PingPongSampler_Custom_Lite",
             "type": "PingPongSamplerNode",
-            "title": "PingPong Sampler (Lite+ v1.5.0) \ud83c\udfd3",
+            "title": "PingPong Sampler (Lite+ v1.5.0)",
             "description": "ComfyUI node wrapper for the Lite+ PingPongSampler.",
             "category": "MD_Nodes/Samplers",
             "file_path": "PingPongSampler_Custom.py"
@@ -349,25 +413,21 @@
     "dependencies": [
         "Jinja2",
         "MarkupSafe",
+        "av",
+        "bitsandbytes",
         "filelock",
         "fsspec",
-        "gptqmodel",
-        "h5py",
-        "hdf5plugin",
         "imageio",
         "librosa",
+        "lion_pytorch",
         "lmstudio",
-        "loguru",
         "matplotlib",
         "mpmath",
-        "natsort",
         "networkx",
         "ollama",
-        "packaging",
         "pedalboard",
-        "peft",
         "piexif",
-        "prodigy-opt",
+        "prodigyopt",
         "pykakasi",
         "pyloudnorm",
         "requests",
