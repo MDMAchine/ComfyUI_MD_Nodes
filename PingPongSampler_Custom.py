@@ -873,5 +873,5 @@ NODE_CLASS_MAPPINGS: Dict[str, Any] = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS: Dict[str, str] = {
-    "PingPongSampler_Custom_Lite": "PingPong Sampler (Lite+ v1.5.0) 🏓",
+    "PingPongSampler_Custom_Lite": "PingPong Sampler (Lite+ v1.5.0)",
 }

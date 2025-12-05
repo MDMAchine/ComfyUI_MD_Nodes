@@ -2,22 +2,22 @@
 # ████ ComfyUI Project Updater v4.3.7 - Enhanced Edition  ████▓▒░
 # ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 # ░▒▓ ORIGIN & DEV:
-#  • Crafted with care by MDMAchine / MD_Nodes
-#  • Enhanced by Claude, Gemini, etc.
-#  • License: Apache 2.0 — do what you want, just give credit
+#   • Crafted with care by MDMAchine / MD_Nodes
+#   • Enhanced by Claude, Gemini, etc.
+#   • License: Apache 2.0 — do what you want, just give credit
 # ░▒▓ DESCRIPTION:
-#  A professional-grade CLI tool for ComfyUI project management with
-#  enhanced dynamic node detection and interactive menu system.
+#   A professional-grade CLI tool for ComfyUI project management with
+#   enhanced dynamic node detection and interactive menu system.
 # ░▒▓ NEW IN v4.3.7:
-#  ✓ CRITICAL FIX (Backwards Comp.): The generated __init__.py now uses the 
-#   original NODE_CLASS_MAPPINGS key (e.g., "APGGuiderForked") instead of 
-#   the Python class name (e.g., "APGGuiderNode") for the dictionary key, 
-#     ensuring compatibility with existing user workflows.
-#  ✓ FIXED (Static Parser): Upgraded the "Static Fallback Parser"
-#   (`extract_node_mappings_static`) to support type-hinted assignments.
-#  ✓ FIXED: `NameError` crash in `main()` from v4.3.6 re-launch guard.
+#   ✓ CRITICAL FIX (Backwards Comp.): The generated __init__.py now uses the 
+#     original NODE_CLASS_MAPPINGS key (e.g., "APGGuiderForked") instead of 
+#     the Python class name (e.g., "APGGuiderNode") for the dictionary key, 
+#       ensuring compatibility with existing user workflows.
+#   ✓ FIXED (Static Parser): Upgraded the "Static Fallback Parser"
+#     (`extract_node_mappings_static`) to support type-hinted assignments.
+#   ✓ FIXED: `NameError` crash in `main()` from v4.3.6 re-launch guard.
 # ░▒▓ FROM v4.3.6:
-#  ✓ ADDED: "Re-launch Guard" to auto-run script in the correct venv.
+#   ✓ ADDED: "Re-launch Guard" to auto-run script in the correct venv.
 # ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 
 import os
@@ -158,8 +158,8 @@ def parse_arguments() -> argparse.Namespace:
 
 def print_header():
   print("\n" + "█" * 70)
-  print("█" + "   ComfyUI Project Updater v4.3.7 - BY MDMACHINE    ".center(68) + "█")
-  print("█" + "   Automate Your Node Management & Release Workflow   ".center(68) + "█")
+  print("█" + "    ComfyUI Project Updater v4.3.7 - BY MDMACHINE     ".center(68) + "█")
+  print("█" + "    Automate Your Node Management & Release Workflow    ".center(68) + "█")
   print("█" * 70 + "\n")
 
 def print_section_header(title: str, icon: str = "▓"):
@@ -254,19 +254,19 @@ def show_preset_menu() -> Optional[Dict[str, Any]]:
   print("\n Choose a preset or customize manually:")
   print()
   print(" 1. 🔍 Full Re-scan (Clear cache + Debug)")
-  print("   → Clear cache, debug mode, no changes made")
+  print("    → Clear cache, debug mode, no changes made")
   print()
   print(" 2. 🚀 Quick Update")
-  print("   → Standard update with backup")
+  print("    → Standard update with backup")
   print()
   print(" 3. 📦 Release Build (Bump + Commit)")
-  print("   → Bump patch version, create backup, commit to git")
+  print("    → Bump patch version, create backup, commit to git")
   print()
   print(" 4. 🐞 Debug Mode")
-  print("   → Dry run with debug output, no changes")
+  print("    → Dry run with debug output, no changes")
   print()
   print(" 5. ⚙️ Custom (Manual configuration)")
-  print("   → Choose all options manually")
+  print("    → Choose all options manually")
   print()
   print(" 0. ❌ Exit")
   print()
@@ -321,10 +321,10 @@ def interactive_menu(config: Dict[str, Any]) -> Dict[str, Any]:
     print(f" Clear Cache:  {'YES ✓' if preset.get('clear_cache') else 'NO'}")
     print(f" Version Bump:  {preset.get('bump', 'None') or preset.get('set_version', 'Keep current')}")
     print(f" Pin Versions:  {'YES ✓' if preset.get('pin_versions') else 'NO'}")
-    print(f" Git Commit:   {'YES ✓' if preset.get('git_commit') else 'NO'}")
+    print(f" Git Commit:    {'YES ✓' if preset.get('git_commit') else 'NO'}")
     print(f" Create Backup: {'NO ⚠️' if preset.get('no_backup') else 'YES ✓'}")
-    print(f" Dry Run:    {'YES ✓' if preset.get('dry_run') else 'NO'}")
-    print(f" Debug Mode:   {'YES ✓' if preset.get('debug') else 'NO'}")
+    print(f" Dry Run:     {'YES ✓' if preset.get('dry_run') else 'NO'}")
+    print(f" Debug Mode:    {'YES ✓' if preset.get('debug') else 'NO'}")
     print("=" * 70)
 
     confirm = input("\n✅ Proceed with preset? (Y/n): ").strip().lower()
@@ -391,10 +391,10 @@ def interactive_menu(config: Dict[str, Any]) -> Dict[str, Any]:
   print(f" Clear Cache:  {'YES ✓' if options.get('clear_cache') else 'NO'}")
   print(f" Version Bump:  {options.get('bump', 'None') or options.get('set_version', 'Keep current')}")
   print(f" Pin Versions:  {'YES ✓' if options.get('pin_versions') else 'NO'}")
-  print(f" Git Commit:   {'YES ✓' if options.get('git_commit') else 'NO'}")
+  print(f" Git Commit:    {'YES ✓' if options.get('git_commit') else 'NO'}")
   print(f" Create Backup: {'NO ⚠️' if options.get('no_backup') else 'YES ✓'}")
-  print(f" Dry Run:    {'YES ✓' if options.get('dry_run') else 'NO'}")
-  print(f" Debug Mode:   {'YES ✓' if options.get('debug') else 'NO'}")
+  print(f" Dry Run:     {'YES ✓' if options.get('dry_run') else 'NO'}")
+  print(f" Debug Mode:    {'YES ✓' if options.get('debug') else 'NO'}")
   print("=" * 70)
 
   confirm = input("\n✅ Proceed with these settings? (Y/n): ").strip().lower()
@@ -450,26 +450,26 @@ def is_in_correct_venv(debug: bool = False) -> bool:
   try:
     current_exe = Path(sys.executable).resolve()
     target_exe = Path(VENV_PYTHON_EXE).resolve()
-   
+    
     is_correct_exe = False
     try:
       is_correct_exe = current_exe.samefile(target_exe)
     except (FileNotFoundError, OSError):
       if debug: print(f"[Venv Guard] Target EXE not found at: {target_exe}")
       pass
-     
+      
     if is_correct_exe:
       if debug: print("[Venv Guard] Check 1: PASSED. Running from configured VENV_PYTHON_EXE.")
       return True
-   
+    
     if debug:
       print("[Venv Guard] Check 1: FAILED.")
       print(f" Current sys.executable: {current_exe}")
       print(f" Expected VENV_PYTHON_EXE: {target_exe}")
-     
+      
     # If not the correct exe, it's the wrong environment.
     return False
-   
+    
   except Exception as e:
     print(f"[Venv Guard] Error during check: {e}. Assuming incorrect environment.")
     return False
@@ -760,7 +760,7 @@ def extract_node_mappings_dynamic(file_path: Path, debug: bool) -> tuple[dict, d
     'torch.nn.functional': mock_torch_instance.nn.functional,
     'torch.hub': mock_torch_instance.hub,
   }
- 
+  
   setattr(mock_modules['comfy'], '__path__', ['mock_comfy_path']) # Make comfy a package
 
   # Add dummy attributes
@@ -771,7 +771,7 @@ def extract_node_mappings_dynamic(file_path: Path, debug: bool) -> tuple[dict, d
   mock_modules['comfy.model_management'].is_device_cuda = lambda: False
   mock_modules['comfy.model_management'].supports_fp16 = lambda: False
   mock_modules['comfy.model_management'].supports_bf16 = lambda: False
- 
+  
   mock_modules['folder_paths'].get_input_directory = lambda: '.'
   mock_modules['folder_paths'].get_output_directory = lambda: '.'
   mock_modules['folder_paths'].get_temp_directory = lambda: '.'
@@ -811,11 +811,11 @@ def extract_node_mappings_dynamic(file_path: Path, debug: bool) -> tuple[dict, d
       return extract_node_mappings_static(file_path, debug)
 
     module = importlib.util.module_from_spec(spec)
-   
+    
     # --- Fix for NameError: name 'torch' is not defined ---
     module.__dict__['torch'] = mock_torch_instance
     # --- End Fix ---
-   
+    
     sys.modules[module_name] = module
 
     old_stdout, old_stderr = sys.stdout, sys.stderr
@@ -922,7 +922,7 @@ def extract_node_mappings_static(file_path: Path, debug: bool) -> tuple[dict, di
   if debug: print(f"  [Static] Running fallback parser for {file_path.name}...")
   try:
     tree = ast.parse(file_path.read_text(encoding="utf-8"))
-   
+    
     # --- START v4.3.7 STATIC PARSER FIX ---
     # Iterate over all top-level nodes in the file
     for node in tree.body:
@@ -955,23 +955,23 @@ def extract_node_mappings_static(file_path: Path, debug: bool) -> tuple[dict, di
             if isinstance(val_node, ast.Constant): val_val = val_node.value
             elif hasattr(ast, 'Str') and isinstance(val_node, ast.Str): val_val = val_node.s # Older Python
             elif isinstance(val_node, ast.Name): val_val = val_node.id
-           
+            
             if val_val is not None:
               temp_dict[key_val] = val_val
             elif debug:
               print(f"  [Static] Skipping key '{key_val}' in {target_name}: value is not a simple type.")
           elif debug:
             print(f"  [Static] Skipping key in {target_name}: key is not a simple string.")
-       
+        
         if target_name == "NODE_CLASS_MAPPINGS": mappings = temp_dict
         else: display_names = temp_dict
-       
+        
   except Exception as e:
     if debug: print(f"  Warning: Static parsing failed for {file_path.name}: {e}")
- 
+  
   if debug and (mappings or display_names):
     print(f"  [Static] Fallback parser found {len(mappings)} class mappings and {len(display_names)} display mappings for {file_path.name}.")
-   
+    
   return mappings, display_names
 
 def discover_python_files(project_root: Path, config: Dict[str, Any], debug: bool) -> List[Path]:
@@ -1205,7 +1205,7 @@ def validate_node_metadata(parsed_nodes: List[Dict[str, Any]]):
 def main():
   args = parse_arguments()
   print_header()
- 
+  
   # This check is no longer needed here, as it's in the __name__ == "__main__" block
   # check_environment_and_warn()
 
@@ -1314,13 +1314,13 @@ def main():
 if __name__ == "__main__":
   # --- v4.3.6 Re-launch Guard Check ---
   is_debug_arg = "--debug" in sys.argv[1:]
- 
+  
   if not is_in_correct_venv(debug=is_debug_arg):
     print("█" * 70, file=sys.stderr)
-    print("█" + "   !! INCORRECT PYTHON ENVIRONMENT DETECTED !!   ".center(68), file=sys.stderr)
+    print("█" + "    !! INCORRECT PYTHON ENVIRONMENT DETECTED !!    ".center(68), file=sys.stderr)
     print("█" + " This script is not running in the correct ComfyUI venv. ".center(68), file=sys.stderr)
     print("█" * 70, file=sys.stderr)
-   
+    
     if not Path(VENV_PYTHON_EXE).exists():
       print(f"\n❌ FATAL: Cannot re-launch. The target Python venv was not found at:")
       print(f" {VENV_PYTHON_EXE}")
@@ -1329,13 +1329,13 @@ if __name__ == "__main__":
       try: os.system("pause > nul") # Windows
       except Exception: pass # Non-windows
       sys.exit(1)
-     
+      
     print(f"\nAttempting to re-launch using the correct venv Python:")
     print(f" {VENV_PYTHON_EXE}")
-   
+    
     script_path = Path(__file__).resolve()
     original_args = sys.argv[1:]
-   
+    
     try:
       result = subprocess.run(
         [VENV_PYTHON_EXE, str(script_path)] + original_args,
@@ -1350,6 +1350,6 @@ if __name__ == "__main__":
       try: os.system("pause > nul") # Windows
       except Exception: pass # Non-windows
       sys.exit(1)
- 
+  
   # --- If we are here, we are in the correct environment ---
   main()

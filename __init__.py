@@ -1,6 +1,6 @@
 """
 ComfyUI Custom Nodes - Auto-generated __init__.py
-Generated: 2025-11-29 22:53:39
+Generated: 2025-12-05 00:29:21
 """
 import os
 import sys
@@ -34,15 +34,22 @@ from .conditioning.ACE_T5_Conditioning_Node import AceT5ConditioningScheduled
 from .conditioning.ACE_T5_Conditioning_Node import AceT5ModelLoader
 from .guiders.MD_ApplyTPG import MD_ApplyTPG
 from .latent.ACE_LATENT_VISUALIZER import ACELatentVisualizer
+from .noise.CustomNoise import MD_CustomNoiseGenerator
+from .noise.CustomNoise import MD_MultiNoiseBlender
+from .optimization.OptimizerSelector import MD_OptimizerSelector
 from .organization.AutoLayoutOptimizer import AutoLayoutOptimizer
 from .organization.EnhancedAnnotation import EnhancedAnnotationNode
 from .organization.SmartColorPaletteManager import SmartColorPaletteManager
 from .organization.UniversalRoutingHub import UniversalRoutingHubAdvanced
+from .organization.WorkflowContextBus import MD_WorkflowContextBus
 from .organization.WorkflowSectionOrganizer import WorkflowSectionOrganizer
 from .seed_saver_node import EnhancedSeedSaverNode
 from .text.TextInputNode import AdvancedTextNode
 from .text.TextInputNode import TextFileLoader
+from .utility.EmptyLatentRatioSelector import MD_EmptyLatentRatioSelector
 from .utility.GPUTemperatureProtection import GPUTemperatureProtectionEnhanced
+from .utility.GlobalUpdateManager import MD_GlobalUpdateManager
+from .utility.RepoMaintenance import MD_RepoMaintenance
 from .utility.SmartFilenameBuilder import FilenameCounterNode
 from .utility.SmartFilenameBuilder import FilenameTokenReplacer
 from .utility.SmartFilenameBuilder import SmartFilenameBuilder
@@ -69,10 +76,17 @@ NODE_CLASS_MAPPINGS = {
     "MD_ApplyTPG": MD_ApplyTPG,
     "MD_AudioAutoEQ": MD_AudioAutoEQ,
     "MD_AutoMasterNode": MD_AutoMasterNode,
+    "MD_CustomNoiseGenerator": MD_CustomNoiseGenerator,
+    "MD_EmptyLatentRatioSelector": MD_EmptyLatentRatioSelector,
+    "MD_GlobalUpdateManager": MD_GlobalUpdateManager,
     "MD_Mastering_Compressor": MasteringCompressorNode,
     "MD_Mastering_EQ": MasteringEQNode,
     "MD_Mastering_Gain": MasteringGainNode,
     "MD_Mastering_Limiter": MasteringLimiterNode,
+    "MD_MultiNoiseBlender": MD_MultiNoiseBlender,
+    "MD_OptimizerSelector": MD_OptimizerSelector,
+    "MD_RepoMaintenance": MD_RepoMaintenance,
+    "MD_WorkflowContextBus": MD_WorkflowContextBus,
     "MasteringChainNode": MasteringChainNode,
     "NoiseDecayScheduler_Custom": NoiseDecayScheduler_Custom,
     "PingPongSamplerNodeFBG": PingPongSamplerNodeFBG,
@@ -108,14 +122,21 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "MD_ApplyTPG": "MD: Apply TPG (Token Perturbation)",
     "MD_AudioAutoEQ": "MD: Audio Auto EQ",
     "MD_AutoMasterNode": "MD: Audio Auto Master Pro",
+    "MD_CustomNoiseGenerator": "MD: Custom Noise Generator",
+    "MD_EmptyLatentRatioSelector": "MD: Empty Latent Ratio Select",
+    "MD_GlobalUpdateManager": "MD: Global Update Fixer (v1.7.1)",
     "MD_Mastering_Compressor": "MD: Mastering Compressor",
     "MD_Mastering_EQ": "MD: Mastering EQ & Filters",
     "MD_Mastering_Gain": "MD: Mastering Gain",
     "MD_Mastering_Limiter": "MD: Mastering Limiter",
+    "MD_MultiNoiseBlender": "MD: Noise Blender (5-Layer)",
+    "MD_OptimizerSelector": "MD: Optimizer Selector",
+    "MD_RepoMaintenance": "MD: Repo Fortress (v2.2.1)",
+    "MD_WorkflowContextBus": "MD: Universal Context Bus",
     "MasteringChainNode": "MD: Mastering Chain (Full)",
     "NoiseDecayScheduler_Custom": "MD: Noise Decay Scheduler (Advanced)",
-    "PingPongSamplerNodeFBG": "PingPong Sampler (FBG v1.5.0)",
-    "PingPongSampler_Custom_Lite": "PingPong Sampler (Lite+ v1.5.0) \ud83c\udfd3",
+    "PingPongSamplerNodeFBG": "MD: PingPong Sampler (FBG v1.5.0)",
+    "PingPongSampler_Custom_Lite": "PingPong Sampler (Lite+ v1.5.0)",
     "SceneGeniusAutocreator": "MD: Scene Genius Autocreator",
     "SigmaConcatenate": "Sigma Concatenate",
     "SigmaSmooth": "Sigma Smooth",
@@ -137,6 +158,7 @@ try:
     from .testing.MD_InitNoiseOptimizer import MD_InitNoiseOptimizer
     from .testing.MD_SamplerDebug import MD_SamplerDebug
     from .testing.MD_SelfCrossGuider import MD_SelfCrossGuider
+    from .testing.UniversalGuardian import UniversalGuardian
 
     # Update Mappings if import succeeds
     NODE_CLASS_MAPPINGS.update({
@@ -146,6 +168,7 @@ try:
         "MD_Qwen_Image_Edit_Object_Replacer_Node": MD_Qwen_Image_Edit_Object_Replacer_Node,
         "MD_SamplerDebug": MD_SamplerDebug,
         "MD_SelfCrossGuider": MD_SelfCrossGuider,
+        "UniversalGuardian": UniversalGuardian,
         "VLM_Confirmation_Gate_Node_MD": VLM_Confirmation_Gate_Node
     })
 
@@ -156,6 +179,7 @@ try:
     "MD_Qwen_Image_Edit_Object_Replacer_Node": "MD: Qwen Object Replacer",
     "MD_SamplerDebug": "MD: Sampler Debug",
     "MD_SelfCrossGuider": "MD: Self-Cross Separation Guider",
+    "UniversalGuardian": "MD: Universal Guardian",
     "VLM_Confirmation_Gate_Node_MD": "MD: VLM Confirmation Gate"
 })
 except ImportError:
