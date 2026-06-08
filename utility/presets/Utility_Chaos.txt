@@ -1,0 +1,9 @@
+[Genre: {Heavy Metal|Smooth Jazz|Dubstep|Polka}]
+[BPM: {60|120|180|240} BPM]
+
+[Random Test]
+The main instrument is a {Tuba|Electric Guitar|Synthesizer|Bagpipe}.
+The mood is {Angry|Romance|Confusion|Terror}.
+The vocalist sounds like {a demon|an angel|a robot|a cowboy}.
+This is a test of the {wildcard system|randomization engine|recursive parser}.
+Theme: {Space travel|Cooking pasta|The end of the world|Buying groceries}.

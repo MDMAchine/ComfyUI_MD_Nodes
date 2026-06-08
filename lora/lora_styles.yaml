@@ -1,0 +1,302 @@
+# ==========================================
+# MD_DynamicLoRAStacker - Style Presets
+# ==========================================
+# Format:
+#   StyleName:
+#     loras:
+#       - name: "filename.safetensors"
+#         strength_model: 0.0-2.0
+#         strength_clip: 0.0-2.0
+#     prompt_prefix: "text to add before prompt"
+#     prompt_suffix: "text to add after prompt"
+#     description: "What this style does"
+# ==========================================
+
+# --- PHOTOGRAPHY STYLES ---
+
+Cinematic_Film:
+  description: "Hollywood cinema aesthetic with dramatic lighting and film grain"
+  loras:
+    - name: "add-detail-xl.safetensors"
+      strength_model: 0.8
+      strength_clip: 0.6
+    - name: "cinematic_lighting_v2.safetensors"
+      strength_model: 0.9
+      strength_clip: 0.7
+    - name: "film_grain.safetensors"
+      strength_model: 0.5
+      strength_clip: 0.3
+  prompt_prefix: "cinematic, dramatic lighting, film photography, "
+  prompt_suffix: ", 35mm film, film grain, depth of field, professional color grading"
+
+Portrait_Studio:
+  description: "Professional studio portrait with soft lighting"
+  loras:
+    - name: "perfect_eyes.safetensors"
+      strength_model: 0.7
+      strength_clip: 0.5
+    - name: "skin_detail.safetensors"
+      strength_model: 0.6
+      strength_clip: 0.4
+    - name: "studio_lighting.safetensors"
+      strength_model: 0.8
+      strength_clip: 0.6
+  prompt_prefix: "professional portrait, studio lighting, "
+  prompt_suffix: ", shallow depth of field, 85mm lens, soft focus background"
+
+Street_Photography:
+  description: "Candid street photography style with natural lighting"
+  loras:
+    - name: "realistic_vision.safetensors"
+      strength_model: 0.7
+      strength_clip: 0.5
+    - name: "urban_detail.safetensors"
+      strength_model: 0.6
+      strength_clip: 0.4
+  prompt_prefix: "street photography, candid moment, natural lighting, "
+  prompt_suffix: ", 50mm lens, documentary style, urban environment"
+
+# --- ARTISTIC STYLES ---
+
+Digital_Painting:
+  description: "Digital art with painterly brushstrokes and vibrant colors"
+  loras:
+    - name: "digital_painting.safetensors"
+      strength_model: 1.0
+      strength_clip: 0.8
+    - name: "vibrant_colors.safetensors"
+      strength_model: 0.7
+      strength_clip: 0.6
+  prompt_prefix: "digital painting, painterly, artistic, "
+  prompt_suffix: ", vibrant colors, brushstrokes, concept art"
+
+Anime_Style:
+  description: "High-quality anime aesthetic with clean lines"
+  loras:
+    - name: "anime_lineart.safetensors"
+      strength_model: 0.9
+      strength_clip: 0.7
+    - name: "anime_colorful.safetensors"
+      strength_model: 0.8
+      strength_clip: 0.6
+  prompt_prefix: "anime style, high quality anime, "
+  prompt_suffix: ", detailed anime, vibrant anime colors, clean linework"
+
+Watercolor_Art:
+  description: "Soft watercolor painting with flowing colors"
+  loras:
+    - name: "watercolor.safetensors"
+      strength_model: 1.1
+      strength_clip: 0.9
+    - name: "soft_colors.safetensors"
+      strength_model: 0.6
+      strength_clip: 0.5
+  prompt_prefix: "watercolor painting, soft colors, artistic, "
+  prompt_suffix: ", watercolor on paper, flowing colors, artistic medium"
+
+# --- FANTASY & SCI-FI ---
+
+Epic_Fantasy:
+  description: "Fantasy realm with magical atmosphere and epic scale"
+  loras:
+    - name: "fantasy_world.safetensors"
+      strength_model: 0.9
+      strength_clip: 0.7
+    - name: "magical_lighting.safetensors"
+      strength_model: 0.8
+      strength_clip: 0.6
+    - name: "epic_scale.safetensors"
+      strength_model: 0.7
+      strength_clip: 0.5
+  prompt_prefix: "epic fantasy, magical atmosphere, "
+  prompt_suffix: ", fantasy realm, dramatic epic scale, magical energy"
+
+Cyberpunk_Neon:
+  description: "Cyberpunk aesthetic with neon lights and urban decay"
+  loras:
+    - name: "cyberpunk_city.safetensors"
+      strength_model: 0.9
+      strength_clip: 0.7
+    - name: "neon_lighting.safetensors"
+      strength_model: 0.8
+      strength_clip: 0.6
+  prompt_prefix: "cyberpunk, neon lights, futuristic city, "
+  prompt_suffix: ", neon glow, urban decay, night scene, rain-slicked streets"
+
+Space_Opera:
+  description: "Sci-fi space scenes with cosmic atmosphere"
+  loras:
+    - name: "space_scene.safetensors"
+      strength_model: 0.9
+      strength_clip: 0.7
+    - name: "cosmic_lighting.safetensors"
+      strength_model: 0.7
+      strength_clip: 0.5
+  prompt_prefix: "space opera, cosmic scene, "
+  prompt_suffix: ", nebula background, starfield, sci-fi atmosphere"
+
+# --- ARCHITECTURE & ENVIRONMENT ---
+
+Architectural_Render:
+  description: "Professional architectural visualization with clean lines"
+  loras:
+    - name: "architecture_detail.safetensors"
+      strength_model: 0.8
+      strength_clip: 0.6
+    - name: "clean_render.safetensors"
+      strength_model: 0.7
+      strength_clip: 0.5
+  prompt_prefix: "architectural visualization, professional render, "
+  prompt_suffix: ", clean lines, modern architecture, photorealistic render"
+
+Nature_Photography:
+  description: "Natural landscape with vibrant nature details"
+  loras:
+    - name: "landscape_detail.safetensors"
+      strength_model: 0.8
+      strength_clip: 0.6
+    - name: "nature_colors.safetensors"
+      strength_model: 0.7
+      strength_clip: 0.5
+  prompt_prefix: "nature photography, natural landscape, "
+  prompt_suffix: ", vibrant nature, detailed foliage, natural lighting"
+
+# --- PRODUCT & COMMERCIAL ---
+
+Product_Photography:
+  description: "Clean product shots with professional lighting"
+  loras:
+    - name: "product_detail.safetensors"
+      strength_model: 0.9
+      strength_clip: 0.7
+    - name: "studio_backdrop.safetensors"
+      strength_model: 0.6
+      strength_clip: 0.4
+  prompt_prefix: "product photography, studio shot, professional lighting, "
+  prompt_suffix: ", clean background, sharp focus, commercial photography"
+
+Food_Photography:
+  description: "Appetizing food photography with perfect presentation"
+  loras:
+    - name: "food_detail.safetensors"
+      strength_model: 0.8
+      strength_clip: 0.6
+    - name: "appetizing_colors.safetensors"
+      strength_model: 0.7
+      strength_clip: 0.5
+  prompt_prefix: "food photography, professional food styling, "
+  prompt_suffix: ", appetizing presentation, detailed food texture, natural lighting"
+
+# --- VINTAGE & RETRO ---
+
+Vintage_1970s:
+  description: "1970s aesthetic with warm tones and film grain"
+  loras:
+    - name: "vintage_70s.safetensors"
+      strength_model: 0.9
+      strength_clip: 0.7
+    - name: "warm_tones.safetensors"
+      strength_model: 0.6
+      strength_clip: 0.5
+    - name: "film_grain.safetensors"
+      strength_model: 0.4
+      strength_clip: 0.3
+  prompt_prefix: "1970s photography, vintage aesthetic, "
+  prompt_suffix: ", warm film tones, slight grain, retro colors"
+
+Retro_Synthwave:
+  description: "80s synthwave with neon colors and retro-futuristic vibes"
+  loras:
+    - name: "synthwave.safetensors"
+      strength_model: 1.0
+      strength_clip: 0.8
+    - name: "neon_colors.safetensors"
+      strength_model: 0.8
+      strength_clip: 0.6
+  prompt_prefix: "synthwave, retro-futuristic, neon colors, "
+  prompt_suffix: ", 1980s aesthetic, grid patterns, sunset gradient"
+
+# --- HORROR & DARK ---
+
+Dark_Horror:
+  description: "Dark atmospheric horror with ominous lighting"
+  loras:
+    - name: "dark_atmosphere.safetensors"
+      strength_model: 0.9
+      strength_clip: 0.7
+    - name: "horror_mood.safetensors"
+      strength_model: 0.8
+      strength_clip: 0.6
+  prompt_prefix: "dark horror, ominous atmosphere, eerie lighting, "
+  prompt_suffix: ", unsettling mood, dramatic shadows, haunting atmosphere"
+
+Gothic_Victorian:
+  description: "Victorian gothic with ornate details and moody atmosphere"
+  loras:
+    - name: "gothic_architecture.safetensors"
+      strength_model: 0.8
+      strength_clip: 0.6
+    - name: "victorian_detail.safetensors"
+      strength_model: 0.7
+      strength_clip: 0.5
+  prompt_prefix: "gothic victorian, ornate details, "
+  prompt_suffix: ", moody atmosphere, victorian architecture, dramatic lighting"
+
+# --- MINIMAL & CLEAN ---
+
+Minimalist_Clean:
+  description: "Clean minimalist aesthetic with simple composition"
+  loras:
+    - name: "minimalist.safetensors"
+      strength_model: 0.8
+      strength_clip: 0.6
+    - name: "clean_composition.safetensors"
+      strength_model: 0.7
+      strength_clip: 0.5
+  prompt_prefix: "minimalist, clean composition, simple, "
+  prompt_suffix: ", minimal design, clean aesthetic, negative space"
+
+# --- CUSTOM EXAMPLES ---
+
+# Example with no LoRAs (just prompt modifiers)
+Prompt_Only_Style:
+  description: "No LoRAs - just prompt engineering"
+  loras: []  # Empty list
+  prompt_prefix: "masterpiece, best quality, highly detailed, "
+  prompt_suffix: ", 8k uhd, professional"
+
+# Example with single LoRA
+Single_LoRA_Test:
+  description: "Single LoRA for testing"
+  loras:
+    - name: "test_lora.safetensors"
+      strength_model: 1.0
+      strength_clip: 0.8
+  prompt_prefix: ""
+  prompt_suffix: ""
+
+# --- QUALITY PRESETS ---
+
+Maximum_Quality:
+  description: "Maximum quality and detail enhancement"
+  loras:
+    - name: "add-detail-xl.safetensors"
+      strength_model: 1.0
+      strength_clip: 0.8
+    - name: "perfect_hands.safetensors"
+      strength_model: 0.7
+      strength_clip: 0.5
+    - name: "perfect_eyes.safetensors"
+      strength_model: 0.7
+      strength_clip: 0.5
+  prompt_prefix: "masterpiece, best quality, highly detailed, ultra detailed, "
+  prompt_suffix: ", 8k uhd, professional, high resolution"
+
+Balanced_Quality:
+  description: "Balanced quality without over-processing"
+  loras:
+    - name: "add-detail-xl.safetensors"
+      strength_model: 0.6
+      strength_clip: 0.4
+  prompt_prefix: "high quality, detailed, "
+  prompt_suffix: ", professional"

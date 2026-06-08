@@ -1,0 +1,40 @@
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ████ APG GUIDANCE: CONSTANT PRESSURE (Stability) ███████████▓▒░
+# © 2025 MDMAchine
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ░▒▓ DESCRIPTION:
+#   Removes the "curve" from the guidance. It applies a steady,
+#   unwavering force for the entire duration until the very last
+#   moment.
+#
+# ░▒▓ USE CASE:
+#   • Drones, Textures, Soundscapes.
+#   • Testing the raw capability of a specific CFG setting.
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+verbose: true
+
+rules:
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # PHASE 0: THE PLATEAU - Steady State (σ > 0.05)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # This single rule covers 95% of the generation steps.
+  - start_sigma: -1
+    apg_scale: 3.0       # Medium-High Constant
+    cfg: 7.0             # Medium-High Constant
+    predict_image: true
+    pre_cfg_mode: false
+    update_mode: "DEFAULT"
+    update_blend_mode: "lerp"
+    dims: [-1]
+    momentum: 0.6
+    norm_threshold: 2.0
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # PHASE 1: THE CLIFF - Safety Cutoff (σ ≤ 0.05)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # Mandatory cleanup phase to prevent static.
+  - start_sigma: 0.05
+    apg_scale: 0.0
+    cfg: 3.0
+    predict_image: true

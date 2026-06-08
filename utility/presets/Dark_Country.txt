@@ -1,0 +1,16 @@
+[Genre: {Dark Country|Southern Gothic|Murder Folk|Gothic Americana}]
+[BPM: {70|80|85|90} BPM, {Heavy boot-stomping rhythm|Sluggish swamp groove|Slow marching beat}]
+
+[Instrumentation]
+The track is driven by a {plucked upright bass|detuned acoustic resonator guitar|thumping kick drum}.
+The drums are {minimal and dusty|made of clanking chains and wood claps|heavy on the floor toms}.
+Eerie {slide guitar riffs|dissonant banjo rolls|haunting fiddle scrapes} accent the verse.
+Accompaniment includes {a mournful harmonica|distant church bells|a droning pump organ}.
+
+[Vocal Style]
+{Gravelly, deep male baritone|Haunting, whispery female vocals|A weary spoken drawl}.
+Lyrics focus on {deals with the devil|regret and whiskey|swamp mysteries|the dust bowl}.
+
+[Vibe]
+The atmosphere is {ominous and brooding|dusty and desolate|swampy and claustrophobic}.
+Think "God's Gonna Cut You Down" by Johnny Cash or early Colter Wall.

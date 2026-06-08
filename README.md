@@ -1,201 +1,264 @@
 # MD_NODES
 
-![Synth Approved](https://img.shields.io/badge/VIBES-CHAOTIC_NEUTRAL-ff00ff?style=flat-square&logo=md&logoColor=white)
-![Node Count](https://img.shields.io/badge/NODES-45+_MODULES-cyan?style=flat-square)
-![L33T MODE](https://img.shields.io/badge/L33T-MODE_ENABLED-red?style=flat-square&logo=hackaday)
+![Build Status](https://img.shields.io/badge/STATUS-ACTIVE_DEVELOPMENT-00ff00?style=flat-square)
+![License](https://img.shields.io/badge/LICENSE-GPL_v3-blue?style=flat-square)
+![Free To Use](https://img.shields.io/badge/PUBLIC_NODES-FREE_FOREVER-brightgreen?style=flat-square)
 ![ComfyUI](https://img.shields.io/badge/ComfyUI-Custom_Nodes-orange?style=flat-square)
+![HOT-Step](https://img.shields.io/badge/HOT--Step--CPP-Lua_Plugins-purple?style=flat-square)
 
 ```text
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃                                                                        ┃
-┃  ███╗   ███╗██████╗        ███╗   ██╗ ██████╗ ██████╗ ███████╗███████╗  ┃
-┃  ████╗ ████║██╔══██╗       ████╗  ██║██╔═══██╗██╔══██╗██╔════╝██╔════╝  ┃
-┃  ██╔████╔██║██║  ██║       ██╔██╗ ██║██║   ██║██║  ██║█████╗  ███████╗  ┃
-┃  ██║╚██╔╝██║██║  ██║       ██║╚██╗██║██║   ██║██║  ██║██╔══╝  ╚════██║  ┃
-┃  ██║ ╚═╝ ██║██████╔╝       ██║ ╚████║╚██████╔╝██████╔╝███████╗███████║  ┃
-┃  ╚═╝     ╚═╝╚═════╝        ╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚══════╝╚══════╝  ┃
-┃                                                                        ┃
-┃         🎛️ ComfyUI Custom Node Central - v1.5.1-RELEASE 🎛️              ┃
-┃      "Latent Space Debauchery & Digital Sorcery Since 56k Days"        ┃
-┃                                                                        ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+█▓▒░                                                                   ░▒▓█
+█▓▒░                        ▄▄▄████████████▄▄▄                         ░▒▓█
+█▓▒░                    ▄▄██████████████████████▄▄                     ░▒▓█
+█▓▒░                  ▄███████▓▓▒▒░░██░░▒▒▓▓███████▄                   ░▒▓█
+█▓▒░                ▄██████▓▓  ▄▄▄▄ ▒▒ ▄▄▄▄  ▓▓██████▄                 ░▒▓█
+█▓▒░               ██████▓▒  ▄██████  ██████▄  ▒▓██████                ░▒▓█
+█▓▒░        ▄▄    ██████▒░  ████████  ████████  ░▒██████    ▄▄         ░▒▓█
+█▓▒░      ▄████  ▐█████▒   █████▓▒░█  █░▒▓█████   ▒█████▌  ████▄       ░▒▓█
+█▓▒░    ▄██████  ██████░   █████████  █████████   ░██████  ██████▄     ░▒▓█
+█▓▒░   ██████▀   ██████░   █████████  █████████   ░██████   ▀██████    ░▒▓█
+█▓▒░    ▀██████  ▐█████▒   ▀█████▓▒░  ░▒▓█████▀   ▒█████▌  ██████▀     ░▒▓█
+█▓▒░      ▀████   ██████▒░  ▀███████  ███████▀  ░▒██████   ████▀       ░▒▓█
+█▓▒░        ▀▀     ██████▓▒   ▀▀████  ████▀▀   ▒▓██████     ▀▀         ░▒▓█
+█▓▒░                ▀██████▓▓    ▀▀▀  ▀▀▀    ▓▓██████▀                 ░▒▓█
+█▓▒░                 ▀███████▓▓▒▒░      ░▒▒▓▓███████▀                  ░▒▓█
+█▓▒░           ▄▄▄     ▀▀██████████▄▄▄▄██████████▀▀     ▄▄▄            ░▒▓█
+█▓▒░         ▄██████▄▄     ▀▀▀██████████████▀▀▀     ▄▄██████▄          ░▒▓█
+█▓▒░       ▄████████████▄▄▄       ▀▀▀▀▀▀       ▄▄▄████████████▄        ░▒▓█
+█▓▒░      ██████▓▓▒▒░▀███████▄▄▄          ▄▄▄███████▀░▒▒▓▓██████       ░▒▓█
+█▓▒░     ██████▒░     ░▒▀█████████▄▄  ▄▄█████████▀▒░     ░▒██████      ░▒▓█
+█▓▒░     ██████░          ░▒▀▀██████████████▀▀▒░          ░██████      ░▒▓█
+█▓▒░     ▀█████▄                ░▒▀▀██▀▀▒░                ▄█████▀      ░▒▓█
+█▓▒░       ▀█████▄                  ░░                  ▄█████▀        ░▒▓█
+█▓▒░         ▀█████▄  ┌────────────────────────────┐  ▄█████▀          ░▒▓█
+█▓▒░           ▀█████ │     M D M A   N O D E S    │ █████▀            ░▒▓█
+█▓▒░             ▀▀██ │ P U R E  D I F F U S I O N │ ██▀▀              ░▒▓█
+█▓▒░                ▀ └────────────────────────────┘ ▀                 ░▒▓█
+█▓▒░  ┌─────────────────────────────────────────────────────────────┐  ░▒▓█
+█▓▒░  │  CRACKER..: MDMAchine           PACKER....: PYTHON 3.10+    │  ░▒▓█
+█▓▒░  │  STATUS...: EUPHORIC            NODES.....: 80+ UNLOCKED    │  ░▒▓█
+█▓▒░  │  SUPPLY...: 115200 BAUD         PROTECT...: GPL v3          │  ░▒▓█
+█▓▒░  └─────────────────────────────────────────────────────────────┘  ░▒▓█
+█▓▒░                                                                   ░▒▓█
+▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 ```
 
-## 📟 Welcome to MD_NODES
+## 📟 What is MD_Nodes?
 
-**Strap in, traveler.** This isn't just another GitHub repo—it's a wormhole into raw, modular creativity with ComfyUI at its freaky finest.
+**MD_Nodes** is a collection of **80+ advanced ComfyUI custom nodes** built by MDMAchine (A&E Concepts). Originally focused on audio generation workflows with ACE-Step, the suite has expanded to cover advanced sampling and scheduling, guidance systems, professional audio mastering, workflow automation, GGUF model loading, and system safety tools.
 
-Brought to you by a confederation of node-smiths, mod wizards, and digital dropouts, this is where unhinged meets unfiltered. Whether you're forging dreamscapes from the void or just want to vibe with your VAE, this is your personal BBS of brilliance.
-
-Packaged with ASCII-flavored love, open-source chaos, and a healthy disregard for conventional sanity.
-
-> *"Why do it the easy way when you can do it the aesthetic way?"*
-> — probably MDMAchine
-
-**🎯 Universal Toolkit:** While MD_Nodes began with a focus on audio generation (Ace-Step), most nodes are now **universal tools** that work with any diffusion model—Stable Diffusion, SDXL, Flux, video models, and beyond. Advanced sampling, scheduling, and guidance nodes are model-agnostic.
+**Everything in this repository is free to use. All code is open source GPL v3.**
 
 ---
 
-## 🔥 Node Collection
+## 🏗️ About This Repository
 
-### 🎨 Wildcards & Prompt Engineering
+**License: GPL v3 — pure Python source, no compiled binaries in this release.**
 
-#### `MD_WILDCARD_PROMPT_BUILDER` ⭐
-**The ultimate multi-mode prompt generation node.**
-Far more than a simple text box, this is a seed-controlled prompt engine. It supports massive wildcard expansion, dynamic list choices, and robust string manipulation to keep your generations fresh yet controllable.
+All `.py` files in this repo are complete, readable source code under the GNU General Public License v3. There are no hidden `.pyd` or `.so` binary cores in this initial public release — what you see is what you get.
 
----
+### Why GPL v3?
+- ✅ **Transparency** — Audit exactly how every node works.
+- ✅ **Community protection** — Improvements to the wrappers must be shared back.
+- ✅ **Commercial freedom** — Use these nodes in personal or commercial workflows, no restrictions.
 
-### 🕹️ Advanced Sampling & Schedulers
-
-#### `PINGPONG_SAMPLER` (Lite+ & FBG Variants)
-**Advanced ancestral sampler with sophisticated noise control.** While originally optimized for Ace-Step audio, this is a powerful universal sampler suitable for any diffusion model (Stable Diffusion, SDXL, Flux, etc.).
-* **v1.5.0 Update:** Adds **Res 2 (Restart)** logic for iterative error correction with 5 restart modes.
-* **Features:** FBG dynamic Feedback Guidance, Noise Behavior presets, strength/coherence control, advanced blend modes, and NaN recovery.
-
-📖 **[Read the Manual](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/Master%20Technical%20Manual_%20PingPong%20Sampler%20(Custom%20v0.9.9-p2%20FBG).md)**
-
-#### `HYBRID_SIGMA_SCHEDULER`
-**Universal precision noise scheduling.** The ultimate sigma/noise scheduler.
-* **Features:** 14+ modes (Karras, Poly, AYS, Beta, Exponential, Bong Tangent), auto-detects model sigmas, supports slicing, visual plots, and comparison.
-* **Utilities Included:**
-    * `SigmaSmooth`: Smoothes step transitions.
-    * `SigmaConcatenate`: Joins different schedules together.
-
-📖 **[Read the Manual](https://github.com/MDMAchine/ComfyUI_MD_Nodes/blob/main/manuals/Master%20Technical%20Manual_%20Hybrid%20Sigma%20Scheduler.md)**
-
-#### `NOISEDECAY_SCHEDULER` (Advanced)
-**Universal custom decay curves.** Generate sophisticated decay curves (polynomial, sigmoidal, gaussian, exponential) with start/end values, inversion, and smoothing.
+### Future Compiled Cores
+The architecture is designed to support optional `.pyd`/`.so` compiled cores for select high-value algorithms in future releases. When that happens, the compiled cores will be free to use in workflows but protected against reverse engineering. The GPL v3 Python source layer will always remain fully open. This release ships source-only.
 
 ---
 
-### 🧭 Universal Guidance & Control
+## 🔥 Node Categories
 
-#### `APG_GUIDER_FORKED`
-**Universal adaptive gradient guidance.** Enhanced Adaptive Projected Gradient guidance that works with any diffusion model. Schedule APG scale, CFG, and momentum via YAML based on sigma. Surgical latent steering with minimal artifacts.
+### 🎨 Samplers & Schedulers
+*The engines that drive the diffusion process.*
 
-#### `MD_APPLY_TPG` (Token Perturbation Guidance) 🆕
-**Controlled chaos.** Applies Token Perturbation Guidance by patching the model's Self-Attention mechanism. Breaks repetitive patterns and improves prompt adherence without high CFG burn.
+#### **PingPong Sampler FBG**
+**Bidirectional ancestral sampler with feedback guidance.**
+- **Classes**: `PingPongSamplerNodeBasic`, `PingPongSamplerNodeFBG`, `PingPongSamplerNodeLite`
+- **Features**: Feedback guidance logic, restart modes, look-back SNR smoothing, NaN recovery
+- **Use Case**: Resolves hyper-detailed textures in images or complex harmonics in audio that standard samplers turn to mush. The FBG variant is the primary production sampler for ACE-Step audio workflows.
+
+#### **AMED Sampler**
+**Adaptive multi-engine diffusion sampler.**
+- **Class**: `MD_AMED_Sampler`
+- **Features**: Multi-mode ancestral/predictor-corrector hybrid
+- **Use Case**: Finding the middle ground between fast render speed and high-quality output.
+
+#### **F-Sampler**
+**Fast sampler using Richardson extrapolation to skip steps.**
+- **Class**: `FSampler`
+- **Features**: Conservative/aggressive skip strategies, quality-preserving step reduction
+- **Use Case**: Cuts rendering time significantly while maintaining comparable output quality.
+
+#### **Hybrid Sigma Scheduler**
+**Universal precision noise scheduling with 14 curve algorithms.**
+- **Classes**: `HybridAdaptiveSigmas_Advanced`, `_Basic`, `_Lite`
+- **Modes**: Karras, Poly, AYS, Fibonacci, Exponential, Tangent, LINA, and more
+- **Use Case**: Replaces the default ComfyUI scheduler with fine-grained control over when the model focuses on broad structure vs. fine detail.
+
+#### **GITS Scheduler**
+**Gradient-informed timestep scaling.**
+- **Class**: `MD_GITS_Scheduler`
+- **Use Case**: Allocates steps where the latent is changing most rapidly, skipping over stable regions. Efficient for both audio and image generation.
+
+#### **Noise Decay Scheduler**
+**Custom decay curves for sigma scheduling.**
+- **Class**: `NoiseDecayScheduler_Custom`
+- **Use Case**: Manual control over the exact noise decay profile.
 
 ---
 
-### 🎚️ Noise & Latent Generation
+### 🧭 Guidance & Optimization
+*Tools that steer generation without destroying output quality.*
 
-#### `MD_CUSTOM_NOISE_GENERATOR` 🆕
-**Beyond Gaussian.** Generates advanced noise patterns for use with custom samplers.
-* **Algorithms:** Perlin, Voronoi (Worley), Collatz Orbit (Fractal), Wavelet, Pyramid, Pink Noise, and more.
+#### **APG Guider (Forked)**
+**Adaptive Projected Gradient guidance.**
+- **Class**: `APGGuiderForked`
+- **Features**: Scheduled APG scale, CFG, and momentum by sigma
+- **Use Case**: Projects guidance math safely, allowing high prompt adherence without burning or oversaturating output.
 
-#### `MD_MULTI_NOISE_BLENDER` (5-Layer) 🆕
-**Sonic alchemy for images.** Mixes up to 5 different noise sources using advanced blend modes (Add, Multiply, Screen, Overlay, Difference) to create complex initial noise states. Inspired by the Sonar suite.
-
-#### `MD_EMPTY_LATENT_RATIO_SELECTOR` 🆕
-**Perfect aspect ratios.** Generates empty latents based on strict ratios (16:9, 21:9, etc.) and target megapixels. Auto-calculates exact dimensions divisible by 8 for SDXL/Flux compatibility. Includes orientation toggle.
-
----
-
-### ⚡ Optimization
-
-#### `MD_OPTIMIZER_SELECTOR` 🆕
-**Crash-proof training config.** A safety factory for PyTorch Optimizers.
-* **Features:** Selects **Prodigy**, **Lion**, or **AdamW**.
-* **Safety:** Automatically detects if `prodigyopt` or `bitsandbytes` are missing and falls back to standard AdamW instead of crashing your workflow.
-* **VRAM:** Auto-enables 8-bit optimizers if available.
+#### **Apply TPG**
+**Token Perturbation Guidance — breaks repetitive patterns.**
+- **Class**: `MD_ApplyTPG`
+- **Use Case**: Shuffles prompt tokens at the attention level to prevent repetitive structural artifacts.
 
 ---
 
 ### 🎵 Audio Processing
+*Professional audio tools built directly into the ComfyUI node graph.*
 
-#### `MASTERING_CHAIN_NODE` (Full & Modular)
-**Make your audio thicc.** Pro-grade mastering suite.
-* **Modular Nodes:** `MD_Mastering_Gain`, `MD_Mastering_EQ`, `MD_Mastering_Compressor` (Multiband), `MD_Mastering_Limiter`.
-* **Features:** True stereo multiband compression, surgical EQ, transparent limiting.
+#### **Auto Master Pro**
+**Iterative mastering to hit a target LUFS and spectral profile.**
+- **Class**: `MD_AutoMasterNode`
+- **Features**: 3-band compression, stereo widening, automatic gain staging
+- **Use Case**: Makes AI-generated audio sound broadcast-ready in a single node.
 
-#### `AUDIO_AUTO_MASTER_PRO`
-**Iterative mastering magic.** Automatically analyzes and processes audio to hit target LUFS and spectral profile using 3-band compression and stereo widening.
+#### **Audio Auto EQ**
+**One-click adaptive EQ with 18+ target profiles.**
+- **Class**: `MD_AudioAutoEQ_Adaptive`
+- **Profiles**: Vocal Clarity, Podcast, Cinematic, Warm Analog, and more
+- **Use Case**: Instantly corrects muddy, muffled, or harsh AI audio.
 
-#### `AUDIO_AUTO_EQ`
-**One-click audio shaping.** Analyzes audio spectrum and applies multi-band EQ based on 18+ target profiles (Vocal Clarity, Podcast, ASMR, etc.).
+#### **Mastering Chain (Modular)**
+**Individual mastering components for custom pipelines.**
+- **Classes**: `MasteringChainNode`, `MD_Mastering_Gain`, `MD_Mastering_EQ`, `MD_Mastering_Compressor`, `MD_Mastering_Limiter`
+- **Use Case**: Manual control over every stage of the mastering signal chain.
 
-#### `ADVANCED_AUDIO_PREVIEW_AND_SAVE` (AAPS)
-**Hear it before you overthink it.** Professional export: MP3/FLAC/OPUS, normalization (Peak/RMS/LUFS), fades, waveform/spectrogram preview, and metadata.
+#### **Broadcast Tools**
+**Loudness normalization for platform and broadcast standards.**
+- **Classes**: `MD_LUFS_Normalizer`, `MD_Stereo_Width_Controller`
+- **Use Case**: Hit exact LUFS targets for Spotify, YouTube, EBU R128.
 
----
+#### **Advanced Audio Preview & Save (AAPS)**
+**Professional audio export with metadata embedding.**
+- **Class**: `AdvancedAudioPreviewAndSave`
+- **Features**: MP3/FLAC/OPUS export, LUFS normalization presets, waveform visualization, workflow JSON embedding
+- **Use Case**: The final output node for audio workflows. Normalizes, exports, and embeds generation metadata in a single step.
 
-### ⚡ ACE T5 Audio Suite
-
-#### `ACE_T5_CONDITIONING`
-**The main event.** Intelligently blends T5 & CLIP embeddings for Ace-Step. Includes `ACE_T5_CONDITIONING_SCHEDULED` and `ACE_T5_CONDITIONING_ANALYZER`.
-
-#### `ACE_T5_MODEL_LOADER`
-**The key to the kingdom.** Custom loader for ACE T5 models enabling specialized tokenizers.
-
----
-
-### 🛠️ Workflow & Utilities
-
-#### `SCENE_GENIUS_AUTOCREATOR`
-**Prompter's divine sidekick.** Uses local LLMs (Ollama/LM Studio) to auto-generate genres, lyrics, and tuned YAML configs for samplers based on a core concept.
-
-#### `MD_WORKFLOW_CONTEXT_BUS` 🆕
-**The cable management king.** A universal "Bus" node that bundles 18+ data types (Model, Clip, VAE, Cond, Latent, Image, Audio, Sampler, Noise, etc.) into a single line. Plug it in once, route it everywhere.
-
-#### `UNIVERSAL_ROUTING_HUB`
-**The traffic controller.** Advanced signal routing with multiple inputs/outputs, intelligent type detection, and visual status mapping.
-
-#### `SMART_FILENAME_BUILDER` Suite
-**Dynamic filename toolkit.** Includes `SmartFilenameBuilder`, `FilenameTokenReplacer`, and `FilenameCounterNode` for persistent numbering.
-
-#### `MD_ENHANCED_SEED_SAVER`
-**Professional seed management.** Save, load, search, favorite, and backup seeds.
-
-#### `LLM_VRAM_MANAGER`
-**VRAM peace talks.** Unloads models from Ollama/LM Studio to prevent VRAM conflicts.
-
-#### `GPU_TEMPERATURE_PROTECTION` (Enhanced)
-**Keep your cool.** Monitors GPU temp/VRAM via `nvidia-smi` and pauses the queue if thresholds are exceeded.
+#### **Audio Simple Editor**
+**Sample-accurate trimming and fading.**
+- **Class**: `MD_AudioSimpleEditor`
+- **Use Case**: Slice, trim, and apply linear/exponential fades to audio tensors.
 
 ---
 
-### 🏗️ Maintenance & Repo Management
+### 📦 ACE Engine
+*Nodes specifically for ACE-Step audio generation models.*
 
-#### `MD_REPO_FORTRESS` (v2.2.1) 🆕
-**The Safety Net.** A node-based maintenance tool.
-* **Updates:** Checks git status and pulls updates.
-* **Backups:** Creates zip snapshots with manifest metadata.
-* **Restore:** "Time Travel" to previous versions.
-* **Safety:** Disk space checks, race condition protection, and "Dry Run" simulation mode.
+#### **ACE-Step XL Loader**
+**Model loader for ACE-Step 1.5 XL variants.**
+- **Class**: `MD_ACE_XLLoader`
+- **Features**: Adapter support, tunable AuraFlow shift
+- **Use Case**: Loads ACE-Step base, SFT, and turbo UNet variants with correct architecture detection.
 
-#### `MD_GLOBAL_UPDATE_FIXER` (v1.7.1) 🆕
-**The Overseer.** Manages your *entire* `custom_nodes` folder.
-* **Scan:** Reports status of all nodes.
-* **Repair:** "Inject Git" mode converts manual Zip installs into updateable Git repos.
-* **Conflict:** Analyzes `requirements.txt` across all nodes to find version conflicts.
+#### **ACE Sigma Denoise Patcher**
+**Slices an existing sigma schedule for audio-to-audio workflows.**
+- **Class**: `MD_ACE_SigmaDenoisePatcher`
+- **Use Case**: Feed it an existing audio file and re-generate with altered style or instrumentation while preserving the original structure.
 
----
-
-### 🗂️ Organization
-
-#### `AUTO_LAYOUT_OPTIMIZER`
-**Untangle your spaghetti.** Automatically reorganizes workflows using force-directed graphs.
-
-#### `WORKFLOW_SECTION_ORGANIZER`
-**Divide and conquer.** Universal passthrough node that acts as a visual chapter marker with auto-coloring.
-
-#### `SMART_COLOR_PALETTE_MANAGER`
-**Color-code your chaos.** Generate and manage professional color palettes for your workflow.
-
-#### `ENHANCED_ANNOTATION_NODE`
-**Notes with style.** Add markdown-supported sticky notes and banners.
+#### **AceStep Inpaint (Generative Fill)**
+**Time-based generative fill mask for audio latents.**
+- **Class**: `MD_ACE_LatentInpaintMask`
+- **Use Case**: Mask a specific time region in an audio latent and regenerate just that section.
 
 ---
 
-### 🎨 Visual Tools
 
-#### `ACE_LATENT_VISUALIZER`
-**Decode the noise gospel.** 9 visualization modes (Waveform, Spectrum, Heatmap) for latent tensors.
+### 🛡️ Guardian Suite
+*Crash prevention and output quality protection.*
 
-#### `ADVANCED_MEDIA_SAVE` (AMS)
-**Your one-stop media vault.** Saves images and videos (GIF/MP4/WEBM) with metadata privacy filters.
+#### **NaN / Image / Audio Guardians**
+**Multi-modal protection against math errors and artifacts.**
+- **Classes**: `MD_NaN_Guardian`, `MD_Image_Guardian`, `MD_Audio_Guardian`
+- **Use Case**: Detects and repairs NaN/Inf values in tensors before they crash ComfyUI or produce garbage output.
+
+#### **Universal Latent Sanitizer**
+**Deep-level latent repair.**
+- **Class**: `MD_LatentSanitizer`
+- **Use Case**: Clamps wild outlier values before VAE decode, eliminating static pops and decoding artifacts.
+
+---
+
+### 🛠️ Workflow Automation & Utilities
+
+#### **Prompting & Wildcards**
+**Wildcard expansion, LLM integration, and scene automation.**
+- **Classes**: `WildcardPromptBuilder`, `UniversalWildcardOrchestrator`, `SceneGeniusAutocreator`
+- **Use Case**: Automate prompt generation with nested wildcard logic, local LLM routing (Ollama/LM Studio), and genre/style preset libraries.
+
+#### **YAML Configuration**
+**YAML-driven parameter systems for complex nodes.**
+- **Classes**: `MD_YAML_Generator`, `MD_YAML_Utils`
+- **Use Case**: Load and manage complex node configurations from human-readable YAML files. Used extensively by the PingPong sampler nodes.
+
+#### **Smart Filenames & Saving**
+**Intelligent filename generation with metadata embedding.**
+- **Classes**: `SmartFilenameBuilder`, `AdvancedMediaSave`
+- **Use Case**: Auto-generate organized filenames and embed generation metadata.
+
+#### **Hardware & System Management**
+**Real-time VRAM/GPU monitoring and protection.**
+- **Classes**: `MD_VRAMCanary`, `LLMVRAMManager`, `GPUTemperatureProtectionEnhanced`
+- **Use Case**: Monitor GPU temperature and VRAM headroom, pause the queue if limits are hit.
+
+#### **Seeds & Conditioning**
+**Seed management and conditioning cache.**
+- **Classes**: `EnhancedSeedSaver`, `MD_AdvancedSeedGenerator`, `MD_LoadConditioning`, `MD_SaveConditioning`
+- **Use Case**: Save favorite seeds to disk, cache expensive text encoding to speed up subsequent runs.
+
+#### **Maintenance Tools**
+**Node-based repo management.**
+- **Classes**: `MD_RepoMaintenance`, `MD_GlobalUpdateManager`, `MD_ModelStateReset`
+- **Use Case**: Update custom nodes, clear VRAM caches, roll back broken updates.
+
+#### **Math, Logic & Modulators**
+**Conditional routing and signal modulation.**
+- **Classes**: `MD_Math_Add`, `MD_Math_Subtract`, `MD_MultiSwitch`, `MD_LFO_Generator`, `MD_CustomNoiseGenerator`
+- **Use Case**: Build decision-branching workflows, modulate parameters over time with LFOs, generate custom noise patterns.
+
+---
+
+## 🔗 Coming Soon
+
+These algorithms are being released as standalone repositories and ComfyUI node packages. Each pairs directly with MD_Nodes workflows.
+
+| Repo | Description |
+|------|-------------|
+| [MDMAchine/STORM-Sampler](https://github.com/MDMAchine/STORM-Sampler) | STORM adaptive hybrid ODE solver (STORK4 + DPM++3M) with LookBack SNR smoother |
+| [MDMAchine/MD-Causal-Scheduler](https://github.com/MDMAchine/MD-Causal-Scheduler) | 14-mode causal sigma scheduler with LINA time-axis warp |
+| [MDMAchine/MD-HAP-Scheduler](https://github.com/MDMAchine/MD-HAP-Scheduler) | Hamiltonian potential well sigma scheduler |
+| [MDMAchine/MD-Audio-VAE-Tiled](https://github.com/MDMAchine/MD-Audio-VAE-Tiled) | Tiled VAE decoder for long-form audio with LSS, HPC, SCE |
+
+---
+
+## 🌐 HOT-Step-CPP
+
+MDMAchine has contributed several plugins to [HOT-Step-CPP](https://github.com/scragnog/HOT-Step-CPP), a C++ inference runtime with a Lua plugin system maintained by [scragnog](https://github.com/scragnog).
+
+Contributions merged upstream include the PingPong solver, Causal and HAP schedulers, STORM Guidance V2, the STORM sampler core, Seed Manager UI, and DSP improvements to the tiled decoder. More in progress including negative prompt support.
+
+If you're running HOT-Step-CPP, these plugins ship with it — no separate install needed. Check the HOT-Step-CPP repo for the full list and release notes.
 
 ---
 
@@ -203,65 +266,111 @@ Far more than a simple text box, this is a seed-controlled prompt engine. It sup
 
 ```bash
 cd path/to/ComfyUI/custom_nodes
-git clone [https://github.com/MDMAchine/ComfyUI_MD_Nodes.git](https://github.com/MDMAchine/ComfyUI_MD_Nodes.git)
+git clone https://github.com/MDMAchine/ComfyUI_MD_Nodes.git
 cd ComfyUI_MD_Nodes
 pip install -r requirements.txt
 ```
 
-Or search for **MD_Nodes** in the ComfyUI Manager!
+**Or via ComfyUI Manager:** search for **MD_Nodes** and click Install.
 
-**Don't forget to restart ComfyUI.** Even gods need to reboot.
+Restart ComfyUI after installation.
+
+---
+
+## 📋 Requirements
+
+**Python**: 3.10+
+**ComfyUI**: Latest (Nodes 2.0 compatible)
+**PyTorch**: 2.0+ with CUDA (2.11+cu130 recommended for full feature set)
+
+**Audio nodes**: `soundfile`, `librosa`, `pyloudnorm`, `pedalboard`
+**Visualization**: `matplotlib`
+
+See `requirements.txt` for the full list.
+
+---
+
+## 🔐 License
+
+**GPL v3 — full source, no compiled binaries in this release.**
+
+You are free to:
+- ✅ Use in personal or commercial projects
+- ✅ Read, modify, and learn from the source code
+- ✅ Redistribute with attribution
+- ✅ Fork and create derivative works (GPL v3 terms apply)
+
+Your generated content (audio, images, video) is always 100% yours.
+
+See [`LICENSE.md`](LICENSE.md) for full details.
+
+---
+
+## 🚀 Roadmap
+
+### Current: June 2026 Public Release
+- [x] Full audit — GPL headers, VERSION constants, unit tests
+- [x] torchaudio fully migrated to soundfile
+- [x] IP firewall verified — no proprietary code in public repo
+- [x] HOT-Step-CPP contributions documented
+- [ ] Tooltip coverage pass (currently 66%, targeting 100%)
+- [ ] Full node documentation
+
+### Next Phase
+- [ ] Compiled core releases for select algorithms (.pyd/.so)
+- [ ] API service endpoints (Captain Quantum, SCT Analyzer, FidelityX)
+- [ ] Additional ACE-Step nodes
+- [ ] Video generation utilities
 
 ---
 
 ## 💾 Credits
 
-These legends walked so you could sample:
-
-| Handle            | Role                            |
-|-------------------|---------------------------------|
-| **MDMAchine** | Core concept, main chaos wizard |
-| **blepping** | Original PingPong/APG mind      |
-| **c0ffymachyne** | Signal alchemist / audio IO     |
-| **devstral** | Local l33t, fix-ologist         |
-| **Gemini (Google)** | Kernel rewriter, patch priest   |
-| **Claude (Anthropic)** | Refactor architect, stability   |
-| **qwen3** | Completionist with RGB soul     |
-| **w-e-w** | OG GPU Temp Protect Concept     |
-| **meap158** | Comfy GPU Temp Protect Adapt.   |
+| Handle | Contribution |
+|--------|-------------|
+| **MDMAchine (Alex)** | Core architecture, all nodes, HOT-Step-CPP plugins |
+| **scragnog** | HOT-Step-CPP maintainer, upstream collaboration |
+| **blepping** | Original PingPong/APG concepts |
+| **c0ffymachyne** | Audio I/O and signal processing research |
+| **Community** | Bug reports, testing, feedback |
 
 ---
 
-## 📜 License
+## 🐛 Support
 
-This project is licensed under the **Apache License 2.0**.
-See [`LICENSE.md`](LICENSE.md) for details.
-
-You are free to use, modify, and distribute this software in accordance with the license terms.
+**Issues**: [GitHub Issues](https://github.com/MDMAchine/ComfyUI_MD_Nodes/issues)
+**Discussions**: [GitHub Discussions](https://github.com/MDMAchine/ComfyUI_MD_Nodes/discussions)
+**Consulting / custom development**: mdmachine@gmail.com
 
 ---
 
 ```text
-                        .-----.
-                       /       \
-                      |  RAVE   |
-                      |_________|
-                     /  _     _  \
-                    |  | |   | |  |
-                    |  |_|___|_|  |
-                    |  /       \  |
-                    |_|_________|_|
-                         \_______/
-                          \_____/
-                           \___/
-                            `-'
-
-            LOGGING OFF FROM MD_NODES 🛰️
-      STAY SYNTHETIC, STAY STRANGE, STAY COMFYUI 💽
+▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+█▓▒░                                                                   ░▒▓█
+█▓▒░                 ▄▄███████▄             ▄███████▄▄                 ░▒▓█
+█▓▒░              ▄█████████████▄         ▄█████████████▄              ░▒▓█
+█▓▒░            ▄██████▀▀   ▀▀████▄     ▄████▀▀   ▀▀██████▄            ░▒▓█
+█▓▒░          ▄██████▓▒░     ░▒▓████▄ ▄████▓▒░     ░▒▓██████▄          ░▒▓█
+█▓▒░         ██████▓▒░         ░▒▓███████▓▒░         ░▒▓██████         ░▒▓█
+█▓▒░        ██████▒░    ▄▄▄▄▄    ░▒█████▒░    ▄▄▄▄▄    ░▒██████        ░▒▓█
+█▓▒░       ██████░   ▄█████████▄   ░███░   ▄█████████▄   ░██████       ░▒▓█
+█▓▒░      ▐█████▌  ▄█████████████▄  ▐█▌  ▄█████████████▄  ▐█████▌      ░▒▓█
+█▓▒░      ██████  ▐██████▓▒░░▒▓████  █  ████▓▒░░▒▓██████▌  ██████      ░▒▓█
+█▓▒░      ██████  ███████▒░  ░▒█████   █████▒░  ░▒███████  ██████      ░▒▓█
+█▓▒░      ██████  ███████▓▒░░▒▓█████   █████▓▒░░▒▓███████  ██████      ░▒▓█
+█▓▒░      ▐█████▌  ▀██████████████▀  ▄  ▀██████████████▀  ▐█████▌      ░▒▓█
+█▓▒░       ██████░   ▀██████████▀   ▄█▄   ▀██████████▀   ░██████       ░▒▓█
+█▓▒░        ██████▒░    ▀▀▀▀▀▀    ▄█████▄    ▀▀▀▀▀▀    ░▒██████        ░▒▓█
+█▓▒░         ██████▓▒░          ▄████▀████▄          ░▒▓██████         ░▒▓█
+█▓▒░          ▀███████▓▓▒▒▒▒▒▓▓█████▀ ▀█████▓▓▒▒▒▒▒▓▓███████▀          ░▒▓█
+█▓▒░            ▀██████████████████▀   ▀██████████████████▀            ░▒▓█
+█▓▒░               ▀▀███████████▀▀       ▀▀███████████▀▀               ░▒▓█
+█▓▒░                                                                   ░▒▓█
+█▓▒░  ┌──[ SYSTEM OFFLINE ]─────────────────────────[ STAY PURE ]──┐   ░▒▓█
+█▓▒░  │                                                            │   ░▒▓█
+█▓▒░  │  >_ TERMINAL DISCONNECTED.                                 │   ░▒▓█
+█▓▒░  │  >_ DATA DUMP SUCCESSFUL. NO CARRIER.                      │   ░▒▓█
+█▓▒░  └────────────────────────────────────────────────────────────┘   ░▒▓█
+█▓▒░                                                                   ░▒▓█
+▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 ```
-
----
-
-**⭐ Star this repo if it tickles your neurons**
-**🐛 Report issues if reality breaks**
-**🔀 PRs welcome from fellow digital shamans**

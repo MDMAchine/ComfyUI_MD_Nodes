@@ -1,0 +1,107 @@
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ████ ACE-STEP PRESET: MODERN DIGITAL (v2 Native) █████████▓▒░
+# © 2025 MDMAchine
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ░▒▓ DESCRIPTION:
+#   This preset leverages the high-precision v2 engine (1e-8).
+#   It produces "Crystal Clean" audio with incredible transient detail.
+#   To prevent digital harshness, it uses Cubic blending and High EMA smoothing.
+#
+# ░▒▓ RECOMMENDED USAGE:
+#   • Steps: 20 - 60 (Very efficient, diminishes returns after 60)
+#   • Scheduler: Any (SST logic will adapt)
+#   • Genres: Glitch, IDM, Neurofunk, Modern Pop, Sound Design.
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+# ──────────────────────────────────────────────────────────────────────────────
+# ENGINE MODE
+# ──────────────────────────────────────────────────────────────────────────────
+legacy_v1_5_mode: false          # ✅ FALSE = Modern v2 Engine (1e-8 precision)
+
+# SST (Split Scheduler) Tuning
+sst_mode: "auto"
+auto_cv_threshold: 2.0
+auto_ratio_threshold: 0.2
+fallback_percentile: 90
+min_temp: 0.1
+max_temp: 10.0
+debug_sst: false
+
+# ──────────────────────────────────────────────────────────────────────────────
+# CORE SETTINGS
+# ──────────────────────────────────────────────────────────────────────────────
+step_random_mode: "block"
+step_size: 25
+seed: 0
+
+first_ancestral_step: 0
+last_ancestral_step: -1
+ancestral_noise_type: "brownian" # Smoother noise for digital engine
+
+start_sigma_index: 0
+end_sigma_index: -1
+enable_clamp_output: false
+
+# ──────────────────────────────────────────────────────────────────────────────
+# BLENDING (SMOOTHING THE DIGITAL EDGE)
+# ──────────────────────────────────────────────────────────────────────────────
+blend_mode: "cubic"              # ✅ Cubic creates organic curves between sharp steps
+step_blend_mode: "cubic"
+
+progressive_blend_mode: false
+conditional_blend_mode: true     # Enable advanced switching for low sigma
+conditional_blend_sigma_threshold: 0.15
+conditional_blend_function_name: "slerp"
+conditional_blend_on_change: false
+
+# ──────────────────────────────────────────────────────────────────────────────
+# RESTARTS
+# ──────────────────────────────────────────────────────────────────────────────
+enable_restarts: true
+restart_mode: "balanced"         # "balanced" works well with cubic blend
+restart_noise_scale: 0.05        # Very small corrections
+restart_s_noise: 0.05            # Very low noise
+
+# ──────────────────────────────────────────────────────────────────────────────
+# FBG TUNING (DUAL PHASE CLEANUP)
+# ──────────────────────────────────────────────────────────────────────────────
+fbg_sampler_mode: "PINGPONG"
+sigma_range_preset: "Custom"
+
+# Phase 2: Gentle Polish (Low Sigma)
+cfg_scale: 4.0                   # Low CFG prevents digital hiss at the end
+cfg_start_sigma: 1.0
+cfg_end_sigma: 0.004
+
+# Phase 1: Heavy Construction (High Sigma)
+fbg_start_sigma: 1.0
+fbg_end_sigma: 0.3               # Stop FBG early to let cubic blend polish
+
+# High Power Values (Phase 1 Only)
+max_guidance_scale: 2000.0
+initial_guidance_scale: 250.0
+fbg_guidance_multiplier: 550.0
+guidance_max_change: 500.0       # Stricter change limit prevents digital clicks
+
+# ──────────────────────────────────────────────────────────────────────────────
+# FBG MATH
+# ──────────────────────────────────────────────────────────────────────────────
+pi: 0.35
+t_0: 0.7
+t_1: 0.4
+fbg_temp: 0.0
+fbg_offset: 0.0
+
+# ──────────────────────────────────────────────────────────────────────────────
+# POSTERIOR (DIGITAL SMOOTHING)
+# ──────────────────────────────────────────────────────────────────────────────
+max_posterior_scale: 3.0
+log_posterior_initial_value: 0.0
+log_posterior_ema_factor: 0.95   # ✅ 0.95 = Extreme smoothing (liquid guidance)
+
+# ──────────────────────────────────────────────────────────────────────────────
+# SYSTEM
+# ──────────────────────────────────────────────────────────────────────────────
+debug_mode: 1
+enable_profiling: true
+tensor_memory_optimization: false

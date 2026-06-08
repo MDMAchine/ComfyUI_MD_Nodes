@@ -1,0 +1,65 @@
+verbose: true
+rules:
+- start_sigma: -1
+  apg_scale: 0.0
+  cfg: 25.0
+  predict_image: true
+- start_sigma: 0.9
+  apg_scale: 4.5
+  cfg: 22.0
+  predict_image: true
+  pre_cfg_mode: false
+  update_mode: DEFAULT
+  update_blend_mode: lerp
+  dims:
+  - -1
+  momentum: 0.8
+  norm_threshold: 2.5
+- start_sigma: 0.6
+  apg_scale: 3.0
+  cfg: 20.0
+  predict_image: true
+  pre_cfg_mode: false
+  update_mode: DEFAULT
+  update_blend_mode: lerp
+  dims:
+  - -1
+  momentum: 0.8
+  norm_threshold: 2.5
+- start_sigma: 0.4
+  apg_scale: 2.62
+  cfg: 18.0
+  predict_image: true
+  pre_cfg_mode: false
+  update_mode: DEFAULT
+  update_blend_mode: lerp
+  dims:
+  - -1
+  momentum: 0.7
+  norm_threshold: 2.5
+- start_sigma: 0.25
+  apg_scale: 2.25
+  cfg: 16.0
+  predict_image: true
+  pre_cfg_mode: false
+  update_mode: DEFAULT
+  update_blend_mode: slerp
+  dims:
+  - -1
+  momentum: 0.6
+  norm_threshold: 2.5
+- start_sigma: 0.1
+  apg_scale: 1.5
+  cfg: 14.0
+  predict_image: true
+  pre_cfg_mode: false
+  update_mode: DEFAULT
+  update_blend_mode: slerp
+  dims:
+  - -1
+  momentum: 0.6
+  norm_threshold: 2.5
+- start_sigma: 0.01
+  apg_scale: 0.0
+  cfg: 13.0
+  predict_image: true

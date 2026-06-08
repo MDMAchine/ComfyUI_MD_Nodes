@@ -1,0 +1,36 @@
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ████ APG GUIDANCE: Z-IMAGE 4-STEP (Qwen Optimized) ███████▓▒░
+# © 2025 MDMAchine
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ░▒▓ DESCRIPTION:
+#   Specialized guidance schedule for 4-Step Turbo/Distilled models
+#   (specifically Z-Image/Qwen).
+#
+#   It splits the generation into two aggressive phases to maximize
+#   detail extraction in a very short window.
+#
+# ░▒▓ RULES:
+#   • Steps 0-2 (Composition): High APG (4.0) / High CFG (3.2)
+#   • Step 3 (Final Touch): Higher APG (4.2) / Higher CFG (3.5)
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+verbose: true
+
+rules:
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # RULE 1: COMPOSITION PHASE (Steps 0, 1, 2)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # Applies to sigmas > 0.5. Establishes the main image structure.
+  - start_sigma: 1.0
+    apg_scale: 4.0       # Aggressive APG
+    cfg: 3.2             # Boosted CFG (Native is 1.0, this forces contrast)
+    predict_image: true
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # RULE 2: FINAL TOUCHES (Step 3)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # Applies to sigmas <= 0.5. Sharpens the result.
+  - start_sigma: 0.5
+    apg_scale: 4.2       # Maximum APG intensity
+    cfg: 3.5             # Maximum CFG intensity
+    predict_image: true

@@ -1,0 +1,16 @@
+[Genre: {Victorian Drill|Baroque Grime|Harpsichord Trap|18th-Century Bass}]
+[BPM: {140|142|144} BPM, {Frantic gliding 808s|Stuttering minuet rhythm|Aggressive 3/4 waltz drops}]
+
+[Instrumentation]
+The track is driven by a {furious, gliding sub-bass|plucked cello counter-melody|heavy 808 tuned to a minor key}.
+The drums are {sharp, rapid-fire hi-hats|cracking flintlock pistol shots for snares|heavy carriage-wood stomps}.
+Bright {frenzied harpsichord arpeggios|dissonant violin screeches|royal trumpet blasts} accent the drop.
+Synths are {replaced by heavily distorted pipe organs|stuttering string quartets|sweeping operatic choirs}.
+
+[Vocal Style]
+{Aggressive Shakespearean spoken-word|Whispered, scandalous high-society gossip|A violently auto-tuned opera tenor}.
+Lyrics focus on {duels at dawn|stealing the crown jewels|powdered wigs|spilling the literal tea}.
+
+[Vibe]
+The atmosphere is {regal but dangerous|arrogant and heavy|high-class chaos}.
+Think Beethoven producing a track for Chief Keef.

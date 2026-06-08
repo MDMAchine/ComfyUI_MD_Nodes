@@ -1,0 +1,52 @@
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ████ MD_SAMPLER_LITE: QWEN LIGHTNING (Speed) █████████████▓▒░
+# © 2025 MDMAchine
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ░▒▓ DESCRIPTION:
+#   Optimized for 4-Step Distilled models.
+#   Since we have very few steps, we use 'Detail Focus' restarts with a
+#   high noise scale to force the model to refine edges aggressively
+#   early in the process.
+#
+#   • Ancestral: 100%
+#   • Blending: Linear (Lerp) for speed and edge hardness.
+#   • Restarts: Aggressive (50% jump back) on steps 1 and 2.
+#
+# ░▒▓ RECOMMENDED USAGE:
+#   • Steps: 4 - 8
+#   • Scheduler: 'sgm_uniform'
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+# ───────────────────────────────────────────────────────────────
+# CORE SETTINGS
+# ───────────────────────────────────────────────────────────────
+step_random_mode: "step"         # Consistent noise for short runs
+step_size: 4                     # Process larger chunks
+seed: 0
+
+first_ancestral_step: 0
+last_ancestral_step: -1
+
+# Lite Specific Controls
+ancestral_strength: 1.0
+noise_coherence: 0.2             # Slight coherence helps stabilize 4-step images
+
+# ───────────────────────────────────────────────────────────────
+# BLENDING
+# ───────────────────────────────────────────────────────────────
+blend_mode: "lerp"               # Linear is cleaner for lightning models
+
+# ───────────────────────────────────────────────────────────────
+# RESTARTS (Aggressive)
+# ───────────────────────────────────────────────────────────────
+enable_restarts: true
+restart_mode: "detail_focus"     # Focus on high-frequency details
+restart_noise_scale: 0.5         # 50% jump back (Large correction)
+restart_s_noise: 1.0
+restart_steps: "1,2"             # Target early composition steps
+
+# ───────────────────────────────────────────────────────────────
+# SYSTEM
+# ───────────────────────────────────────────────────────────────
+debug_mode: 1
+enable_profiling: false

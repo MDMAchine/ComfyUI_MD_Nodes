@@ -1,0 +1,55 @@
+fbg_config:
+  fbg_guidance_multiplier: 2.5
+  cfg_scale: 1.1
+  max_guidance_scale: 8.0
+  initial_guidance_scale: 1.1
+  pi: 0.35
+  guidance_max_change: 1000.0
+  temp: 0.0
+  offset: 0.0
+  t_0: 0.65
+  t_1: 0.4
+  max_posterior_scale: 3.0
+  log_posterior_initial_value: 0.0
+  log_posterior_ema_factor: 0.92
+  cfg_start_sigma: 1.0
+  cfg_end_sigma: 0.0
+  fbg_start_sigma: 1.0
+  fbg_end_sigma: 0.0001
+  ancestral_start_sigma: 1000.0
+  ancestral_end_sigma: 0.004
+blend_mode: slerp
+step_blend_mode: slerp
+ancestral_strength: 1.0
+noise_coherence: 0.0
+ancestral_noise_type: gaussian
+progressive_blend_mode: false
+conditional_blend_mode: false
+conditional_blend_sigma_threshold: 0.3
+conditional_blend_function_name: slerp
+conditional_blend_on_change: false
+conditional_blend_change_threshold: 0.2
+legacy_v1_5_mode: false
+step_random_mode: block
+step_size: 2
+start_sigma_index: 0
+end_sigma_index: -1
+first_ancestral_step: 0
+last_ancestral_step: -1
+clamp_noise_norm: false
+max_noise_norm: 1.5
+adaptive_noise_scaling: false
+noise_scale_factor: 0.25
+enable_restarts: false
+restart_mode: custom
+restart_noise_scale: 0.15
+restart_s_noise: 0.2
+restart_steps: 2,3
+enable_clamp_output: false
+tensor_memory_optimization: false
+early_exit_threshold: 0.0
+sigma_early_exit_threshold: 0.0
+checkpoint_steps_str: ''
+debug_mode: 2 - Verbose
+enable_profiling: true
+enable_logging: true

@@ -1,0 +1,11 @@
+[Genre: {Classic Rock|Disco|Funk|Early Punk|Progressive Rock}]
+[Style: {Stadium Anthem|Studio 54|CBGBs Grit|Laurel Canyon}]
+
+[Instrumentation]
+{Overdriven Les Paul guitars|Funky wah-wah pedals|Analog synthesizers (Moog/ARP)}.
+Drums are {dry and deadened|four-on-the-floor disco|fast punk beats}.
+Bass is {prominent and melodic|slapped and popped}.
+
+[Vocal Style]
+{High-pitched rock screams|Smooth disco crooning|Raw punk shouting|Bluesy wailing}.
+Lyrics are {hedonistic|political|mystical|about the rock and roll lifestyle}.

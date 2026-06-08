@@ -1,0 +1,16 @@
+[Genre: {Bongo-Step|Espresso 2-Step|Beatnik Bass|Cool-Cat Garage}]
+[BPM: {130|132|135} BPM, {Shuffling, syncopated 2-step swing|Frantic bongo rhythm|Laid-back walking bassline}]
+
+[Instrumentation]
+The track is driven by a {filthy, detuned Reese bass playing a jazz walking line|deep sub-bass pulse|plucked acoustic upright bass}.
+The drums are {frantic, improvised bongo solos|espresso machine steam hisses|shuffled, metallic hi-hats}.
+Bright {snapping fingers on the off-beat|dissonant saxophone squeals|typewriter clacks} accent the chorus.
+Synths are {smoky, jazz-club electric pianos|deep, wobbling sub-frequencies|minimalist, echoing vibraphones}.
+
+[Vocal Style]
+{Cool, detached spoken-word poetry|A highly pretentious beatnik drawl|A smooth jazz singer doing rapid-fire MC flows}.
+Lyrics focus on {existential dread|how everyone else is a "square"|drinking black coffee in the dark|riding the subway to nowhere, daddy-o}.
+
+[Vibe]
+The atmosphere is {too cool for school but vibrating with bass|smoky and caffeinated|pretentious and heavy}.
+Think Jack Kerouac MCing a rave in a damp London basement.

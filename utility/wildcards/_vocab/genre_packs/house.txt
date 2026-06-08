@@ -1,0 +1,24 @@
+# MD_Nodes - House Genre Pack
+
+[BASE_GENRE]
+House
+Deep House
+Tech House
+Progressive House
+Bass House
+Lo-Fi House
+Acid House
+
+[BASS_CHARACTER]
+Punchy sidechain sub bass
+Warm house bass riff
+Acid 303 bass line with filter sweep
+Deep house sub with smooth attack
+Funk-influenced plucked bass riff
+Bass house mid with heavy sidechain pump
+
+[PERCUSSION_STYLE]
+Classic four-on-the-floor with open hi-hat swing
+Deep house shaker groove with soft clap
+Tech house clipped percussion with tight loop
+Acid house 909 with swing quantization

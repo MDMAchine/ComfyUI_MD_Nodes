@@ -1,0 +1,36 @@
+{174 BPM Drum and Bass, aggressive neuro-bass, tech-step breaks, metallic snares | 
+175 BPM Neurofunk, distorted neuro-growls, tech-step rhythm, cold industrial textures | 
+172 BPM Techstep, heavy distorted sub, intricate percussion, mechanical atmosphere | 
+174 BPM Jump-up DnB, screeching synth leads, wobbling bass, high-energy festival drums | 
+170 BPM Liquid DnB, smooth Rhodes piano, rolling breaks, ethereal female vocals | 
+175 BPM Intelligent DnB, jazz saxophone, smooth bass, crisp clean breakbeats | 
+95 BPM Boom Bap Rap, dusty vinyl drum breaks, soulful jazz samples, gritty male vocals | 
+90 BPM East Coast Hip Hop, aggressive lyrical flow, lo-fi piano, heavy boom-bap kick | 
+150 BPM Modern Trap, booming 808 glides, rapid hi-hat rolls, dark melodic bells | 
+145 BPM Cinematic Trap, aggressive brass hits, heavy impacts, dark orchestral strings | 
+155 BPM Melodic Trap, wide supersaw chords, pitched vocal chops, deep sub-bass | 
+105 BPM Phonk, distorted cowbell, gritty Memphis vocals, heavy phonk bass glides | 
+140 BPM Phonk-Trap, aggressive Memphis loops, industrial percussion, distorted bass | 
+140 BPM Grime Rap, ice-cold square wave bass, rapid percussion, aggressive British vocals | 
+140 BPM Dubstep, metallic growls, rhythmic sub wobbles, digital distortion | 
+142 BPM Riddim, robotic synth stabs, heavy sub-pressure, minimalist percussion | 
+145 BPM Melodic Dubstep, soaring leads, piano breakdown, powerful bass drops | 
+115 BPM Nu-Disco, funky slap-bass, filter-swept guitar, 4-on-the-floor kick | 
+120 BPM Nu-Disco, retro synth stabs, rhythmic bassline, wide stereo imaging | 
+124 BPM Disco House, warm house piano, organic shaker loops, soulful vocal chops | 
+126 BPM Disco House, filtered strings, driving sub-bass, rhythmic clap groove | 
+122 BPM Future Disco, neon-soaked leads, sidechained compression, funky energy | 
+128 BPM Future House, bouncy slap-bass, bright vocal fragments, shuffling drums | 
+130 BPM Industrial Techno, pounding kick, acid squelches, warehouse atmosphere | 
+92 BPM Conscious Hip Hop, smooth upright bass, soulful piano, clear rhythmic rapping | 
+100 BPM Trip Hop, melancholic strings, slow breaks, female vocal layers | 
+120 BPM Synthwave, retro arpeggios, gated reverb, lush analog pads | 
+150 BPM Hardstyle, distorted pitched kick, uplifting leads, epic vocal builds | 
+100 BPM West Coast Rap, G-Funk lead synth, funky rhythmic bass, laid-back vocal flow | 
+100 BPM Mid-Tempo Bass, crunchy distorted lead, industrial textures, dark pads | 
+145 BPM Psytrance, rolling triplet bass, acid chirps, tribal percussion | 
+120 BPM Deep House, organic percussion, warm sub, soulful organ chords | 
+110 BPM Glitch Hop, funky bass, granular synthesis, swing-timed percussion | 
+85 BPM Dark Ambient, deep drones, industrial clangs, haunting vocal echoes | 
+160 BPM Footwork, syncopated percussion, deep sub-hits, repetitive vocal glitches | 
+140 BPM UK Drill, sliding 808 sub-bass, sharp percussion, aggressive vocal cadence}

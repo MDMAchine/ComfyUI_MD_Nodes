@@ -1,0 +1,16 @@
+[Genre: {East Coast Hip Hop|NY Boom Bap|Hardcore 90s Rap|Jazz Rap}]
+[BPM: {86|88|90|92} BPM, {Gritty head-nod|Raw swing|Stiff quantization}]
+
+[Instrumentation]
+The beat is built around a {dusty jazz piano loop|chopped soul sample|dark orchestral stab}.
+The drums are {heavy and lo-fi|crunchy and distorted}, featuring a {thumping kick|snare that cracks like a whip}.
+The bass is an {upright double bass sample|filtered low-end hum}.
+Atmosphere: {Rain and subway sounds|Tape hiss and vinyl pops|Cold winter wind}.
+
+[Vocal Style]
+The rapper has a {husky, poetic baritone like Nas|heavy, smooth flow like Biggie|gritty, aggressive delivery like Wu-Tang}.
+The lyrics use {complex internal rhymes|multi-syllabic patterns|vivid storytelling}.
+
+[Lyrical Theme]
+A gritty story about {hustling on the corner|the struggle in the projects|playing chess with life|the cold reality of the city}.
+Metaphors involving {war and survival|knowledge and power|concrete and steel}.

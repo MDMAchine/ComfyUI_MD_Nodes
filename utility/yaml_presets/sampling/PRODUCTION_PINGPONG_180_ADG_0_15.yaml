@@ -1,0 +1,188 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# ACE-STEP PRODUCTION CONFIG - 180 STEPS WITH ADG 0.15 (FINAL)
+# ══════════════════════════════════════════════════════════════════════════════
+# Status: PRODUCTION READY ✅
+# Tested: 2025-12-21 | Result: Excellent quality, clean output
+# ADG Setting: 0.15 radians (~9° rotation per step)
+# ══════════════════════════════════════════════════════════════════════════════
+
+legacy_v1_5_mode: true  # ✅ CRITICAL: Use legacy epsilon (1e-6) for analog warmth at high steps
+
+# ──────────────────────────────────────────────────────────────────────────────
+# CORE SAMPLER SETTINGS
+# ──────────────────────────────────────────────────────────────────────────────
+step_random_mode: "block"       # Rhythmic consistency
+step_size: 25                   # Seed block size
+seed: 0                         # 0 = Random per generation
+
+# Ancestral Noise - PROVEN CONFIGURATION
+first_ancestral_step: 0
+last_ancestral_step: -1
+ancestral_noise_type: "gaussian"  # Proven for ACE-Step audio
+
+# Schedule Range
+start_sigma_index: 0
+end_sigma_index: -1
+enable_clamp_output: false      # ⚠️ NEVER clamp for audio latents
+
+# ──────────────────────────────────────────────────────────────────────────────
+# BLENDING - GOLD STANDARD (STABLE & PROVEN)
+# ──────────────────────────────────────────────────────────────────────────────
+blend_mode: "lerp"              # Simple, stable interpolation
+step_blend_mode: "lerp"         # Simple, stable interpolation
+
+# Advanced Blending (All disabled for maximum stability)
+progressive_blend_mode: false
+conditional_blend_mode: false
+conditional_blend_sigma_threshold: 0.3
+conditional_blend_function_name: "slerp"
+conditional_blend_on_change: false
+conditional_blend_change_threshold: 0.2
+
+# ──────────────────────────────────────────────────────────────────────────────
+# NOISE SCALING - GOLD STANDARD
+# ──────────────────────────────────────────────────────────────────────────────
+clamp_noise_norm: false
+max_noise_norm: 1.5
+adaptive_noise_scaling: false   # Disabled for consistency
+noise_scale_factor: 1.0         # Full noise strength
+
+# ──────────────────────────────────────────────────────────────────────────────
+# RES 2 RESTARTS - DISABLED FOR PRODUCTION
+# ──────────────────────────────────────────────────────────────────────────────
+# Restarts are disabled in this proven config. Enable only if you need
+# additional error correction for specific use cases.
+enable_restarts: false
+restart_mode: "conservative"
+restart_noise_scale: 0.10
+restart_s_noise: 0.50
+restart_steps: ""
+
+# ──────────────────────────────────────────────────────────────────────────────
+# FBG TUNING - PROVEN PRODUCTION VALUES
+# ──────────────────────────────────────────────────────────────────────────────
+fbg_sampler_mode: "PINGPONG"
+sigma_range_preset: "Custom"    # Custom allows precise control
+
+# CFG Settings (Base Guidance)
+cfg_scale: 12.0                 # ✅ PROVEN: Strong base CFG for ACE-Step
+cfg_start_sigma: 1.0
+cfg_end_sigma: 0.004
+
+# FBG Settings (Dynamic Guidance)
+fbg_start_sigma: 1.0
+fbg_end_sigma: 0.004            # Run FBG through nearly entire generation
+
+# PRODUCTION POWER VALUES
+# These values produced guidance range: Min=568.39, Max=994.35, Avg=676.93
+max_guidance_scale: 2000.0      # ✅ PROVEN: Tested ceiling
+initial_guidance_scale: 250.0   # ✅ PROVEN: Strong initial push
+fbg_guidance_multiplier: 550.0  # ✅ PROVEN: Dynamic modulation sweet spot
+guidance_max_change: 1000.0     # ✅ PROVEN: Max delta per step
+
+# ──────────────────────────────────────────────────────────────────────────────
+# FBG MATH (AUTO-CALCULATION)
+# ──────────────────────────────────────────────────────────────────────────────
+pi: 0.35                        # ✅ PROVEN: Balance point
+t_0: 0.7                        # ✅ PROVEN: Offset calculation
+t_1: 0.4                        # ✅ PROVEN: Temp calculation
+
+fbg_temp: 0.0                   # Auto-calculated (ignored)
+fbg_offset: 0.0                 # Auto-calculated (ignored)
+
+# ──────────────────────────────────────────────────────────────────────────────
+# POSTERIOR (SMOOTHING)
+# ──────────────────────────────────────────────────────────────────────────────
+max_posterior_scale: 3.0
+log_posterior_initial_value: 0.0
+log_posterior_ema_factor: 0.8   # ✅ PROVEN: Smooth feedback without losing detail
+
+# ──────────────────────────────────────────────────────────────────────────────
+# SYSTEM & DEBUG
+# ──────────────────────────────────────────────────────────────────────────────
+debug_mode: 2                   # 2 = Full analytics in console
+enable_profiling: true          # Performance metrics
+tensor_memory_optimization: false
+early_exit_threshold: 0.000001
+checkpoint_steps_str: ""
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 📊 PRODUCTION NOTES - TESTED CONFIGURATION
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# This configuration was validated on 2025-12-21 with 180 steps and produced:
+# • Guidance Scale Range: 568.39 - 994.35 (avg 676.93)
+# • Clean output with no distortion/grain
+# • Excellent structure and coherence
+# • Good high-frequency content
+# • Stable vocals without harshness
+#
+# ══════════════════════════════════════════════════════════════════════════════
+# 🎯 CRITICAL EXTERNAL SETTINGS (MUST MATCH):
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# MD_Patch_ADG Node:
+# • enable: true
+# • max_angle: 0.15  ← CRITICAL! This is the magic number for 180 steps
+#
+# Scheduler (Casual Scheduler recommended):
+# • mode: "linear_quadratic"
+# • shift: 1.05
+# • steps: 180  ← Match your step count
+# • rho: 7.0
+# • blend_factor: 0.5
+# • power: 4.0
+#
+# APG Guider:
+# • Use PRODUCTION_APG_CONFIG.yaml (see companion file)
+#
+# ══════════════════════════════════════════════════════════════════════════════
+# 🔧 SCALING FOR DIFFERENT STEP COUNTS:
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# If you change step count, adjust ADG angle proportionally:
+#
+# Formula: ADG_angle = 0.39 * (60 / your_steps)
+#
+# Step Count | Recommended ADG Angle | Notes
+# -----------|----------------------|------------------
+# 60         | 0.39                 | Reference config
+# 120        | 0.20                 | Good balance
+# 150        | 0.16                 | Fast production
+# 180        | 0.15                 | ✅ PRODUCTION (this config)
+# 200        | 0.12                 | Very safe
+# 220        | 0.11                 | Conservative
+#
+# ══════════════════════════════════════════════════════════════════════════════
+# 💡 OPTIONAL TWEAKS (ADVANCED):
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# For MORE high-end sparkle:
+# • max_guidance_scale: 2200.0 (from 2000)
+# • fbg_guidance_multiplier: 600.0 (from 550)
+#
+# For FASTER generation (test quality first):
+# • Try 150 steps with ADG 0.16
+# • Try 120 steps with ADG 0.20
+#
+# For SMOOTHER output (if needed):
+# • log_posterior_ema_factor: 0.85 (from 0.8)
+# • fbg_guidance_multiplier: 500.0 (from 550)
+#
+# ══════════════════════════════════════════════════════════════════════════════
+# ⚠️ DO NOT CHANGE UNLESS TESTING:
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# The following values are CRITICAL to this configuration's success:
+# • legacy_v1_5_mode: true
+# • blend_mode: "lerp"
+# • step_blend_mode: "lerp"
+# • ancestral_noise_type: "gaussian"
+# • noise_scale_factor: 1.0
+# • adaptive_noise_scaling: false
+# • pi: 0.35
+# • t_0: 0.7
+#
+# Changing these may introduce grain, wobble, or phase artifacts.
+#
+# ══════════════════════════════════════════════════════════════════════════════

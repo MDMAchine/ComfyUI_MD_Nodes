@@ -1,0 +1,16 @@
+[Genre: {Turntablism|Breakbeat Funk|Vintage Soul|Hip Hop|Big Beat}]
+[BPM: {105|110|115} BPM, {Head-nodding bounce|Party rocking tempo|Funky break}]
+
+[Instrumentation]
+The foundation is a {dusty drum break|chopped funk sample loop}.
+Heavy use of {horn sections (trumpet/sax)|Hammond organ riffs|scratched vocal samples}.
+The bass is {upright double bass|walking funk lines}.
+FX: {Vinyl scratching|Vocal chops|Siren sounds|Party crowd noise}.
+
+[Vocal Style]
+{Fast-paced rapping|Sampled soul shouting|Call and response hooks}.
+Lyrics are about {having a good time|the groove|old school vibes|rocking the party}.
+
+[Vibe]
+The atmosphere is {energetic and happy|retro cool|block party anthem}.
+Sounds like {a crate-digging discovery|a modernized 60s party}.

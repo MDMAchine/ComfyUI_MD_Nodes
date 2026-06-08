@@ -1,0 +1,51 @@
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ████ MD_SAMPLER_LITE: Z-IMAGE TURBO (Coherent) ███████████▓▒░
+# © 2025 MDMAchine
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ░▒▓ DESCRIPTION:
+#   A "Smooth Operator" for Z-Image/Turbo models.
+#   It utilizes the 'Noise Coherence' feature of the Lite sampler to
+#   blend noise patterns between steps (0.5 coherence). This reduces
+#   the harsh/plastic artifacts common in Turbo models.
+#
+#   • Ancestral: 80% (Slightly reduced to let coherence work)
+#   • Coherence: 50% (High coherence = smooth textures)
+#
+# ░▒▓ RECOMMENDED USAGE:
+#   • Steps: 8 - 12
+#   • Scheduler: 'simple' or 'normal'
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+# ───────────────────────────────────────────────────────────────
+# CORE SETTINGS
+# ───────────────────────────────────────────────────────────────
+step_random_mode: "off"          # Deterministic is best for Turbo
+step_size: 1
+seed: 0
+
+first_ancestral_step: 0
+last_ancestral_step: -1
+
+# Lite Specific Controls (The Secret Sauce)
+ancestral_strength: 0.8          # Reduced to prevent "burn"
+noise_coherence: 0.5             # High coherence smoothes Turbo artifacts
+
+# ───────────────────────────────────────────────────────────────
+# BLENDING
+# ───────────────────────────────────────────────────────────────
+blend_mode: "lerp"
+
+# ───────────────────────────────────────────────────────────────
+# RESTARTS (Mid-Run Fix)
+# ───────────────────────────────────────────────────────────────
+enable_restarts: true
+restart_mode: "detail_focus"
+restart_noise_scale: 0.4         # Moderate jump back
+restart_s_noise: 1.0
+restart_steps: "4"               # Fix structure at 40% completion
+
+# ───────────────────────────────────────────────────────────────
+# SYSTEM
+# ───────────────────────────────────────────────────────────────
+debug_mode: 1
+enable_profiling: false

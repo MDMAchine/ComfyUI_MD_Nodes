@@ -1,0 +1,69 @@
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ████ APG GUIDANCE: QWEN EDIT STANDARD (15+ Steps) █████████▓▒░
+# © 2025 MDMAchine
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ░▒▓ DESCRIPTION:
+#   Designed for the Base Qwen-Image-Edit model.
+#   Uses a "Structure -> Texture" handoff strategy.
+#
+#   • Phase 1 (High Sigma): High CFG/APG forces the edit (cabinet change, etc).
+#   • Phase 2 (Low Sigma): Low CFG preserves original image fidelity.
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+verbose: true
+
+rules:
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # RULE 1: FORCE THE EDIT (Sigma > 0.8)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # High guidance to override the original image structure.
+  - start_sigma: 1.0
+    apg_scale: 5.0       # Aggressive projection
+    cfg: 6.0             # High CFG for adherence
+    predict_image: true
+    momentum: 0.75
+    norm_threshold: 2.5
+    dims: "-1, -2"       # Spatial dimensions focus
+    mode: "pure_apg"
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # RULE 2: INTEGRATION (Sigma 0.8 - 0.4)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # Blending the new elements with the scene.
+  - start_sigma: 0.8
+    apg_scale: 3.5
+    cfg: 4.5
+    momentum: 0.5
+    norm_threshold: 2.0
+    mode: "pure_apg"
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # RULE 3: HARMONIZATION (Sigma 0.4 - 0.1)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # Lower guidance to match lighting and texture.
+  - start_sigma: 0.4
+    apg_scale: 1.5
+    cfg: 3.0
+    momentum: 0.3
+    norm_threshold: 1.5
+    mode: "pure_apg"
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # RULE 4: CLEANUP (Sigma < 0.1)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # "Static Killer" phase.
+  - start_sigma: 0.1
+    apg_scale: 0.0       # Off
+    cfg: 2.0             # Bare minimum
+    momentum: 0.0
+    norm_threshold: 0.0
+    mode: "pure_apg"
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # RULE 5: FALLBACK (Safety)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  - start_sigma: -1
+    apg_scale: 0.0
+    cfg: 2.0
+    momentum: 0.0
+    norm_threshold: 0.0

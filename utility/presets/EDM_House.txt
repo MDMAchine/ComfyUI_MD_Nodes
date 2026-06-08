@@ -1,0 +1,16 @@
+[Genre: {Deep House|Chicago House|Tech House|Piano House}]
+[BPM: {120|124|126|128} BPM, {Four-on-the-floor|Steady groove|Dancefloor ready}]
+
+[Instrumentation]
+The kick drum is {thumping and steady|soft and round}.
+The high-hats are {open and shuffling|crisp and tight} on the off-beat.
+The main hook is provided by a {classic M1 piano chord|bouncy bassline|filtered disco sample|repetitive vocal chop}.
+Basslines are {funky and plucked|deep and sustaining|acid 303 squelches}.
+
+[Vocal Style]
+{Soulful female ad-libs|Spoken word preaching|Catchy pop hooks|Sampled disco vocals}.
+Lyrics are about {dancing all night|love and unity|the rhythm|feeling the vibe}.
+
+[Vibe]
+The atmosphere is {club-ready|poolside chill|underground warehouse|euphoric sunrise}.
+"Boots and cats" rhythm is essential.

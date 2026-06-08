@@ -1,0 +1,76 @@
+# MD_Nodes - Neurofunk / DnB Genre Pack
+# Format: one descriptor per line. Lines starting with # are comments.
+# Used by WildcardPromptBuilder in genre file picker and _internal bass/break banks.
+
+[BASE_GENRE]
+Drum and Bass
+Liquid DnB
+Neurofunk
+Techstep
+Jump Up
+Darkstep
+Rollers
+Jungle
+Breakcore
+Intelligent DnB
+
+[BASS_CHARACTER]
+Classic reese bass with heavy chorus and formant filter sweep
+Neurofunk growl bass with formant-filtered mid-range modulation
+Distorted 808 sub with neuro mid-bass layer
+Dual-layer reese: clean sub + overdriven mid
+FM-synthesized neuro bass with pitch LFO automation
+Heavily distorted bass with robot-vocal formant character
+Wobble bass with step-sequenced LFO on cutoff
+Acidic reese with bandpass resonance sweep
+Granular bass texture created from resampled vocal fry
+Sub pressure bass with sidechain-pumped envelope
+Hoover lead used as bass mid layer
+Brostep-influenced mid-bass with filthy growl
+Minimal rolling sub with occasional neuro stab accent
+Liquid DnB warm sub with clean pluck top
+Dual-oscillator reese with minor 3rd detuning
+Pitched neuro bass cycling through 5 formant stages
+Hard-clipped mid bass with brick-wall limiting
+Reese bass with automated resonant highpass sweep
+Neuro bass built from FM operator feedback loop
+Sub-only bass with granular texture on mid layer
+
+[BREAK_STYLE]
+Amen Brother break
+Think break
+Apache break
+Hot Pants break
+Funky Drummer break
+Custom drum edit with 16th-note micro-timing
+Layered break composite with processed transients
+Pitched and resampled jungle break
+Tightly gated snare with extended reverb tail
+Amen chop with heavy pitch warp per slice
+Rolling 2-step break with ghost note hi-hats
+Neurofunk breakbeat with resampled glitch layer
+Pitched Amen slices with timestretched fills
+Heavy snare crack with sub-kick layering
+Reese bass-locked kick-snare interplay
+
+[PERCUSSION_STYLE]
+Amen break chop with heavy pitch warp
+Tightly processed rolling breaks with layered ghost notes
+Think break with surgical compression
+Complex drum edit with micro-timed ghost hits
+Neurofunk breakbeat with resampled glitch layer
+Pitched Amen slices with timestretched fills
+Heavy snare crack with sub-kick layering
+Reese bass-locked kick-snare interplay
+
+[PRODUCTION_DETAIL]
+Sidechain compression locking kicks to sub bass
+Parallel compression on the break for punch and glue
+Surgical mid-frequency EQ carving space for the reese
+Heavy limiting on the master for dancefloor loudness
+Stereo widening on mid-bass for club-system presence
+Transient shaping on the snare for crack and body
+LFO-automated filter on the reese bass for movement
+Distortion chain: soft clip to waveshaper to tube emulation
+Reverb sends only on hi-hats and cymbals
+Dense sound design with 5 or more bass layers stacked

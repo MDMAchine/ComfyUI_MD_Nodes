@@ -1,0 +1,23 @@
+# MD_Nodes - Ambient / Cinematic Genre Pack
+
+[BASE_GENRE]
+Ambient
+Dark Ambient
+Drone
+Space Ambient
+Cinematic
+Downtempo
+Psybient
+
+[BASS_CHARACTER]
+Deep space sine tone sub
+Wind-swept tonal drone
+Low rumble field recording
+Bowed bass sustain with shimmer reverb
+Granular sub texture from pitched noise
+
+[PERCUSSION_STYLE]
+Beatless with subtle rhythmic texture
+Slow evolving cymbal swells
+Distant processed tribal hits
+Sparse reverb-drenched hits with long decay

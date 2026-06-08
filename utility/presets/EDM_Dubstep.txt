@@ -1,0 +1,16 @@
+[Genre: {Dubstep|Brostep|Tearout|Melodic Dubstep}]
+[BPM: {140|150} BPM, {Half-time feel|Headbanging rhythm}]
+
+[Instrumentation]
+The track builds up with {epic cinematic chords|rising synthesizers|fast snare rolls}.
+The "Drop" features {aggressive metallic growls|screaming synth leads|heavy sub-bass wobbles}.
+The rhythm is dominated by a {massive kick and snare|punchy half-time beat}.
+Pre-drop vocal: {"Let the bass cannon kick it"|"Switch"|"Drop it"|A distorted scream}.
+
+[Vocal Style]
+{High-pitched female chops|Aggressive male shouting|Robotized speech|None}.
+If there are lyrics, they are about {energy|power|the apocalypse|letting go}.
+
+[Sound Design]
+Focus on {FM synthesis|bit-crushed distortion|laser zaps|heavy sidechain compression}.
+The bass should feel {like a chainsaw|like a transformer transforming|deep and guttural}.

@@ -1,0 +1,25 @@
+# MD_Nodes - Techno Genre Pack
+
+[BASE_GENRE]
+Techno
+Hard Techno
+Acid Techno
+Peak Time Techno
+Dub Techno
+Minimal Techno
+Industrial Techno
+
+[BASS_CHARACTER]
+Overdriven industrial bass clank
+Acid 303 squell with resonance sweep
+Distorted kick-bass hybrid
+Minimal rolling sub with filter automation
+Dub techno sub with heavy reverb tail
+Hard techno bass with clipping saturation
+
+[PERCUSSION_STYLE]
+Four-to-the-floor kick with overdriven claps
+Industrial hi-hat triplets over a punchy kick
+Minimal kick with resonant clap on 2 and 4
+Hard techno kick with distorted snare crack
+Acid hi-hat shuffle with off-grid ghost hits

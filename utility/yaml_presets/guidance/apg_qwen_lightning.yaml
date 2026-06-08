@@ -1,0 +1,58 @@
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ████ APG GUIDANCE: QWEN LIGHTNING (4-Step Optimized) ██████▓▒░
+# © 2025 MDMAchine
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ░▒▓ DESCRIPTION:
+#   Surgical guidance for 4-Step Distilled models.
+#   Since base CFG must stay near 1.0, APG provides the "pop"
+#   without the "burn".
+#
+#   • Step 1 (Sigma 1.0): Setup Structure.
+#   • Step 2 (Sigma 0.6): Refine Shapes.
+#   • Step 3 (Sigma 0.3): Final Polish.
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+verbose: true
+
+rules:
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # STEP 1: INITIAL COMPOSITION (Sigma ~1.0)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # Very subtle boost. Too high here ruins the distillation.
+  - start_sigma: 1.0
+    apg_scale: 1.5       # Subtle boost
+    cfg: 1.2             # Slight nudge above 1.0
+    predict_image: true
+    momentum: 0.2        # Low momentum for fast switching
+    norm_threshold: 1.0
+    mode: "pure_apg"
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # STEP 2: DEFINITION (Sigma ~0.6)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  - start_sigma: 0.6
+    apg_scale: 1.2
+    cfg: 1.1
+    momentum: 0.1
+    norm_threshold: 1.0
+    mode: "pure_apg"
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # STEP 3 & 4: SURFACE (Sigma < 0.3)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # Disable everything to let the distilled model finish cleanly.
+  - start_sigma: 0.3
+    apg_scale: 0.0
+    cfg: 1.0             # Back to native 1.0
+    momentum: 0.0
+    norm_threshold: 0.0
+    mode: "pure_apg"
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # FALLBACK
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  - start_sigma: -1
+    apg_scale: 0.0
+    cfg: 1.0
+    momentum: 0.0
+    norm_threshold: 0.0

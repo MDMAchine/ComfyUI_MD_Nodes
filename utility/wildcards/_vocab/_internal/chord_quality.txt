@@ -1,0 +1,22 @@
+Minor
+Major
+Diminished
+Augmented
+Suspended 2
+Suspended 4
+Minor 7th
+Major 7th
+Dominant 7th
+Half-Diminished
+Modal
+Dorian
+Lydian
+Phrygian
+Cluster
+Atonal
+Open Voicing
+Blues Scale
+Power Chords
+Jazz Extensions
+Phrygian Dominant
+Locrian

@@ -1,0 +1,10 @@
+[Genre: {Epic Film Score|Hans Zimmer Style|Dark Sci-Fi Soundtrack|Emotional Orchestral}]
+[Mood: {Tense and suspenseful|Heroic and uplifting|Melancholic and tragic|Eerie and mysterious}]
+
+[Instrumentation]
+The composition features {thundering taiko drums|swelling string sections|minimalist piano arpeggios|distorted braam horns}.
+Textures include {metallic sound design|sweeping sub-bass drops|ethereal choir vocals|ticking clock rhythms}.
+
+[Structure]
+The piece starts {quietly and builds to a crescendo|with a sudden impact|with a lonely solo instrument}.
+It evokes a scene of {a massive space battle|a tearful goodbye in the rain|a high-speed chase|a dystopian wasteland}.

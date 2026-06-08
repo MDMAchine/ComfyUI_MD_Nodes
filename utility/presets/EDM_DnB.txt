@@ -1,0 +1,15 @@
+[Genre: {Drum and Bass|Liquid DnB|Neurofunk|Jungle}]
+[BPM: {170|172|174|175} BPM, {Fast and frantic|Rolling and smooth|Breakneck speed}]
+
+[Instrumentation]
+The drums are {complex, chopped Amen breaks|tight, synthetic two-step beats}.
+The bass is a {distorted, filtering Reese bass|smooth, deep sub-bass|wobbling mid-range synth}.
+Atmospheric pads and {sci-fi FX|soulful piano chords|jazzy saxophone samples} float on top.
+
+[Vocal Style]
+{Soulful female diva vocals|Fast-paced MC rapping|Reggae-influenced toasting|Ethereal vocal chops}.
+The lyrics focus on {movement and speed|urban life|love and euphoria|dark technology}.
+
+[Vibe]
+The track feels {futuristic and dark|liquid and emotional|high-energy and rave-ready}.
+Perfect for {racing games|late night raves|highway driving}.

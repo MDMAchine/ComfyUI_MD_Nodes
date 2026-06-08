@@ -1,0 +1,16 @@
+[Genre: {Nu-Disco|Disco House|French Touch|Future Funk}]
+[BPM: {118|120|122|124} BPM, {Groovy and strutting|Four-on-the-floor|Funky bounce}]
+
+[Instrumentation]
+The track is driven by a {Nile Rodgers-style funk guitar riff|slapping live bassline}.
+The drums are {punchy and modern|vintage disco samples layered with electronic kicks}.
+Bright {string sections|brass stabs|talkbox vocals} accent the chorus.
+Synths are {warm analog pads|sparkling arpeggios|retro-futuristic leads}.
+
+[Vocal Style]
+{Falsetto male vocals|Soulful diva hooks|Vocoded robotic harmonies|Spoken word cool}.
+Lyrics focus on {dancing|the weekend|love on the dancefloor|glitter and gold}.
+
+[Vibe]
+The atmosphere is {euphoric|chic and stylish|retro yet futuristic|summery}.
+Think "Get Lucky" or "Music Sounds Better With You."

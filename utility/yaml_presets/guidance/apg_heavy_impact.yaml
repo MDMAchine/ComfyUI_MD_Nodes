@@ -1,0 +1,83 @@
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ████ APG GUIDANCE: HEAVY IMPACT (Strict Adherence) █████████▓▒░
+# © 2025 MDMAchine
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ░▒▓ DESCRIPTION:
+#   A high-pressure configuration designed to force the model into
+#   compliance. It maintains high CFG and APG values deep into the
+#   denoising process.
+#
+#   • Phase 0-3: Maximum Pressure (CFG 14.0 / APG 7.0).
+#   • Phase 4-5: Sudden Drop-off (Prevents "burn" at end).
+#
+# ░▒▓ USE CASE:
+#   • Weak prompts or abstract concepts.
+#   • Forcing a specific BPM or key signature.
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+verbose: true
+
+rules:
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # PHASE 0: THE HAMMER - Max Force (σ > 0.8)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  - start_sigma: -1
+    apg_scale: 7.0       # Maximum APG intensity
+    cfg: 14.0            # Very high CFG
+    predict_image: true
+    pre_cfg_mode: false
+    update_mode: "DEFAULT"
+    update_blend_mode: "lerp"
+    dims: [-1]
+    momentum: 0.9        # High momentum locks in the trajectory
+    norm_threshold: 3.0  # Allow larger corrections
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # PHASE 1: SUSTAIN - Hold Pressure (σ ≤ 0.8)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  - start_sigma: 0.8
+    apg_scale: 6.0
+    cfg: 12.0
+    predict_image: true
+    pre_cfg_mode: false
+    update_mode: "DEFAULT"
+    update_blend_mode: "lerp"
+    dims: [-1]
+    momentum: 0.85
+    norm_threshold: 3.0
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # PHASE 2: CRUISE - Still High (σ ≤ 0.5)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  - start_sigma: 0.5
+    apg_scale: 5.0
+    cfg: 10.0
+    predict_image: true
+    pre_cfg_mode: false
+    update_mode: "DEFAULT"
+    update_blend_mode: "lerp"
+    dims: [-1]
+    momentum: 0.8
+    norm_threshold: 2.5
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # PHASE 3: RAPID DESCENT - Cleanup (σ ≤ 0.2)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  - start_sigma: 0.2
+    apg_scale: 2.0       # Sharp drop to prevent artifacts
+    cfg: 6.0
+    predict_image: true
+    pre_cfg_mode: false
+    update_mode: "DEFAULT"
+    update_blend_mode: "slerp"
+    dims: [-1]
+    momentum: 0.5        # Release momentum for details
+    norm_threshold: 2.0
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # PHASE 4: FINAL POLISH (σ ≤ 0.05)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  - start_sigma: 0.05
+    apg_scale: 0.0       # OFF
+    cfg: 3.0             # Clean finish
+    predict_image: true

@@ -1,0 +1,16 @@
+[Genre: {Future Funk|Vapor-Disco|French Touch|Nu-Funk}]
+[BPM: {115|120|125|128} BPM, {Chopped and screwed grooves|Heavy sidechain pumping|Upbeat and infectious 4/4}]
+
+[Instrumentation]
+The track is driven by a {sampled 70s library funk bassline|slap-bass loop heavily filtered}.
+The drums are {punchy, modern electronic kicks mixed with acoustic breaks|classic French House percussion loops}.
+Bright {anime-style synth stabs|vintage brass sections|wah-wah funk guitars} accent the chorus.
+Synths are {gliding G-funk leads|shimmering 80s FM keys|retro arpeggiators}.
+
+[Vocal Style]
+{Sped-up 80s Japanese City Pop vocals|Chopped disco diva phrases|Retro anime dialogue samples|Vaporwave-style pitched hooks}.
+Lyrics focus on {neon cities|retro romance|dancing through the night|summertime nostalgia}.
+
+[Vibe]
+The atmosphere is {neon-lit and energetic|internet-nostalgic|Tokyo night drive|anime-aesthetic}.
+Think Macross 82-99, Yung Bae, or early Daft Punk.

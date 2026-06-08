@@ -3,39 +3,46 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.egg-info/
+
 # Virtual environments
 venv/
 .venv/
 env/
 .env/
+
 # IDE files
 .vscode/
 .idea/
 *.swp
+
 # OS files
 .DS_Store
 Thumbs.db
+
 # Backups
 .project_backups/
 *.rar
 *.zip
+
 # ComfyUI specific
 .ipynb_checkpoints/
-# Large files
+
+# Large model files
 *.bin
 *.safetensors
 *.ckpt
 *.pt
 *.pth
+
 # Local configs
 *.ini
 *.local
-project_updater_config.json
-updater_settings.json
+
 # Build artifacts
 build/
 dist/
-# Project Exclusions
+
+# Project exclusions
 .git/
 node_modules/
 misc/
@@ -43,3 +50,42 @@ Internal/
 docs/
 tests/
 testing/
+work_files/
+
+# Backup / version history (local only)
+versions/
+*.backup
+*.bak
+*_OLD.py
+*_TEMP.py
+*_TEST.py
+
+# API server files (server-side only, never commit)
+api/
+*_api.py
+
+# Internal tools (not for public repo)
+tools/
+
+# Dev/build scripts
+build_public_release.bat
+build_public_release.py
+unit_test_patcher.py
+version_patcher.py
+
+# Local config / snapshot files
+project_updater_config.json
+updater_settings.json
+omni_root_snapshot.txt
+omni_scan_*.txt
+
+# License manager (private)
+license_backups/
+license_changes*.log
+license_config_private.yaml
+apply_licenses.bat
+apply_licenses.sh
+LICENSE_MANAGER_GUIDE.md
+QUICK_START_ALEX.md
+patch_adg_core.py
+PRIVATE_VAULT.json

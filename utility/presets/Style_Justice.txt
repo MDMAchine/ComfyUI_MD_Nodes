@@ -1,0 +1,16 @@
+[Genre: {French Electro|Electro House|Industrial Rock|Distorted Disco}]
+[BPM: {115|120|125|130} BPM, {Stomping and heavy|Marching rhythm|Aggressive groove}]
+
+[Instrumentation]
+The bassline is {heavily distorted slap bass|gritty and buzzing|compressed to the limit}.
+The drums are {trashy and loud|compressed rock kits|electronic stomps}.
+Synths sound like {church organs|distorted electric guitars|sirens}.
+Orchestral elements: {Choir stabs|Dramatic strings|Harpsichord melodies}.
+
+[Vocal Style]
+{Shouted gang vocals|Children's choir|Operatic falsetto|Heavily processed chanting}.
+Lyrics are {anthemic|religious but dark|about the night|simple and repetitive}.
+
+[Vibe]
+The energy is {apocalyptic|sacrilegious|high-octane rock star energy}.
+A mix of {heavy metal attitude|disco rhythm|classical grandeur}.

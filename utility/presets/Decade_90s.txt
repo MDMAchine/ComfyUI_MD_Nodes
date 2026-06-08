@@ -1,0 +1,11 @@
+[Genre: {90s R&B|Eurodance|Pop Rock|Trip Hop}]
+[Style: {MTV Era|Generation X|Blockbuster Movie Soundtrack}]
+
+[Instrumentation]
+{Korg M1 Piano|Orchestra Hits|Breakbeats|Acoustic guitars with hip-hop drums}.
+Synths are {digital and glassy|rave stabs}.
+Bass is {slapped fretless bass|deep sine waves}.
+
+[Vocal Style]
+{Powerful divas|Melismatic R&B runs|Breathy pop vocals|Rap verses in pop songs}.
+Lyrics focus on {universal love|party anthems|ironic detachment}.

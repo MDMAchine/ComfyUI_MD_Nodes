@@ -1,0 +1,16 @@
+[Genre: {Trance|Uplifting Trance|Progressive Trance|Psytrance}]
+[BPM: {128|132|138|140} BPM, {Driving four-on-the-floor|Rolling triplet groove|Relentless energy}]
+
+[Instrumentation]
+The track is driven by a {pulsating rolling bassline|sub-heavy off-beat bass|driving rhythmic sequence}.
+The drums are {punchy and synthesized|layered with crisp, open hi-hats|heavy on the ride cymbals}.
+Bright {supersaw chord stabs|acid 303 lines|ethereal vocal chops} accent the drop.
+Synths are {massive anthemic leads|lush, evolving atmospheric pads|hypnotic plucked arpeggios}.
+
+[Vocal Style]
+{Ethereal, soaring female vocals|Whispered spoken word|Epic choral chants|Instrumental only}.
+Lyrics focus on {the universe|deep emotional connection|euphoria and unity|letting go}.
+
+[Vibe]
+The atmosphere is {uplifting and emotional|hypnotic and driving|expansive and atmospheric|stadium-filling}.
+Think "Adagio for Strings" by Tiësto or "Children" by Robert Miles.

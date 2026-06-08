@@ -1,0 +1,16 @@
+[Genre: {Indie Rock|Shoegaze|Dream Pop|Lo-Fi Alternative}]
+[BPM: {100|115|125} BPM, {Upbeat and quirky|Dreamy and slow|Driving motorik beat}]
+
+[Instrumentation]
+The guitars are {jangly and chorus-laden|drenched in reverb and delay|fuzzy and warm}.
+Synthesizers add {quirky melodies|retro textures|ambient pads} in the background.
+The drums sound {tight and dry|lo-fi and compressed|electronic mixed with acoustic}.
+Basslines are {melodic and high in the mix|simple and rooting}.
+
+[Vocal Style]
+The vocals are {soft and breathy|detached and cool|shouted and energetic}.
+Lyrics explore {nostalgia and youth|obscure references|ironic storytelling|melancholy romance}.
+Ad-libs: {"Yeah, yeah, yeah"|Whistling|Handclaps}.
+
+[Vibe]
+The atmosphere is {sunny but sad|rainy day introspection|late night drive|garage party}.

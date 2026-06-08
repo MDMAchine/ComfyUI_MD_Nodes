@@ -1,0 +1,94 @@
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ████ MD_SAMPLER: QWEN LIGHTNING (4-8 Steps) ██████████████▓▒░
+# © 2025 MDMAchine
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ░▒▓ DESCRIPTION:
+#   Strict configuration for Qwen-Image-Edit LIGHTNING / Distilled.
+#   These models break if CFG != 1.0.
+#
+#   • Steps: 4 - 8 (Do not exceed 10)
+#   • CFG: 1.0 (HARD REQUIREMENT)
+#   • Sampler: 'euler' with 'sgm_uniform'
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+legacy_v1_5_mode: true           # ✅ TRUE = Reverts to v1.5.1 math (1e-6 precision)
+
+# ───────────────────────────────────────────────────────────────
+# CORE SETTINGS (Deterministic)
+# ───────────────────────────────────────────────────────────────
+step_random_mode: "step"         # "step" or "off" for Lightning consistency
+step_size: 4                     # Matches typical lightning step count
+seed: 0
+
+# Lightning models bake in noise handling; keep simple
+first_ancestral_step: 0
+last_ancestral_step: -1
+ancestral_noise_type: "gaussian"
+
+# ───────────────────────────────────────────────────────────────
+# BLENDING (Low Step Optimization)
+# ───────────────────────────────────────────────────────────────
+blend_mode: "lerp"               # Linear blend is sharper at low steps
+step_blend_mode: "lerp"
+
+conditional_blend_mode: false    # Disable complex blending for speed
+progressive_blend_mode: false
+
+# ───────────────────────────────────────────────────────────────
+# NOISE CONTROL
+# ───────────────────────────────────────────────────────────────
+clamp_noise_norm: false
+max_noise_norm: 1.5
+adaptive_noise_scaling: false    # Off for pure lightning behavior
+noise_scale_factor: 1.0
+
+# ───────────────────────────────────────────────────────────────
+# FBG TUNING (Minimal Guidance)
+# ───────────────────────────────────────────────────────────────
+sigma_range_preset: "Custom"
+fbg_sampler_mode: "PINGPONG"
+
+# Guidance Settings (CFG 1.0 IS MANDATORY)
+cfg_scale: 1.0                   #
+cfg_start_sigma: 1.0
+cfg_end_sigma: 0.004
+
+# FBG Range
+fbg_start_sigma: 1.0
+fbg_end_sigma: 0.004
+
+# Power Settings (Restrained)
+max_guidance_scale: 1.0          # Cap at 1.0 to prevent artifacts
+initial_guidance_scale: 1.0
+fbg_guidance_multiplier: 1.0
+guidance_max_change: 0.0
+
+# FBG Math
+pi: 0.75
+t_0: 0.6                         # Late onset for stability
+t_1: 0.3
+fbg_temp: 0.0
+fbg_offset: 0.0
+
+# ───────────────────────────────────────────────────────────────
+# POSTERIOR
+# ───────────────────────────────────────────────────────────────
+max_posterior_scale: 3.0
+log_posterior_initial_value: 0.0
+log_posterior_ema_factor: 0.5    # Low EMA for fast convergence
+
+# ───────────────────────────────────────────────────────────────
+# RESTARTS (Detail Focus)
+# ───────────────────────────────────────────────────────────────
+enable_restarts: true
+restart_mode: "detail_focus"     # Helps sharpen lightning output
+restart_noise_scale: 0.5         # Aggressive jump for short schedule
+restart_s_noise: 1.0
+restart_steps: "1,2"             # Target early structure steps
+
+# ───────────────────────────────────────────────────────────────
+# SYSTEM
+# ───────────────────────────────────────────────────────────────
+debug_mode: 2
+enable_profiling: true
+tensor_memory_optimization: true

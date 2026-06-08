@@ -1,0 +1,11 @@
+[Genre: {Rockabilly|Doo-Wop|Rhythm and Blues|Crooner Pop}]
+[Style: {Jukebox Hit|Diner Vibes|High School Prom|Sun Studio Sound}]
+
+[Instrumentation]
+{Slap-back echo electric guitars|Honking tenor saxophone solos|Upright double bass}.
+Drums are {swinging and shuffled|simple triplets}.
+Piano is {boogie-woogie style|rhythmic triplets}.
+
+[Vocal Style]
+{Hiccuping rockabilly vocals|Smooth velvet crooning|Barbershop quartet harmonies}.
+Lyrics are about {teen romance|fast cars|heartbreak|dancing at the hop}.

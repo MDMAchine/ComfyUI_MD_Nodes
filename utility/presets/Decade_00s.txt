@@ -1,0 +1,11 @@
+[Genre: {Y2K Pop|Garage Rock Revival|Crunk|Indie Sleaze}]
+[Style: {MySpace Era|iPod Commercial|Club Banger}]
+
+[Instrumentation]
+{Distorted strokes-style guitars|Timbaland-style beatboxing|Super-saw synths}.
+Drums are {dry and garage-y|snap-heavy hip hop beats}.
+Auto-tune is {just starting to appear|used for effect}.
+
+[Vocal Style]
+{Sassy pop vocals|Distorted indie shouting|Smooth R&B crooning}.
+Lyrics are about {clubbing|text messaging|complicated relationships|partying like a rockstar}.

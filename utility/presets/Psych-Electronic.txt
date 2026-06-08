@@ -1,0 +1,15 @@
+[Genre: {Experimental Electronic|Analog Psych|Synth-Grunge|Tape-Beat}]
+[BPM: {80|90|100|110} BPM, {Lurching, unquantized hip-hop beats|Heavy, blown-out stomps|Sludgy mid-tempo groove}]
+
+[Instrumentation]
+The track is driven by a {distorted, fuzzy analog synth bass|grinding, bit-crushed low end}.
+The drums are {crunchy, overdriven drum machines|lo-fi acoustic breaks blasted through a guitar amp}.
+Bright {warped, pitch-bending synth leads|melted, out-of-tune arpeggios|harsh noise bursts} accent the chorus.
+Synths are {unstable, tape-saturated pads|squealing analog leads|heavily modulated drones}.
+
+[Vocal Style]
+{Heavily vocoded and distorted melodies|Creepy, whispered analog transmissions|Muffled through a telephone filter|Weird and wonderful gibberish}.
+Lyrics focus on {surreal imagery|bizarre nostalgic trips|psychedelic oddities}.
+
+[Vibe]
+The atmosphere is {gritty and melted|retro-futuristic nightmare|psychedelic and strange|sun-baked and warped}.
