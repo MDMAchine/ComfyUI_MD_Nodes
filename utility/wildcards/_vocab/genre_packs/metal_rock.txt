@@ -1,0 +1,31 @@
+# MD_Nodes - Metal / Rock Genre Pack
+
+[BASE_GENRE]
+Rock
+Hard Rock
+Metal
+Heavy Metal
+Thrash Metal
+Death Metal
+Black Metal
+Metalcore
+Djent
+Punk
+Shoegaze
+Post-Rock
+Math Rock
+Grunge
+
+[BASS_CHARACTER]
+Down-tuned palm-muted guitar bass riff
+Distorted bass guitar following rhythm guitar
+Clean picked bass with tone enhancement
+Fretless bass with slides and vibrato
+Djent bass with syncopated polyrhythm
+
+[PERCUSSION_STYLE]
+Blast beats at extreme tempo
+Double kick with tight snare
+D-beat punk percussion
+Shoegaze wash with buried soft kit
+Math rock odd time with precision kick

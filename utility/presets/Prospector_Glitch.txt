@@ -1,0 +1,16 @@
+[Genre: {Prospector Glitch|Sourdough Speedcore|Yosemite Bounce|Gold-Pan Pop}]
+[BPM: {160|170|180+} BPM, {Frantic galloping beat|Erratic pickaxe rhythm|Manic square-dance bounce}]
+
+[Instrumentation]
+The track is driven by a {hyper-speed MIDI banjo|pitch-bent saloon piano|distorted jug-band bass}.
+The drums are {cracking leather bullwhips|pickaxes striking solid rock|spitting into a brass spittoon}.
+Bright {clinking gold nuggets|ricocheting revolver shots|whinnying robotic horses} accent the chorus.
+Synths are {acid-soaked harmonicas|chiptune fiddles|harsh, metallic panning-tin noises}.
+
+[Vocal Style]
+{Gravelly prospector drawl pitched up to chipmunk levels|A robotic square-dance caller|A glitching, yodeling cowboy}.
+Lyrics focus on {claim-jumpin' varmints|findin' a shiny nugget|dying of dysentery|shouting "Dagnabbit!" or "Tarnation!" right before the drop}.
+
+[Vibe]
+The atmosphere is {dusty and hyperactive|feverish and greedy|ridiculous and high-energy}.
+Think 100 gecs scoring a manic episode of Red Dead Redemption.

@@ -1,0 +1,16 @@
+[Genre: {Indie Dance|Piano House|Balearic Beat|Nu-Disco}]
+[BPM: {115|118|120} BPM, {Driving four-on-the-floor|Uplifting bounce}]
+
+[Instrumentation]
+The track is built around a {massive, stabbing piano riff|bright M1 piano chord}.
+The bassline is {driving and melodic|post-punk influenced|rolling disco octaves}.
+Drums are {crisp and punchy|acoustic disco kits mixed with 909s}.
+Guitars are {clean and funky|strummed acoustic layers}.
+
+[Vocal Style]
+{Indie rock vocals over dance beats|Gang vocal choruses|Falsetto hooks}.
+Lyrics are {ecstatic|about feeling good|escapism|dancing through the pain}.
+
+[Vibe]
+The energy is {euphoric|sun-drenched|hands in the air}.
+Perfect for {summer festivals|sunrise sets|rooftop parties}.

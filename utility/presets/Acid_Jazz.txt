@@ -1,0 +1,16 @@
+[Genre: {Acid Jazz|Downtempo|Trip-Hop|Lounge}]
+[BPM: {85|90|100|110} BPM, {Syncopated breakbeats|Laid-back boom-bap|Live drum room sound}]
+
+[Instrumentation]
+The track is driven by a {prominent, groovy live electric bass|upright jazz bass loop}.
+The drums are {sampled vinyl breakbeats|live-sounding kits with heavy snare ghost notes}.
+Bright {cinematic KPM-style flutes|wah-wah guitar pedals|vibraphone solos} accent the groove.
+Synths are {vintage Wurlitzer/Rhodes keys|Hammond B3 organ swells|subtle, eerie string sections}.
+
+[Vocal Style]
+{Sultry lounge vocals|Poetic hip-hop flows|Vintage 70s cinematic voiceovers|Instrumental groove}.
+Lyrics focus on {urban espionage|social commentary|laid-back lounging|smoky romance}.
+
+[Vibe]
+The atmosphere is {70s spy movie|smoky underground cafe|effortlessly cool|vinyl-crate-digger}.
+Think Thievery Corporation, Nightmares on Wax, or St. Germain.

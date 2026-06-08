@@ -1,61 +1,61 @@
 {
-    "version": "1.5.1",
+    "version": "1.6.0",
     "nodes": [
         {
-            "key": "HybridAdaptiveSigmas",
-            "type": "HybridAdaptiveSigmas",
-            "title": "Hybrid Sigma Scheduler",
-            "description": "Advanced sigma scheduler generator with multiple algorithms, presets,\nvisualization, and the new Bong Tangent scheduler.",
-            "category": "MD_Nodes/Schedulers",
-            "file_path": "Hybrid_Sigma_Scheduler.py"
+            "key": "MD_ACE_SigmaDenoisePatcher",
+            "type": "MD_ACE_SigmaDenoisePatcher",
+            "title": "MD: ACE Sigma Denoise Patcher \u2702\ufe0f",
+            "description": "Takes any existing SIGMAS schedule and slices it to create an \nAudio-to-Audio (Img2Img) denoise effect for advanced custom samplers.",
+            "category": "MD_Nodes/ACE_Engine/Schedulers",
+            "file_path": "ACE_Engine/MD_ACE_SigmaDenoisePatcher.py"
         },
         {
-            "key": "ACE_LatentVisualizer",
-            "type": "ACELatentVisualizer",
-            "title": "MD: ACE Latent Visualizer",
-            "description": "MD: ACE Latent Visualizer\n\nProvides multiple visualization modes (waveform, spectrum, heatmap, etc.)\nfor inspecting latent tensors, aiding in debugging and analysis. Includes\noptions for batch/channel selection, normalization, peak detection, and styling.",
-            "category": "MD_Nodes/Visualization",
-            "file_path": "latent/ACE_LATENT_VISUALIZER.py"
-        },
-        {
-            "key": "AceT5ConditioningAnalyzer",
-            "type": "AceT5ConditioningAnalyzer",
-            "title": "MD: ACE T5 Conditioning Analyzer",
-            "description": "MD: ACE T5 Conditioning Analyzer\n\nDebugging tool to inspect conditioning tensor statistics, lyrics token count,\nand metadata. Helps diagnose quality issues related to conditioning.",
-            "category": "MD_Nodes/Conditioning",
-            "file_path": "conditioning/ACE_T5_Conditioning_Node.py"
-        },
-        {
-            "key": "AceT5ConditioningScheduled",
-            "type": "AceT5ConditioningScheduled",
-            "title": "MD: ACE T5 Conditioning Scheduled",
-            "description": "MD: ACE T5 Conditioning Scheduled\n\nCreates high-quality audio conditioning using ACE T5, separating genre/style tags,\nvocal characteristics, and lyrical content. Supports both the custom AceT5ModelLoader\n(recommended for quality) and native ComfyUI CLIP loaders (for LoRA support).\nOutputs multiple conditioning tensors for different use cases.",
-            "category": "MD_Nodes/Conditioning",
-            "file_path": "conditioning/ACE_T5_Conditioning_Node.py"
-        },
-        {
-            "key": "AceT5ModelLoader",
-            "type": "AceT5ModelLoader",
-            "title": "MD: ACE T5 Model Loader",
-            "description": "MD: ACE T5 Model Loader\n\nLoads the custom ACE T5 model and its specialized tokenizers.\nProvides the highest quality conditioning for ACE Step audio models.\nNOTE: This custom loader does *not* support LoRAs. Use the native\nCLIPLoader/DualCLIPLoader for LoRA compatibility (may have slightly\ndifferent conditioning characteristics).",
+            "key": "MD_ACE_XLLatentProcessor",
+            "type": "MD_ACE_XLLatentProcessor",
+            "title": "MD: ACE-Step XL Latent Processor \ud83c\udf9b\ufe0f",
+            "description": "MD: ACE-Step XL Latent Processor  v1.0.0\n\nPost-sampling latent correction. Place between KSampler and VAE Decode.\n\nOperations (in order):\n  1. mean_normalize  \u2014 subtract per-channel mean (stronger DC correction)\n  2. latent_shift    \u2014 additive DC offset. Re-centers ACE-Step's\n                       non-zero silence_latent distribution.\n  3. scale           \u2014 multiplicative output level control\n\nPer-variant defaults:\n  xl-turbo : -0.12\n  xl-sft   : -0.17\n  xl-base  : -0.15",
             "category": "MD_Nodes/Loaders",
-            "file_path": "conditioning/ACE_T5_Conditioning_Node.py"
+            "file_path": "loaders/MD_ACE_XLLoader.py"
+        },
+        {
+            "key": "MD_ACE_XLLoader",
+            "type": "MD_ACE_XLLoader",
+            "title": "MD: ACE-Step XL Loader \ud83c\udfb5",
+            "description": "MD: ACE-Step 1.5 XL Loader  v1.3.0\n\nLoads XL model variants (hidden_size=2560) with tunable AuraFlow shift.\nNo external ModelSamplingAuraFlow node required \u2014 shift is baked in.\n\nOutputs:\n  MODEL       \u2014 wire into TPG \u2192 NAG \u2192 Guider chain as normal\n  sigma_plot  \u2014 \u03c3(t) curve IMAGE, wire into Preview Image node\n  analytics   \u2014 load report STRING, wire into text display node",
+            "category": "MD_Nodes/Loaders",
+            "file_path": "loaders/MD_ACE_XLLoader.py"
+        },
+        {
+            "key": "MD_AMED_Sampler",
+            "type": "MD_AMED_Sampler",
+            "title": "MD: AMED Solver (Corrected Euler)",
+            "description": "",
+            "category": "MD_Nodes/Samplers",
+            "file_path": "samplers/MD_AMED_Sampler.py"
         },
         {
             "key": "APGGuiderForked",
             "type": "APGGuiderNode",
             "title": "MD: APG Guider",
-            "description": "ComfyUI node for APG (Adaptive Projected Gradient) guidance.",
-            "category": "MD_Nodes/Sampling",
-            "file_path": "APG_Guider_Forked.py"
+            "description": "ComfyUI wrapper node for APG (Adaptive Projected Gradient) guidance.",
+            "category": "MD_Nodes/Guidance",
+            "file_path": "guiders/MD_APGGuiderForked.py"
+        },
+        {
+            "key": "MD_ACE_LatentInpaintMask",
+            "type": "MD_ACE_LatentInpaintMask",
+            "title": "MD: AceStep Audio Generative Fill \ud83d\udd8c\ufe0f",
+            "description": "Applies a time-based Generative Fill mask to ACE-Step Audio Latents.\nACE1.5 encodes 48kHz audio at a 1920 hop size = exactly 25 latent frames per second.",
+            "category": "MD_Nodes/AceStep",
+            "file_path": "ACE_Engine/MD_AceStepInpaint.py"
         },
         {
             "key": "AdvancedAudioPreviewAndSave",
             "type": "AdvancedAudioPreviewAndSave",
             "title": "MD: Advanced Audio Preview & Save",
-            "description": "Professional audio processing and export node for ComfyUI.\nHandles normalization, effects, visualization, and intelligent metadata embedding.",
+            "description": "Comprehensive audio processing and export with enterprise logging.",
             "category": "MD_Nodes/Save",
-            "file_path": "audio/AdvancedAudioPreviewAndSave.py"
+            "file_path": "audio/MD_AdvancedAudioPreviewAndSave.py"
         },
         {
             "key": "AdvancedMediaSave",
@@ -63,7 +63,15 @@
             "title": "MD: Advanced Media Save",
             "description": "Saves images or animations in various formats with metadata control.\nUses timestamped filenames inspired by AAPS to prevent overwrites.",
             "category": "MD_Nodes/Save",
-            "file_path": "AdvancedMediaSave.py"
+            "file_path": "save/MD_AdvancedMediaSave.py"
+        },
+        {
+            "key": "MD_AdvancedSeedGenerator",
+            "type": "MD_AdvancedSeedGenerator",
+            "title": "MD: Advanced Seed Generator",
+            "description": "Advanced Seed Generator with Offset, Increment, and System Time modes.\nEnsures all outputs are within JavaScript's safe integer range.",
+            "category": "MD_Nodes/Utility",
+            "file_path": "utility/MD_AdvancedSeedGenerator.py"
         },
         {
             "key": "AdvancedTextNode",
@@ -71,263 +79,447 @@
             "title": "MD: Advanced Text Input",
             "description": "A versatile text input node with seed-controlled wildcard processing,\ntext transformations, and multiple output options including text length.",
             "category": "MD_Nodes/Text",
-            "file_path": "text/TextInputNode.py"
+            "file_path": "text/MD_TextInput.py"
         },
         {
-            "key": "Aesthetic_Transformer_Node_MD",
-            "type": "Aesthetic_Transformer_Node",
-            "title": "MD: Aesthetic Transformer",
-            "description": "MD: Aesthetic Transformer (v1.7.0)\nTransforms simple user intent and/or images into complex, high-quality prompts.",
-            "category": "MD_Nodes/Workflow_Automation",
-            "file_path": "testing/Aesthetic_VLM_Pack/Aesthetic_VLM_Pack_Node1_Transformer.py"
+            "key": "MD_AnySwitch",
+            "type": "MD_AnySwitch",
+            "title": "MD: Any Switch (Boolean)",
+            "description": "A universal 2-way switch. Routes data based on a True/False signal.",
+            "category": "MD_Nodes/Logic",
+            "file_path": "logic/MD_Logic_Switch.py"
         },
         {
             "key": "MD_ApplyTPG",
             "type": "MD_ApplyTPG",
             "title": "MD: Apply TPG (Token Perturbation)",
-            "description": "Applies Token Perturbation Guidance (TPG) by patching the model's Self-Attention.",
-            "category": "MD_Nodes/Guidance",
-            "file_path": "guiders/MD_ApplyTPG.py"
+            "description": "ComfyUI wrapper node for Token Perturbation Guidance (TPG).",
+            "category": "MD_Nodes/Optimization",
+            "file_path": "optimization/MD_ApplyTPG.py"
         },
         {
-            "key": "MD_AudioAutoEQ",
-            "type": "MD_AudioAutoEQ",
-            "title": "MD: Audio Auto EQ",
-            "description": "Audio Auto EQ (MD_AudioAutoEQ)\nApplies automatic equalization to audio by analyzing its spectrum\nand matching it to a selected target profile using multi-band EQ.",
-            "category": "MD_Nodes/Audio",
-            "file_path": "audio/auto_eq.py"
+            "key": "MD_Audio_Spectrum_Analyzer_Enhanced",
+            "type": "AudioSpectrumAnalyzer_Enhanced",
+            "title": "MD: Audio Analyzer (Report + LUFS)",
+            "description": "",
+            "category": "MD_Nodes/Audio Processing",
+            "file_path": "audio/MD_BroadcastTools.py"
+        },
+        {
+            "key": "MD_AudioAutoEQ_Adaptive",
+            "type": "MD_AudioAutoEQ_Adaptive",
+            "title": "MD: Audio Auto EQ (Adaptive)",
+            "description": "Intelligent spectral balancing with adaptive content analysis.",
+            "category": "Uncategorized",
+            "file_path": "audio/MD_AudioAutoEQ.py"
         },
         {
             "key": "MD_AutoMasterNode",
             "type": "MD_AutoMasterNode",
             "title": "MD: Audio Auto Master Pro",
-            "description": "Audio Auto Master Pro (MD_AutoMasterNode)\nAn all-in-one, iterative audio mastering node.",
-            "category": "MD_Nodes/Audio",
+            "description": "MD Audio Auto Master Pro v6.32.0 (Enterprise)\nWrapper with Unified Parameter Resolution and AI Co-Pilot.",
+            "category": "MD_Nodes/Audio Processing",
             "file_path": "audio/MD_AutoMasterNode.py"
         },
         {
-            "key": "AutoLayoutOptimizer",
-            "type": "AutoLayoutOptimizer",
-            "title": "MD: Auto-Layout Optimizer",
-            "description": "MD: Auto-Layout Optimizer (Prototype)\n\nAnalyzes the layout structure of a ComfyUI workflow provided as JSON.\nCalculates metrics (complexity, spacing, crossings), generates optimization\nrecommendations, and optionally applies a selected auto-layout algorithm,\noutputting the modified workflow JSON.",
-            "category": "MD_Nodes/Workflow Organization",
-            "file_path": "organization/AutoLayoutOptimizer.py"
+            "key": "MD_Audio_Guardian",
+            "type": "MD_Audio_Guardian",
+            "title": "MD: Audio Guardian",
+            "description": "",
+            "category": "MD_Nodes/Debugging",
+            "file_path": "utility/MD_GuardianSuite.py"
         },
         {
-            "key": "MD_CLIPTokenFinder",
-            "type": "MD_CLIPTokenFinder",
-            "title": "MD: CLIP Token Finder",
-            "description": "Universal token finder for Self-Cross Guidance.",
-            "category": "MD_Nodes/Guidance",
-            "file_path": "testing/MD_CLIPTokenFinder.py"
+            "key": "MD_AudioSimpleEditor",
+            "type": "MD_AudioSimpleEditor",
+            "title": "MD: Audio Simple Editor \u2702\ufe0f",
+            "description": "",
+            "category": "MD_Nodes/Audio",
+            "file_path": "audio/MD_AudioSimpleEditor.py"
+        },
+        {
+            "key": "MD_Audio_Spectrum_Visualizer",
+            "type": "AudioSpectrumVisualizer",
+            "title": "MD: Audio Spectrum Visualizer (Plot)",
+            "description": "",
+            "category": "MD_Nodes/Debugging & Visualization",
+            "file_path": "audio/MD_BroadcastTools.py"
         },
         {
             "key": "MD_CustomNoiseGenerator",
             "type": "MD_CustomNoiseGenerator",
             "title": "MD: Custom Noise Generator",
-            "description": "Creates a standalone NOISE object for SamplerCustomAdvanced using\nselectable algorithms (Gaussian, Perlin, Collatz, etc.).",
+            "description": "Creates a standalone NOISE object and renders a preview.",
             "category": "MD_Nodes/Noise",
-            "file_path": "noise/CustomNoise.py"
+            "file_path": "noise/MD_CustomNoiseGenerator.py"
+        },
+        {
+            "key": "MD_DynamicLoRAStacker",
+            "type": "MD_DynamicLoRAStacker",
+            "title": "MD: Dynamic LoRA Stacker (Style Butler)",
+            "description": "Automates LoRA loading and prompt enhancement based on YAML presets.",
+            "category": "MD_Nodes/LoRa",
+            "file_path": "lora/MD_DynamicLoRAStacker.py"
         },
         {
             "key": "MD_EmptyLatentRatioSelector",
             "type": "MD_EmptyLatentRatioSelector",
             "title": "MD: Empty Latent Ratio Select",
             "description": "Generates empty latents based on Aspect Ratio and Target Megapixels.\nCalculates precise W/H dimensions to match total pixel count area.",
-            "category": "MD_Nodes/Utilities",
-            "file_path": "utility/EmptyLatentRatioSelector.py"
-        },
-        {
-            "key": "EnhancedAnnotationNode",
-            "type": "EnhancedAnnotationNode",
-            "title": "MD: Enhanced Annotation",
-            "description": "MD: Enhanced Annotation\n\nA highly customizable node for adding visual documentation (notes, headers,\nreminders) directly into the ComfyUI workflow graph. Supports various styles,\ncolors, fonts, and markdown. It does not perform any computations and acts\npurely as a visual aid, with no impact on generation performance.",
-            "category": "MD_Nodes/Workflow Organization",
-            "file_path": "organization/EnhancedAnnotation.py"
+            "category": "MD_Nodes/Utility",
+            "file_path": "utility/MD_EmptyLatentRatioSelector.py"
         },
         {
             "key": "EnhancedSeedSaver",
             "type": "EnhancedSeedSaverNode",
             "title": "MD: Enhanced Seed Saver",
-            "description": "MD Enhanced Seed Saver\n\nAdvanced seed management node with three operation modes: Pass-through for\nexternal seeds, Manual Input for direct seed entry, and Execute Action for\ndynamic seed management operations.",
-            "category": "MD_Nodes/Utility",
-            "file_path": "seed_saver_node.py"
+            "description": "MD Enhanced Seed Saver\nAdvanced local seed management node. Operates entirely in ComfyUI environment.",
+            "category": "MD_Nodes/Save",
+            "file_path": "save/MD_SeedSaver.py"
+        },
+        {
+            "key": "FSampler",
+            "type": "FSampler",
+            "title": "MD: FSampler (Speed Patcher)",
+            "description": "The ComfyUI Node definition for FSampler.\nAttaches the core extrapolation hook to the diffusion model.",
+            "category": "MD_Nodes/Optimization",
+            "file_path": "optimization/MD_FSampler.py"
         },
         {
             "key": "FilenameCounterNode",
             "type": "FilenameCounterNode",
             "title": "MD: Filename Counter",
-            "description": "MD: Filename Counter\nProvides a persistent, auto-incrementing counter stored in a JSON file.",
+            "description": "Provides a persistent, auto-incrementing counter stored in a JSON file.",
             "category": "MD_Nodes/Utility",
-            "file_path": "utility/SmartFilenameBuilder.py"
+            "file_path": "utility/MD_SmartFilenameBuilder.py"
         },
         {
             "key": "FilenameTokenReplacer",
             "type": "FilenameTokenReplacer",
             "title": "MD: Filename Token Replacer",
-            "description": "MD: Filename Token Replacer\nReplaces predefined tokens in a template string.",
+            "description": "Replaces predefined tokens in a template string.",
             "category": "MD_Nodes/Utility",
-            "file_path": "utility/SmartFilenameBuilder.py"
+            "file_path": "utility/MD_SmartFilenameBuilder.py"
+        },
+        {
+            "key": "MD_GITS_Scheduler",
+            "type": "MD_GITS_Scheduler",
+            "title": "MD: GITS Scheduler (Boomerang)",
+            "description": "GITS Scheduler Node for ComfyUI.\nUses geometric curvature to optimize step distribution.",
+            "category": "MD_Nodes/Schedulers",
+            "file_path": "schedulers/MD_GITS_Scheduler.py"
         },
         {
             "key": "GPUTemperatureProtectionEnhanced",
             "type": "GPUTemperatureProtectionEnhanced",
-            "title": "MD: GPU Temp Protect (Enhanced)",
-            "description": "MD: GPU Temperature Protection (Enhanced)\n\nMonitors GPU temperature, VRAM, and utilization via nvidia-smi.\nPauses the ComfyUI queue if temperature exceeds a set threshold, resuming\nonce it cools down. Includes multi-GPU support, logging, adaptive cooling,\nand specific data type pass-through. Outputs the current temperature as a string.",
+            "title": "MD: GPU Temp Protect",
+            "description": "MD: GPU Temperature Protection (Enhanced)\nMonitors GPU temperature, VRAM, and utilization via nvidia-smi.\nPauses the ComfyUI queue if temperature exceeds a set threshold.",
             "category": "MD_Nodes/Utility",
-            "file_path": "utility/GPUTemperatureProtection.py"
+            "file_path": "utility/MD_GPUTemperatureProtection.py"
         },
         {
             "key": "MD_GlobalUpdateManager",
             "type": "MD_GlobalUpdateManager",
-            "title": "MD: Global Update Fixer (v1.7.1)",
-            "description": "Manages custom nodes. Includes Repair Tool for converting manual installs to Git repos.",
-            "category": "MD_Nodes/Utilities",
-            "file_path": "utility/GlobalUpdateManager.py"
+            "title": "MD: Global Update Architect",
+            "description": "The Architect. Targeted updates, batch processing, and full repair suite.",
+            "category": "MD_Nodes/Utility",
+            "file_path": "utility/MD_GlobalUpdateManager.py"
         },
         {
-            "key": "MD_InitNoiseOptimizer",
-            "type": "MD_InitNoiseOptimizer",
-            "title": "MD: Init Noise Optimizer",
-            "description": "Pre-sampling noise optimization node.",
-            "category": "MD_Nodes/Guidance",
-            "file_path": "testing/MD_InitNoiseOptimizer.py"
+            "key": "HybridAdaptiveSigmas",
+            "type": "HybridAdaptiveSigmas_Advanced",
+            "title": "MD: Hybrid Scheduler (Advanced)",
+            "description": "",
+            "category": "MD_Nodes/Schedulers",
+            "file_path": "schedulers/MD_HybridSigmaScheduler.py"
+        },
+        {
+            "key": "HybridAdaptiveSigmas_Basic",
+            "type": "HybridAdaptiveSigmas_Basic",
+            "title": "MD: Hybrid Scheduler (Basic)",
+            "description": "",
+            "category": "MD_Nodes/Schedulers",
+            "file_path": "schedulers/MD_HybridSigmaScheduler.py"
+        },
+        {
+            "key": "HybridAdaptiveSigmas_Lite",
+            "type": "HybridAdaptiveSigmas_Lite",
+            "title": "MD: Hybrid Scheduler (Lite)",
+            "description": "",
+            "category": "MD_Nodes/Schedulers",
+            "file_path": "schedulers/MD_HybridSigmaScheduler.py"
+        },
+        {
+            "key": "MD_Image_Guardian",
+            "type": "MD_Image_Guardian",
+            "title": "MD: Image Guardian",
+            "description": "",
+            "category": "MD_Nodes/Debugging",
+            "file_path": "utility/MD_GuardianSuite.py"
+        },
+        {
+            "key": "MD_LFO_Generator",
+            "type": "MD_LFO_Generator",
+            "title": "MD: LFO Generator (Automator)",
+            "description": "",
+            "category": "MD_Nodes/Modulation",
+            "file_path": "modulation/MD_LFO_Generator.py"
         },
         {
             "key": "LLMVRAMManager",
             "type": "LLMVRAMManager",
             "title": "MD: LLM VRAM Manager",
-            "description": "MD: LLM VRAM Manager\n\nUtility node to manage VRAM conflicts with local LLM servers (Ollama, LM Studio, llama-swap).\nProvides actions to unload models via API (Ollama, llama-swap) or force-stop processes\nto free GPU memory during ComfyUI workflow execution. Includes pass-through\nconnections for easy integration.",
+            "description": "MD: LLM VRAM Manager\nUtility node to manage VRAM conflicts with local LLM servers.",
             "category": "MD_Nodes/Utility",
-            "file_path": "utility/llm_vram_manager.py"
+            "file_path": "utility/MD_LLM_VRAMManager.py"
+        },
+        {
+            "key": "MD_LUFS_Normalizer",
+            "type": "MD_LUFS_Normalizer",
+            "title": "MD: LUFS Normalizer",
+            "description": "",
+            "category": "MD_Nodes/Audio Processing",
+            "file_path": "audio/MD_BroadcastTools.py"
+        },
+        {
+            "key": "MD_Latent_Time_Mask",
+            "type": "MD_Latent_Time_Mask",
+            "title": "MD: Latent Time Mask (Timeline Director)",
+            "description": "",
+            "category": "MD_Nodes/Masking",
+            "file_path": "masking/MD_Latent_Time_Mask.py"
+        },
+        {
+            "key": "ACE_LatentVisualizer",
+            "type": "ACELatentVisualizer",
+            "title": "MD: Latent Visualizer",
+            "description": "MD: ACE Latent Visualizer\nProvides multiple visualization modes for inspecting latent tensors.\nUtilizes Core algorithms for data extraction and Matplotlib for UI rendering.",
+            "category": "MD_Nodes/Debugging & Visualization",
+            "file_path": "latent/MD_LatentVisualizer.py"
+        },
+        {
+            "key": "MD_LoadConditioning",
+            "type": "MD_LoadConditioning",
+            "title": "MD: Load Conditioning \ud83d\udcc2",
+            "description": "Loads conditioning data from the models/conditionings directory.",
+            "category": "MD_Nodes/Utility",
+            "file_path": "utility/MD_ConditioningCacheNodes.py"
+        },
+        {
+            "key": "MD_LookBack_Smoother",
+            "type": "MD_LookBack_Smoother",
+            "title": "MD: Look-Back Smoother \ud83c\udf0a",
+            "description": "MD: Look-Back Smoother \ud83c\udf0a\n\nSNR-adaptive latent smoother. Suppresses harmonic hum from ODE manifold\nshearing in ACE-Step XL Turbo early denoising steps.\n\nWire between sampler LATENT output and VAE Decode.\nWorks with any sampler (PingPong, Euler, DPM++, STORM, etc.)\n\nBased on arXiv:2602.09449 Look-Ahead/Look-Back flows.\nValidated: lambda_base=0.55, snr_power=1.3, ddim_uniform 25-step.",
+            "category": "MD_Nodes/Samplers",
+            "file_path": "samplers/MD_LookBack_Smoother.py"
         },
         {
             "key": "MasteringChainNode",
             "type": "MasteringChainNode",
             "title": "MD: Mastering Chain (Full)",
-            "description": "Advanced ComfyUI audio mastering chain node (All-in-One).\nUses the same logic as modular nodes via MasteringBase.",
+            "description": "",
             "category": "MD_Nodes/Audio Processing",
-            "file_path": "audio/mastering_chain_node.py"
+            "file_path": "audio/MD_MasteringChain.py"
         },
         {
             "key": "MD_Mastering_Compressor",
             "type": "MasteringCompressorNode",
             "title": "MD: Mastering Compressor",
-            "description": "Standalone Compressor Node",
+            "description": "",
             "category": "MD_Nodes/Audio Processing",
-            "file_path": "audio/mastering_chain_node.py"
+            "file_path": "audio/MD_MasteringChain.py"
         },
         {
             "key": "MD_Mastering_EQ",
             "type": "MasteringEQNode",
-            "title": "MD: Mastering EQ & Filters",
-            "description": "Standalone EQ/Filter Node",
+            "title": "MD: Mastering EQ",
+            "description": "",
             "category": "MD_Nodes/Audio Processing",
-            "file_path": "audio/mastering_chain_node.py"
+            "file_path": "audio/MD_MasteringChain.py"
         },
         {
             "key": "MD_Mastering_Gain",
             "type": "MasteringGainNode",
             "title": "MD: Mastering Gain",
-            "description": "Standalone Gain Node",
+            "description": "",
             "category": "MD_Nodes/Audio Processing",
-            "file_path": "audio/mastering_chain_node.py"
+            "file_path": "audio/MD_MasteringChain.py"
         },
         {
             "key": "MD_Mastering_Limiter",
             "type": "MasteringLimiterNode",
             "title": "MD: Mastering Limiter",
-            "description": "Standalone Limiter Node",
+            "description": "",
             "category": "MD_Nodes/Audio Processing",
-            "file_path": "audio/mastering_chain_node.py"
+            "file_path": "audio/MD_MasteringChain.py"
+        },
+        {
+            "key": "MD_Math_Add",
+            "type": "MD_Math_Add",
+            "title": "MD: Math Add (Int/Float)",
+            "description": "Performs basic addition (A + B).\nReturns both INT and FLOAT for workflow flexibility.",
+            "category": "MD_Nodes/Math",
+            "file_path": "math/MD_BasicMath.py"
+        },
+        {
+            "key": "MD_Math_Divide",
+            "type": "MD_Math_Divide",
+            "title": "MD: Math Divide (Int/Float)",
+            "description": "Performs basic division (A / B).\nIncludes safety check for division by zero.",
+            "category": "MD_Nodes/Math",
+            "file_path": "math/MD_BasicMath.py"
+        },
+        {
+            "key": "MD_Math_Multiply",
+            "type": "MD_Math_Multiply",
+            "title": "MD: Math Multiply (Int/Float)",
+            "description": "Performs basic multiplication (A * B).\nReturns both INT and FLOAT for workflow flexibility.",
+            "category": "MD_Nodes/Math",
+            "file_path": "math/MD_BasicMath.py"
+        },
+        {
+            "key": "MD_Math_Subtract",
+            "type": "MD_Math_Subtract",
+            "title": "MD: Math Subtract (Int/Float)",
+            "description": "Performs basic subtraction (A - B).\nReturns both INT and FLOAT for workflow flexibility.",
+            "category": "MD_Nodes/Math",
+            "file_path": "math/MD_BasicMath.py"
+        },
+        {
+            "key": "MD_ModelStateReset",
+            "type": "MD_ModelStateReset",
+            "title": "MD: Model State Reset (Anti-Static)",
+            "description": "MD: Model State Reset (Anti-Static)\n\nA maintenance node to fix accumulation errors, NaN explosions, and Eval mode drift.\nIt clones the model patcher to sever corrupt state links and \nscrubs VRAM to remove ghost tensors.",
+            "category": "MD_Nodes/Maintenance",
+            "file_path": "maintenance/MD_ModelStateReset.py"
+        },
+        {
+            "key": "MD_MultiSwitch",
+            "type": "MD_MultiSwitch",
+            "title": "MD: Multi-Way Switch (5-Path)",
+            "description": "A universal 5-way switch. Routes data based on an Integer Index (1-5).",
+            "category": "MD_Nodes/Logic",
+            "file_path": "logic/MD_Logic_Switch.py"
+        },
+        {
+            "key": "MD_NaN_Guardian",
+            "type": "MD_NaN_Guardian",
+            "title": "MD: NaN Guardian",
+            "description": "",
+            "category": "MD_Nodes/Debugging",
+            "file_path": "utility/MD_GuardianSuite.py"
         },
         {
             "key": "MD_MultiNoiseBlender",
             "type": "MD_MultiNoiseBlender",
             "title": "MD: Noise Blender (5-Layer)",
-            "description": "Combines up to 5 Noise sources sequentially into a single NOISE object.\nInspired by Bleppings Sonar suite.",
+            "description": "Combines up to 5 Noise sources sequentially into a single NOISE object.",
             "category": "MD_Nodes/Noise",
-            "file_path": "noise/CustomNoise.py"
+            "file_path": "noise/MD_CustomNoiseGenerator.py"
         },
         {
             "key": "NoiseDecayScheduler_Custom",
             "type": "NoiseDecayScheduler_Custom",
             "title": "MD: Noise Decay Scheduler (Advanced)",
-            "description": "MD: Noise Decay Scheduler (Advanced)\n\nGenerates a customizable noise decay curve object based on various algorithms\n(polynomial, sigmoidal, etc.) for use with compatible custom samplers.",
-            "category": "MD_Nodes/Scheduler",
-            "file_path": "NoiseDecayScheduler_Custom.py"
+            "description": "MD: Noise Decay Scheduler (Advanced)\nGenerates a customizable noise decay curve object and visualizes it.",
+            "category": "MD_Nodes/Schedulers",
+            "file_path": "schedulers/MD_NoiseDecayScheduler.py"
         },
         {
-            "key": "MD_OptimizerSelector",
-            "type": "MD_OptimizerSelector",
-            "title": "MD: Optimizer Selector",
-            "description": "Configures an Optimizer Factory for use in advanced sampling or training nodes.",
-            "category": "MD_Nodes/Optimization",
-            "file_path": "optimization/OptimizerSelector.py"
+            "key": "PingPongSamplerNodeBasic",
+            "type": "PingPongSamplerNodeBasic",
+            "title": "MD: PingPong Basic (Presets)",
+            "description": "",
+            "category": "MD_Nodes/Samplers",
+            "file_path": "samplers/MD_PingPongSamplerFBG_Legacy.py"
         },
         {
             "key": "PingPongSamplerNodeFBG",
             "type": "PingPongSamplerNodeFBG",
-            "title": "MD: PingPong Sampler (FBG v1.5.0)",
-            "description": "ComfyUI Node wrapper with Res 2 restart support (v1.5.0).",
+            "title": "MD: PingPong FBG (Full Control)",
+            "description": "",
             "category": "MD_Nodes/Samplers",
-            "file_path": "PingPongSampler_Custom_FBG.py"
+            "file_path": "samplers/MD_PingPongSamplerFBG_Legacy.py"
         },
         {
-            "key": "MD_Qwen_Image_Edit_Object_Replacer_Node",
-            "type": "MD_Qwen_Image_Edit_Object_Replacer_Node",
-            "title": "MD: Qwen Object Replacer",
-            "description": "MD: Qwen Object Replacer (v1.7.1)\nVLM-enhanced inpainting pre-processor optimized for Qwen-Image-Edit models.",
-            "category": "MD_Nodes/Workflow_Automation",
-            "file_path": "testing/Aesthetic_VLM_Pack/Aesthetic_VLM_Pack_Node3_QwenReplacer.py"
+            "key": "PingPongSamplerNodeLite",
+            "type": "PingPongSamplerNodeLite",
+            "title": "MD: PingPong Lite (Classic)",
+            "description": "",
+            "category": "MD_Nodes/Samplers",
+            "file_path": "samplers/MD_PingPongSamplerFBG_Legacy.py"
         },
         {
             "key": "MD_RepoMaintenance",
             "type": "MD_RepoMaintenance",
-            "title": "MD: Repo Fortress (v2.2.1)",
-            "description": "Manages updates for MD_Nodes. Includes Fortress safeguards (Disk Space, Race Conditions).",
-            "category": "MD_Nodes/Utilities",
-            "file_path": "utility/RepoMaintenance.py"
+            "title": "MD: Repo Fortress",
+            "description": "Manages updates for MD_Nodes. Includes Fortress safeguards.",
+            "category": "MD_Nodes/Utility",
+            "file_path": "utility/MD_RepoMaintenance.py"
         },
         {
-            "key": "MD_SamplerDebug",
-            "type": "MD_SamplerDebug",
-            "title": "MD: Sampler Debug",
-            "description": "Shows if guider is being called.",
-            "category": "MD_Nodes/Guidance",
-            "file_path": "testing/MD_SamplerDebug.py"
+            "key": "MD_STORM_Sampler",
+            "type": "MD_STORM_Sampler",
+            "title": "MD: STORM Hybrid Solver \u26a1",
+            "description": "MD: STORM Hybrid Solver v2.0 \u26a1\n\nHPC-grade adaptive ODE sampler for flow-matching audio diffusion.\n\nSTORK (Stabilized Taylor RK) handles stiff early steps.\nDPM++3M handles smooth late steps.\nAuto-switches per step based on velocity field curvature.\n\nFeatures:\n\u2022 RK2/3/4/5 adaptive multi-order (single NFE, cached derivatives)\n\u2022 Adaptive sub-stepping \u2014 splits step on U-turn detection\n\u2022 Look-Back SNR smoother \u2014 suppresses harmonic hum\n\u2022 SDE restarts \u2014 isotropic or velocity-aligned Langevin noise\n\u2022 Full telemetry plot saved to ComfyUI output/ folder\n\u2022 YAML input/template/params outputs\n\nValidated configs:\n    35-step simple:       look_back_lambda=0.35, snr_power=1.5\n    25-step ddim_uniform: look_back_lambda=0.55, snr_power=1.3",
+            "category": "MDMAchine/samplers",
+            "file_path": "samplers/MD_STORM_Sampler.py"
+        },
+        {
+            "key": "MD_SaveConditioning",
+            "type": "MD_SaveConditioning",
+            "title": "MD: Save Conditioning \ud83d\udcbe",
+            "description": "Saves conditioning data directly to the models/conditionings directory.",
+            "category": "MD_Nodes/Utility",
+            "file_path": "utility/MD_ConditioningCacheNodes.py"
         },
         {
             "key": "SceneGeniusAutocreator",
             "type": "SceneGeniusAutocreator",
             "title": "MD: Scene Genius Autocreator",
-            "description": "A multi-stage ComfyUI node leveraging local LLMs for dynamic creative content\ngeneration (genres, lyrics, duration) and technical configuration (YAMLs).",
-            "category": "MD_Nodes/Workflow Automation",
-            "file_path": "SCENE_GENIUS_AUTOCREATOR.py"
+            "description": "Intelligent workflow orchestrator with adaptive execution modes.",
+            "category": "MD_Nodes/Prompt Generation",
+            "file_path": "utility/MD_SceneGeniusAutocreator.py"
         },
         {
-            "key": "MD_SelfCrossGuider",
-            "type": "MD_SelfCrossGuider",
-            "title": "MD: Self-Cross Separation Guider",
-            "description": "ComfyUI node for Self-Cross subject separation guidance.",
-            "category": "MD_Nodes/Guidance",
-            "file_path": "testing/MD_SelfCrossGuider.py"
+            "key": "SigmaConcatenate",
+            "type": "SigmaConcatenate",
+            "title": "MD: Sigma Concatenate",
+            "description": "",
+            "category": "MD_Nodes/Schedulers/Utilities",
+            "file_path": "schedulers/MD_HybridSigmaScheduler.py"
         },
         {
-            "key": "SmartColorPaletteManager",
-            "type": "SmartColorPaletteManager",
-            "title": "MD: Smart Color Palette Manager",
-            "description": "MD: Smart Color Palette Manager (Prototype)\n\nManages and provides color palettes for workflow organization. Select presets,\nuse auto-detection based on keywords, or define custom colors. Outputs\nindividual hex codes and a visual preview image. Complements other\nWorkflow Organization Suite nodes.",
-            "category": "MD_Nodes/Workflow Organization",
-            "file_path": "organization/SmartColorPaletteManager.py"
+            "key": "SigmaSmooth",
+            "type": "SigmaSmooth",
+            "title": "MD: Sigma Smooth",
+            "description": "",
+            "category": "MD_Nodes/Schedulers/Utilities",
+            "file_path": "schedulers/MD_HybridSigmaScheduler.py"
         },
         {
             "key": "SmartFilenameBuilder",
             "type": "SmartFilenameBuilder",
             "title": "MD: Smart Filename Builder",
-            "description": "MD: Smart Filename Builder\nGenerates complex and clean filenames using presets or custom configurations.",
+            "description": "Generates complex and clean filenames using presets or custom configurations.",
             "category": "MD_Nodes/Utility",
-            "file_path": "utility/SmartFilenameBuilder.py"
+            "file_path": "utility/MD_SmartFilenameBuilder.py"
+        },
+        {
+            "key": "MD_Stereo_Width_Controller",
+            "type": "MD_Stereo_Width_Controller",
+            "title": "MD: Stereo Width Controller",
+            "description": "",
+            "category": "MD_Nodes/Audio Processing",
+            "file_path": "audio/MD_BroadcastTools.py"
+        },
+        {
+            "key": "MD_String_Logic",
+            "type": "MD_String_Logic",
+            "title": "MD: String Logic (Router)",
+            "description": "",
+            "category": "MD_Nodes/Logic",
+            "file_path": "logic/MD_String_Logic.py"
         },
         {
             "key": "TextFileLoader",
@@ -335,109 +527,98 @@
             "title": "MD: Text File Loader",
             "description": "Companion node to load text content from external files.",
             "category": "MD_Nodes/Text",
-            "file_path": "text/TextInputNode.py"
+            "file_path": "text/MD_TextInput.py"
         },
         {
             "key": "MD_WorkflowContextBus",
             "type": "MD_WorkflowContextBus",
             "title": "MD: Universal Context Bus",
-            "description": "Universal Context Bus.\nAggregates inputs into a dictionary and outputs them individually.",
-            "category": "MD_Nodes/Workflow",
-            "file_path": "organization/WorkflowContextBus.py"
+            "description": "Consolidates SceneGenius outputs for one-wire workflows.",
+            "category": "MD_Nodes/Utility",
+            "file_path": "utility/MD_SceneGeniusAutocreator.py"
         },
         {
-            "key": "UniversalGuardian",
-            "type": "UniversalGuardian",
-            "title": "MD: Universal Guardian",
-            "description": "MD Universal Guardian\n\nEvaluates generated outputs (latent, image) against quality metrics.\nOptionally retries generation with enhanced prompts if quality is below threshold,\nusing Ollama, LM Studio, or keywords.",
-            "category": "MD_Nodes/Workflow",
-            "file_path": "testing/UniversalGuardian.py"
+            "key": "MD_LatentSanitizer",
+            "type": "MD_LatentSanitizer",
+            "title": "MD: Universal Latent Sanitizer (Audio/Video/Image)",
+            "description": "MD: Universal Latent Sanitizer (Audio/Video/Image)\n\nA comprehensive maintenance node that clamps latent outliers, fixes NaNs,\nand patches VAE settings to prevent decoding artifacts like static and crackle.",
+            "category": "MD_Nodes/Maintenance",
+            "file_path": "maintenance/MD_LatentSanitizer.py"
         },
         {
-            "key": "UniversalRoutingHubAdvanced",
-            "type": "UniversalRoutingHubAdvanced",
-            "title": "MD: Universal Routing Hub",
-            "description": "MD: Universal Routing Hub (Advanced)\n\nAn advanced signal routing node using the universal '*' type. It passes data\nfrom input slots to corresponding output slots. Optionally monitors connected\nslots, detects data types, generates a visual status map, and provides\ntextual metrics. Supports chaining hubs via status strings.",
-            "category": "MD_Nodes/Workflow Organization",
-            "file_path": "organization/UniversalRoutingHub.py"
+            "key": "UniversalWildcardOrchestrator",
+            "type": "UniversalWildcardOrchestrator",
+            "title": "MD: Universal Wildcard Orchestrator",
+            "description": "The central text rendering engine for MD_Nodes workflows.",
+            "category": "MD_Nodes/Prompt Generation",
+            "file_path": "utility/MD_UniversalWildcardOrchestrator.py"
         },
         {
-            "key": "VLM_Confirmation_Gate_Node_MD",
-            "type": "VLM_Confirmation_Gate_Node",
-            "title": "MD: VLM Confirmation Gate",
-            "description": "MD: VLM Confirmation Gate\nValidates a generated image against the original user intent using a local VLM.",
-            "category": "MD_Nodes/Workflow_Automation",
-            "file_path": "testing/Aesthetic_VLM_Pack/Aesthetic_VLM_Pack_Node2_ConfirmationGate.py"
+            "key": "MD_VRAMCanary",
+            "type": "MD_VRAMCanary",
+            "title": "MD: VRAM Canary (Memory Guardian)",
+            "description": "VRAM Canary - Memory Guardian\n\nMonitors GPU memory and prevents OOM crashes through proactive cleanup.\nAccepts any input type and passes it through unchanged.",
+            "category": "MD_Nodes/Utility",
+            "file_path": "utility/MD_VRAMCanary.py"
         },
         {
             "key": "WildcardPromptBuilder",
             "type": "WildcardPromptBuilder",
             "title": "MD: Wildcard Prompt Builder",
-            "description": "The ultimate multi-mode prompt generation node.",
+            "description": "Multi-modal prompt engine: ACE-Step audio, SD/Flux image, Wan/Mochi video.",
             "category": "MD_Nodes/Prompt Generation",
-            "file_path": "WildcardPromptBuilder.py"
+            "file_path": "utility/MD_WildcardPromptBuilder.py"
         },
         {
-            "key": "WorkflowSectionOrganizer",
-            "type": "WorkflowSectionOrganizer",
-            "title": "MD: Workflow Section Organizer",
-            "description": "MD: Workflow Section Organizer (Prototype)\n\nA universal passthrough node (*) designed to act as a visual separator or\n'chapter marker' within complex ComfyUI workflows. It accepts any data type,\npasses it through completely unchanged, and displays as a customizable banner.\nHelps to visually structure large graphs into logical processing stages.",
-            "category": "MD_Nodes/Workflow Organization",
-            "file_path": "organization/WorkflowSectionOrganizer.py"
+            "key": "MD_YAML_Generator",
+            "type": "MD_YAML_Generator",
+            "title": "MD: YAML Configuration Tool",
+            "description": "A power-user tool to load base YAML configurations, apply manual overrides,\nvalidate the syntax, and optionally save the result as a new preset.",
+            "category": "MD_Nodes/Utility",
+            "file_path": "utility/MD_YAML_Node.py"
         },
         {
-            "key": "PingPongSampler_Custom_Lite",
-            "type": "PingPongSamplerNode",
-            "title": "PingPong Sampler (Lite+ v1.5.0)",
-            "description": "ComfyUI node wrapper for the Lite+ PingPongSampler.",
-            "category": "MD_Nodes/Samplers",
-            "file_path": "PingPongSampler_Custom.py"
-        },
-        {
-            "key": "SigmaConcatenate",
-            "type": "SigmaConcatenate",
-            "title": "Sigma Concatenate",
-            "description": "Concatenates two sigma schedules for multi-pass workflows.\nUseful for chaining different schedulers or creating custom multi-stage schedules.",
-            "category": "MD_Nodes/Schedulers/Utilities",
-            "file_path": "Hybrid_Sigma_Scheduler.py"
-        },
-        {
-            "key": "SigmaSmooth",
-            "type": "SigmaSmooth",
-            "title": "Sigma Smooth",
-            "description": "Applies smoothing to a sigma schedule to reduce harsh transitions.\nUseful for reducing artifacts caused by abrupt sigma changes.",
-            "category": "MD_Nodes/Schedulers/Utilities",
-            "file_path": "Hybrid_Sigma_Scheduler.py"
+            "key": "MD_YAML_Utils",
+            "type": "MD_YAML_Utils",
+            "title": "MD: YAML Utils (Architect)",
+            "description": "The Machine Interface for YAML manipulation.\nAllows runtime modification of configuration data.",
+            "category": "MD_Nodes/Utility",
+            "file_path": "utility/MD_YAML_Utils.py"
         }
     ],
     "dependencies": [
-        "Jinja2",
-        "MarkupSafe",
-        "av",
+        "# flashinfer - Optional: Install specific wheel for your CUDA version. Example: pip install flashinfer -i https://flashinfer.ai/whl/cu121/torch2.4/",
         "bitsandbytes",
-        "filelock",
-        "fsspec",
+        "google-api-python-client",
+        "google-auth",
+        "h5py",
+        "hdf5plugin",
+        "huggingface_hub",
         "imageio",
         "librosa",
         "lion_pytorch",
         "lmstudio",
+        "loguru",
+        "lpips",
         "matplotlib",
-        "mpmath",
-        "networkx",
+        "mpl_toolkits",
+        "natsort",
         "ollama",
         "pedalboard",
         "piexif",
         "prodigyopt",
         "pykakasi",
         "pyloudnorm",
-        "requests",
-        "scipy",
-        "sentencepiece",
-        "sympy",
-        "tokenizers",
-        "tqdm"
+        "pynvml",
+        "pytorch_lightning",
+        "rich",
+        "soundfile",
+        "stdlib_list",
+        "tomli",
+        "tomli_w",
+        "torchcodec"
     ],
     "name": "ComfyUI_MD_Nodes",
-    "author": "Unknown",
+    "author": "MDMAchine",
     "description": "Custom nodes for ComfyUI"
 }

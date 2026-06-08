@@ -1,0 +1,26 @@
+# MD_Nodes - Hip-Hop / Trap Genre Pack
+
+[BASE_GENRE]
+Hip Hop
+Boom Bap
+Drill
+Lo-Fi Hip Hop
+Old School Hip Hop
+Trap
+Phonk
+Drift Phonk
+
+[BASS_CHARACTER]
+Distorted 808 with pitch slide
+Trap bass knock with sub tail
+Boom bap round sub with attack transient
+Lo-fi bass with tape saturation
+Phonk bass with heavy distortion and reverb
+Drill bass with melodic 808 glide
+
+[PERCUSSION_STYLE]
+Boom bap swing with dusty vinyl sample
+Hi-hat trap rolls with 808 ghost notes
+Drill percussion with dark reverb tails
+Lo-fi kit with vinyl crackle and pitch drift
+Phonk kick with heavy compression

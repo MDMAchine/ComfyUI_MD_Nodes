@@ -1,0 +1,12 @@
+[Genre: {Industrial Techno|Acid House|Darkwave|Cyberpunk}]
+[BPM: {128|132|135} BPM, {Four-on-the-floor|Driving and relentless|Mechanical groove}]
+
+[Instrumentation]
+A {pounding 909 kick drum|distorted industrial percussion} drives the rhythm.
+The bassline is a {rolling 303 acid sequence|gritty saw-wave drone}.
+Synths are {metallic and cold|detuned and chaotic|stabbing and aggressive}.
+Atmosphere: {Factory steam sounds|High-frequency glitches|Distant alarms}.
+
+[Vocal Style]
+Vocals are {non-existent|spoken word samples|distorted shouting|robotic vocoder}.
+Lyrics (if any) repeat phrases about {control|technology|the system|darkness}.

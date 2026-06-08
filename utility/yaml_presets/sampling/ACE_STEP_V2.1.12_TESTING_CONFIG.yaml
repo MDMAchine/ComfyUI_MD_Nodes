@@ -1,0 +1,242 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# ACE-STEP AUDIO CONFIGURATION (v2.1.12 COMPATIBLE)
+# ══════════════════════════════════════════════════════════════════════════════
+# Target Node: MD: PingPong FBG (testing) v2.1.12
+# Optimization: High-Fidelity Audio Generation with Advanced Features
+# Version: v2.1.12 Testing (EMA Restored + SST Sampling)
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ───────────────────────────────────────────────────────────────────────────────
+# LEGACY MODE (v1.5.0 COMPATIBILITY)
+# ───────────────────────────────────────────────────────────────────────────────
+# NEW IN v2.1.12: Strict backward compatibility toggle
+# TRUE:  Use v1.5.0 math (epsilon 1e-6, 64-bit seeds)
+# FALSE: Use modern precision (epsilon 1e-8, JS-safe seeds)
+legacy_v1_5_mode: false
+
+# ───────────────────────────────────────────────────────────────────────────────
+# CORE SAMPLER SETTINGS
+# ───────────────────────────────────────────────────────────────────────────────
+
+# Seed behavior: 'block' is best for audio structure consistency
+step_random_mode: "block"
+step_size: 25
+
+# Ancestral Noise: Inject noise from start (0) to finish (-1)
+first_ancestral_step: 0
+last_ancestral_step: -1
+ancestral_noise_type: "gaussian"
+
+# Schedule: Run full range
+start_sigma_index: 0
+end_sigma_index: -1
+
+# ⚠️ Audio Protection: Never clamp output for audio latents
+enable_clamp_output: false
+
+# ───────────────────────────────────────────────────────────────────────────────
+# BLENDING (INTERPOLATION)
+# ───────────────────────────────────────────────────────────────────────────────
+
+# 'lerp' is standard, 'slerp' preserves magnitude better for high energy
+blend_mode: "lerp"
+step_blend_mode: "lerp"
+
+# Progressive/Conditional blending (Advanced Features)
+# Kept off for stability, enable if refining specific segments
+progressive_blend_mode: false
+conditional_blend_mode: false
+conditional_blend_sigma_threshold: 0.3
+conditional_blend_function_name: "slerp"
+conditional_blend_on_change: false
+conditional_blend_change_threshold: 0.2
+
+# ───────────────────────────────────────────────────────────────────────────────
+# NOISE SCALING
+# ───────────────────────────────────────────────────────────────────────────────
+
+# ⚠️ Audio Protection: Do not clamp noise norm
+clamp_noise_norm: false
+max_noise_norm: 1.5
+
+# Standard scaling
+adaptive_noise_scaling: false
+noise_scale_factor: 1.0
+
+# ───────────────────────────────────────────────────────────────────────────────
+# RES 2 RESTARTS (Error Correction)
+# ───────────────────────────────────────────────────────────────────────────────
+# Iteratively fixes artifacts. 'Conservative' is safest for audio.
+
+enable_restarts: false
+restart_mode: "conservative"
+restart_noise_scale: 0.10
+restart_s_noise: 0.5
+restart_steps: ""
+
+# ───────────────────────────────────────────────────────────────────────────────
+# FBG (FEEDBACK GUIDANCE) & CFG
+# ───────────────────────────────────────────────────────────────────────────────
+
+# Must be PINGPONG for Ace-Step Audio
+fbg_sampler_mode: "PINGPONG"
+
+# NEW IN v2.1.12: Sigma Range Presets
+# 'All' = Full range (1.0-0.004), 'Custom' = Manual ranges below
+sigma_range_preset: "All"
+
+# CFG Settings (Base Guidance)
+cfg_scale: 6.0
+cfg_start_sigma: 1.0
+cfg_end_sigma: 0.004
+
+# FBG Settings (Dynamic Guidance)
+fbg_start_sigma: 1.0
+fbg_end_sigma: 0.004
+
+# v2.1.12 Reactive Defaults (tuned for audio responsiveness)
+# These are more conservative than v1.5.1 for stability
+max_guidance_scale: 500.0
+initial_guidance_scale: 25.0
+fbg_guidance_multiplier: 5.0
+guidance_max_change: 5.0
+
+# ───────────────────────────────────────────────────────────────────────────────
+# FBG MATH (Auto-Calculation)
+# ───────────────────────────────────────────────────────────────────────────────
+# The node calculates fbg_temp/offset automatically if t_0 and t_1 are > 0
+
+pi: 0.35
+t_0: 0.7
+t_1: 0.4
+
+# These are ignored because t_0/t_1 are set, but kept for safety
+fbg_temp: 0.0
+fbg_offset: 0.0
+
+# ───────────────────────────────────────────────────────────────────────────────
+# POSTERIOR (v2.1.12: EMA RESTORED!)
+# ───────────────────────────────────────────────────────────────────────────────
+
+max_posterior_scale: 3.0
+log_posterior_initial_value: 0.0
+
+# ⭐ CRITICAL FIX IN v2.1.12: EMA Smoothing restored from v1.5.0
+# 0.0 = no smoothing, 0.8 = balanced (recommended), 0.95 = heavy smoothing
+log_posterior_ema_factor: 0.8
+
+# ───────────────────────────────────────────────────────────────────────────────
+# SST SAMPLING (NEW IN v2.1.11/v2.1.12!)
+# ───────────────────────────────────────────────────────────────────────────────
+# Controls how sigma_square_tilde (SST) is sampled for temp calculation
+# Essential for split scheduler support
+
+# SST Mode Selection
+# 'interpolate': Original v1.5.0 behavior (works with regular schedulers)
+# 'auto':        Detect split schedulers automatically (recommended)
+# 'p90':         Force 90th percentile (aggressive, for split schedulers)
+# 'median':      Always use median (conservative fallback)
+sst_mode: "interpolate"
+
+# Auto Mode Tuning (only used when sst_mode='auto')
+# Higher CV threshold = less sensitive to split detection
+# v2.1.12 uses abs(mean) for CV calculation (fixed negative mean bug)
+auto_cv_threshold: 2.0
+auto_ratio_threshold: 0.2
+fallback_percentile: 90
+
+# Safety Constraints
+# Prevents extreme temp values regardless of SST mode
+min_temp: 0.1
+max_temp: 10.0
+
+# SST Diagnostics (NEW IN v2.1.11!)
+# TRUE:  Print detailed SST statistics and auto mode decisions
+# FALSE: Clean console output
+# Useful for testing new schedulers or tuning auto mode
+debug_sst: true
+
+# ───────────────────────────────────────────────────────────────────────────────
+# SYSTEM
+# ───────────────────────────────────────────────────────────────────────────────
+
+# 0=Off, 1=Info, 2=Debug
+debug_mode: 2
+enable_profiling: true
+
+# NEW IN v2.1.11: Aggressive VRAM optimization
+# TRUE:  Lower VRAM usage (slower)
+# FALSE: Standard memory management (faster, recommended)
+tensor_memory_optimization: false
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# QUICK START PRESETS (v2.1.12)
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ✅ STANDARD AUDIO (Recommended Starting Point):
+# Uses all defaults above - balanced for most audio generation
+# - Moderate guidance (max 500.0)
+# - EMA smoothing enabled (0.8)
+# - SST diagnostics on (debug_sst: true)
+# - Restarts disabled for speed
+
+# 🔥 HIGH GUIDANCE (Match v1.5.1 Power):
+# Uncomment these to match v1.5.1 aggressive settings:
+# max_guidance_scale: 2000.0
+# initial_guidance_scale: 250.0
+# fbg_guidance_multiplier: 550.0
+# guidance_max_change: 1000.0
+# cfg_scale: 12.0
+
+# 🧪 SPLIT SCHEDULER MODE:
+# For split schedulers (e.g., 25/75, 30/70 configurations):
+# sst_mode: "auto"              # Auto-detect splits
+# auto_cv_threshold: 2.0        # Standard sensitivity
+# debug_sst: true               # See diagnostics
+# OR force p90:
+# sst_mode: "p90"               # Always use 90th percentile
+
+# 🛡️ LEGACY v1.5.0 REPRODUCTION:
+# For exact v1.5.0 compatibility (1e-6 epsilon, analog warmth):
+# legacy_v1_5_mode: true
+# max_guidance_scale: 2000.0    # Match v1.5.0 values
+# fbg_guidance_multiplier: 550.0
+# initial_guidance_scale: 250.0
+
+# 🚀 VRAM CONSTRAINED:
+# For low VRAM systems:
+# tensor_memory_optimization: true
+# max_guidance_scale: 200.0     # Lower ceiling
+# fbg_guidance_multiplier: 2.0  # Less aggressive
+
+# 🔧 WITH RESTARTS (Artifact Correction):
+# Enable iterative error correction:
+# enable_restarts: true
+# restart_mode: "conservative"
+# restart_s_noise: 0.5
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# NOTES ON v2.1.12 vs v1.5.1
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# NEW FEATURES IN v2.1.12:
+# ✅ EMA smoothing restored (critical fix!)
+# ✅ SST sampling modes (split scheduler support)
+# ✅ Legacy v1.5.0 mode toggle
+# ✅ SST diagnostics (debug_sst)
+# ✅ VRAM optimizations (tensor_memory_optimization)
+# ✅ Sigma range presets
+#
+# DEFAULT DIFFERENCES vs v1.5.1:
+# - More conservative guidance (500.0 vs 2000.0 max)
+# - Restarts OFF by default (vs ON in v1.5.1)
+# - SST mode selection available
+# - Debug SST diagnostics enabled
+#
+# TO MATCH v1.5.1 BEHAVIOR:
+# Set high guidance values (see "HIGH GUIDANCE" preset above)
+# Or use legacy_v1_5_mode: true for exact reproduction
+#
+# ══════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,287 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# ACE-STEP AUDIO CONFIGURATION - LITE VERSION
+# ══════════════════════════════════════════════════════════════════════════════
+# Compatible with: MD: PingPong Lite (v1.5.1 - Classic) OR
+#                  MD: PingPong Lite (testing) v2.1.12
+# 
+# Purpose: Simplified configuration for intermediate users
+# Focuses on: Essential parameters with sane defaults
+# Complexity: Medium (12 core parameters + 6 optional)
+# ══════════════════════════════════════════════════════════════════════════════
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CORE SAMPLING PARAMETERS (12 Required)
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ───────────────────────────────────────────────────────────────────────────────
+# Noise Behavior Preset
+# ───────────────────────────────────────────────────────────────────────────────
+# Quick preset for noise characteristics
+# 
+# OPTIONS:
+#   "Default (Raw)":    1.0 strength, 0.0 coherence (standard)
+#   "Dynamic":          1.0 strength, 0.25 coherence (balanced)
+#   "Smooth":           0.8 strength, 0.5 coherence (gentle)
+#   "Textured Grain":   0.9 strength, 0.9 coherence (grainy)
+#   "Soft":             0.2 strength, 0.0 coherence (subtle)
+#   "Custom":           Use manual ancestral_strength and noise_coherence below
+# 
+# RECOMMENDATION: "Dynamic" for most audio
+noise_behavior: "Dynamic"
+
+
+# ───────────────────────────────────────────────────────────────────────────────
+# Random Seed Management
+# ───────────────────────────────────────────────────────────────────────────────
+
+# Step Random Mode
+# How the seed changes during sampling
+# 
+# OPTIONS:
+#   "off":   Same seed every step (deterministic)
+#   "block": Change seed every N steps (recommended)
+#   "reset": New random seed every step (maximum variation)
+#   "step":  Increment seed by 1 each step (moderate)
+# 
+# RECOMMENDATION: "block" for audio coherence
+step_random_mode: "block"
+
+# Step Size
+# Steps between seed changes (only for 'block' mode)
+# 
+# RANGE: 1-100
+# RECOMMENDATION: 4-25 (4 for variety, 25 for consistency)
+step_size: 4
+
+# Seed
+# Base random seed for reproducibility
+# 
+# RANGE: 0 to 9,007,199,254,740,991 (JS-safe)
+# NOTE: 0 = use random seed
+# seed: 0
+
+
+# ───────────────────────────────────────────────────────────────────────────────
+# Ancestral Step Range
+# ───────────────────────────────────────────────────────────────────────────────
+
+# First Ancestral Step
+# Step index where noise injection begins
+# 
+# TYPICAL VALUES:
+#   0:  From start (recommended)
+#   10-20: Skip early composition
+first_ancestral_step: 0
+
+# Last Ancestral Step
+# Step index where noise injection ends
+# 
+# TYPICAL VALUES:
+#   -1: Through all steps (recommended)
+#   N:  Stop at step N
+last_ancestral_step: -1
+
+
+# ───────────────────────────────────────────────────────────────────────────────
+# Sigma Range
+# ───────────────────────────────────────────────────────────────────────────────
+
+# Start Sigma Index
+# Skip early steps by starting at this index
+# 
+# TYPICAL VALUES:
+#   0:  Full generation (recommended)
+#   N:  Partial denoising (audio-to-audio)
+start_sigma_index: 0
+
+# End Sigma Index
+# Stop sampling at this index
+# 
+# TYPICAL VALUES:
+#   -1: Complete schedule (recommended)
+#   N:  Early stopping
+end_sigma_index: -1
+
+
+# ───────────────────────────────────────────────────────────────────────────────
+# Output Control
+# ───────────────────────────────────────────────────────────────────────────────
+
+# Enable Clamp Output
+# Clamp final latents to [-1.0, 1.0]
+# 
+# ⚠️  AUDIO WARNING: Keep false!
+# Clamping damages audio dynamic range
+enable_clamp_output: false
+
+
+# ───────────────────────────────────────────────────────────────────────────────
+# Blending
+# ───────────────────────────────────────────────────────────────────────────────
+
+# Blend Mode
+# Interpolation function for blending
+# 
+# OPTIONS:
+#   "lerp":   Linear (fast, standard)
+#   "slerp":  Spherical (smooth, preserves magnitude)
+#   "cosine": Smooth S-curve
+#   "cubic":  Organic curves
+# 
+# RECOMMENDATION: "lerp" for speed, "slerp" for quality
+blend_mode: "lerp"
+
+
+# ───────────────────────────────────────────────────────────────────────────────
+# Restarts
+# ───────────────────────────────────────────────────────────────────────────────
+
+# Enable Restarts
+# Iterative error correction (Res 2)
+# 
+# TRUE:  Enable artifact correction (slower)
+# FALSE: Standard sampling (faster, recommended)
+enable_restarts: false
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# OPTIONAL PARAMETERS (6 Advanced Controls)
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ───────────────────────────────────────────────────────────────────────────────
+# Manual Noise Control (Only for "Custom" preset)
+# ───────────────────────────────────────────────────────────────────────────────
+
+# Ancestral Strength
+# Noise injection strength
+# Only used when noise_behavior="Custom"
+# 
+# RANGE: 0.0-2.0
+# TYPICAL: 0.8-1.2
+# ancestral_strength: 1.0
+
+# Noise Coherence
+# Correlation between noise samples
+# Only used when noise_behavior="Custom"
+# 
+# RANGE: 0.0-1.0
+# TYPICAL: 0.0-0.5
+# noise_coherence: 0.0
+
+
+# ───────────────────────────────────────────────────────────────────────────────
+# Debug & Profiling
+# ───────────────────────────────────────────────────────────────────────────────
+
+# Debug Mode
+# Console logging verbosity
+# 
+# VALUES:
+#   0: Silent (errors only)
+#   1: Info (major events)
+#   2: Detailed (per-step logging)
+# 
+# RECOMMENDATION: 1 for monitoring
+debug_mode: 1
+
+# Enable Profiling
+# Track timing and statistics
+# 
+# TRUE:  Output analytics report
+# FALSE: No overhead
+# 
+# RECOMMENDATION: True (minimal overhead)
+enable_profiling: true
+
+
+# ───────────────────────────────────────────────────────────────────────────────
+# Restart Configuration
+# ───────────────────────────────────────────────────────────────────────────────
+
+# Restart Mode
+# Aggressiveness of error correction
+# Only used if enable_restarts=true
+# 
+# OPTIONS:
+#   "conservative": Gentle (audio-safe)
+#   "balanced":     Standard (recommended)
+#   "aggressive":   Strong (for heavy artifacts)
+#   "detail_focus": High-frequency focus
+# 
+# RECOMMENDATION: "balanced"
+restart_mode: "balanced"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# QUICK START PRESETS
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ✅ STANDARD AUDIO (Most Common):
+# noise_behavior: "Dynamic"
+# step_random_mode: "block"
+# step_size: 4
+# blend_mode: "lerp"
+# enable_restarts: false
+# debug_mode: 1
+
+# 🎨 SMOOTH AMBIENT:
+# noise_behavior: "Smooth"
+# step_random_mode: "block"
+# step_size: 25
+# blend_mode: "slerp"
+# enable_restarts: false
+
+# 🔊 AGGRESSIVE/GLITCHY:
+# noise_behavior: "Default (Raw)"
+# step_random_mode: "reset"
+# step_size: 1
+# blend_mode: "lerp"
+# enable_restarts: false
+
+# 🛠️ CUSTOM FINE-TUNING:
+# noise_behavior: "Custom"
+# ancestral_strength: 0.9
+# noise_coherence: 0.3
+# step_random_mode: "block"
+# step_size: 16
+# blend_mode: "slerp"
+
+# 🔧 WITH RESTARTS (Artifact Correction):
+# noise_behavior: "Dynamic"
+# enable_restarts: true
+# restart_mode: "conservative"
+# debug_mode: 2
+# enable_profiling: true
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# NOTES
+# ══════════════════════════════════════════════════════════════════════════════
+# 
+# LITE NODE STRENGTHS:
+# ✓ Simple preset system (6 noise behaviors)
+# ✓ Manual override with "Custom" preset
+# ✓ YAML configuration support
+# ✓ All essential controls exposed
+# ✓ Optional advanced features
+# 
+# WHEN TO USE LITE:
+# ✓ You understand the basics
+# ✓ You want presets with flexibility
+# ✓ You need config management
+# ✓ You want debug tools
+# 
+# WHEN TO USE BASIC:
+# → Ultra-simple (4 inputs only)
+# → Zero configuration needed
+# → Just pick a preset and go
+# 
+# WHEN TO USE FBG (FULL):
+# → Maximum control (50+ parameters)
+# → Advanced FBG guidance features
+# → Research and experimentation
+# 
+# ══════════════════════════════════════════════════════════════════════════════
+# END OF LITE CONFIGURATION
+# ══════════════════════════════════════════════════════════════════════════════

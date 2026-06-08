@@ -1,0 +1,11 @@
+[Genre: {Psychedelic Rock|Motown Soul|British Invasion Pop|Folk Rock}]
+[Style: {Vintage 60s|Summer of Love|Swinging London|Detroit Soul}]
+
+[Instrumentation]
+{Jangly 12-string guitars|Sitar drones|Fuzz bass|Hammond B3 organ}.
+Drums are {loose and jazzy|thumping mono recordings|tambourine heavy}.
+{Brass sections|String quartets} add color.
+
+[Vocal Style]
+{Harmonized groups|Soulful belting|Nasal folk singing|Reverb-drenched psychedelic vocals}.
+Lyrics cover {peace and love|heartbreak|social change|mind-expansion}.

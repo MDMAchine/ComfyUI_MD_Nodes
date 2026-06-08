@@ -1,0 +1,16 @@
+[Genre: {Lo-Fi House|Outsider House|Raw House}]
+[BPM: {115|118|120|122} BPM, {Dusty four-on-the-floor|Slightly off-grid and unquantized|Heavy tape-hiss groove}]
+
+[Instrumentation]
+The track is driven by a {fuzzy, overdriven bassline|filtered, melancholic bass synth}.
+The drums are {muffled, tape-saturated drum machines|heavy on the ride cymbals|punchy but distorted}.
+Bright {shimmering, lo-fi synth bells|detuned VHS-style leads|vinyl crackle and room noise} accent the drop.
+Synths are {warm, warbly analog pads|sampled jazz-funk chord stabs|melancholic synth strings}.
+
+[Vocal Style]
+{Muffled soul samples|Distorted, anonymous spoken word|Melancholic, pitched-up R&B chops|Completely instrumental}.
+Lyrics focus on {nostalgia|isolation|fleeting memories|late-night longing}.
+
+[Vibe]
+The atmosphere is {nostalgic and gritty|melancholic|3 AM bedroom producer|DIY and raw}.
+Think DJ Boring ("Winona") or Ross From Friends.

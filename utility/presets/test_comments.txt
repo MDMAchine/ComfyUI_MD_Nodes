@@ -1,0 +1,4 @@
+# This is a comment, the node will ignore it.
+// This is also a comment.
+[Genre: {House|Techno}]
+A {dark|bright} atmosphere...

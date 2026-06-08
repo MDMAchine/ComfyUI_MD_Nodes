@@ -1,0 +1,90 @@
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ████ MD_SAMPLER: Z-IMAGE TURBO (Standard 8-12 Steps) █████▓▒░
+# © 2025 MDMAchine
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ░▒▓ DESCRIPTION:
+#   Optimized for Z-Image (SDXL Turbo architecture) running at 8-12 steps.
+#   It moves away from the "CFG 1.0" restriction by assuming you are using
+#   APG Guidance to handle the dynamic range.
+#
+#   • Noise: Uses 'brownian' to fix plastic textures common in Turbo.
+#   • Blending: 'lerp' (Linear) is sharper for low step counts.
+#   • Restarts: Active at 40% progress to fix structural errors.
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+# ───────────────────────────────────────────────────────────────
+# CORE SETTINGS
+# ───────────────────────────────────────────────────────────────
+step_random_mode: "off"          # Deterministic is best for Turbo
+step_size: 1
+seed: 0
+
+# ✅ ENHANCEMENT: Brownian noise adds texture that Turbo models lack
+first_ancestral_step: 0
+last_ancestral_step: -1
+ancestral_noise_type: "brownian"
+
+# ───────────────────────────────────────────────────────────────
+# BLENDING
+# ───────────────────────────────────────────────────────────────
+blend_mode: "lerp"               # Linear blend prevents "soft" edges in low steps
+step_blend_mode: "lerp"
+
+conditional_blend_mode: false    # Keep off for speed
+progressive_blend_mode: false
+
+# ───────────────────────────────────────────────────────────────
+# NOISE CONTROL
+# ───────────────────────────────────────────────────────────────
+clamp_noise_norm: false
+max_noise_norm: 1.5
+adaptive_noise_scaling: false
+noise_scale_factor: 1.0
+
+# ───────────────────────────────────────────────────────────────
+# FBG TUNING
+# ───────────────────────────────────────────────────────────────
+fbg_sampler_mode: "PINGPONG"
+sigma_range_preset: "Custom"
+
+# Range
+cfg_start_sigma: 1.0
+cfg_end_sigma: 0.004
+fbg_start_sigma: 1.0
+fbg_end_sigma: 0.004
+
+# Power Settings (Balanced for APG usage)
+max_guidance_scale: 100.0        # Lower ceiling than Ace-Step
+initial_guidance_scale: 1.0
+fbg_guidance_multiplier: 1.0
+guidance_max_change: 0.5
+
+# FBG Math
+pi: 0.65
+t_0: 0.3
+t_1: 0.8
+fbg_temp: 0.0
+fbg_offset: 0.0
+
+# ───────────────────────────────────────────────────────────────
+# POSTERIOR
+# ───────────────────────────────────────────────────────────────
+max_posterior_scale: 3.0
+log_posterior_initial_value: 0.0
+log_posterior_ema_factor: 0.6    # 0.6 is snappier for short generations
+
+# ───────────────────────────────────────────────────────────────
+# RESTARTS (Mid-Run Correction)
+# ───────────────────────────────────────────────────────────────
+enable_restarts: true
+restart_mode: "detail_focus"
+restart_noise_scale: 0.5         # 50% jump back
+restart_s_noise: 1.0
+restart_steps: "4"               # ✅ Explicitly fix structure at step 4
+
+# ───────────────────────────────────────────────────────────────
+# SYSTEM
+# ───────────────────────────────────────────────────────────────
+debug_mode: 1
+enable_profiling: true
+tensor_memory_optimization: false

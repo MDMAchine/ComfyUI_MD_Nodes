@@ -1,0 +1,51 @@
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ████ MD_SAMPLER_LITE: QWEN STANDARD (Fidelity) ███████████▓▒░
+# © 2025 MDMAchine
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ░▒▓ DESCRIPTION:
+#   A simplified high-fidelity preset for the Qwen-Image-Edit (Base) model.
+#   It uses 'Conservative' restarts to catch major errors without
+#   disturbing the texture generation.
+#
+#   • Ancestral: 100% (Standard Gaussian)
+#   • Coherence: 0% (Allows full variation)
+#   • Restarts: Conservative (Safe error correction)
+#
+# ░▒▓ RECOMMENDED USAGE:
+#   • Steps: 15 - 30
+#   • Scheduler: 'beta' or 'exponential'
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+# ───────────────────────────────────────────────────────────────
+# CORE SETTINGS
+# ───────────────────────────────────────────────────────────────
+step_random_mode: "block"        # Standard randomization
+step_size: 2                     # Moderate batching
+seed: 0
+
+first_ancestral_step: 0
+last_ancestral_step: -1
+
+# Lite Specific Controls
+ancestral_strength: 1.0          # Full ancestral noise
+noise_coherence: 0.0             # Independent noise per step (Sharper)
+
+# ───────────────────────────────────────────────────────────────
+# BLENDING
+# ───────────────────────────────────────────────────────────────
+blend_mode: "slerp"              # Best for maintaining color saturation
+
+# ───────────────────────────────────────────────────────────────
+# RESTARTS (Simplified)
+# ───────────────────────────────────────────────────────────────
+enable_restarts: true
+restart_mode: "conservative"     # Gentle correction
+restart_noise_scale: 0.10        # 10% jump back
+restart_s_noise: 1.0
+restart_steps: ""                # Auto-schedule
+
+# ───────────────────────────────────────────────────────────────
+# SYSTEM
+# ───────────────────────────────────────────────────────────────
+debug_mode: 1
+enable_profiling: false

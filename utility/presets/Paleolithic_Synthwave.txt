@@ -1,0 +1,16 @@
+[Genre: {Paleolithic Synthwave|Neanderthal Wave|Cave-Pop|Chiseled Disco}]
+[BPM: {110|115|120} BPM, {Primal four-on-the-floor|Club-dragging thump|Syncopated rock-banging}]
+
+[Instrumentation]
+The track is driven by a {thick, analog Moog bassline|rhythmic chest-thumping sub|booming mammoth-skin drum}.
+The drums are {massive gated-reverb stalactite drips|two rocks clapped together|snapping giant twigs}.
+Bright {mammoth bone flute melodies|soaring 80s synth brass|echoing pterodactyl screeches} accent the chorus.
+Synths are {lush, retro-futuristic pads|gritty, low-bitrate growls|arpeggiated flint sparks}.
+
+[Vocal Style]
+{Heavily vocoded grunting|Melodic, reverb-drenched howling|Pre-lingual rhythmic chanting}.
+Lyrics focus on {inventing fire|running from big cats|the shiny orb in the night sky|inventing the wheel}.
+
+[Vibe]
+The atmosphere is {retro-futuristic survival|triumphant and primal|neon-lit cave dwelling}.
+Think the Stranger Things soundtrack played entirely by a tribe of cavemen.

@@ -1,0 +1,48 @@
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ████ APG GUIDANCE: Z-IMAGE CONTRAST BOOST (High CFG) ███████▓▒░
+# © 2025 MDMAchine
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ░▒▓ DESCRIPTION:
+#   A "Cheat Code" configuration for Z-Image/Turbo models.
+#   Normally, these models fail above CFG 1.5. This config uses APG
+#   normalization to safely push CFG to 3.5+, resulting in significantly
+#   sharper contrast and better prompt following.
+#
+#   • Composition (High Sigma): CFG 3.2 / APG 4.0
+#   • Detail (Low Sigma): CFG 3.5 / APG 4.2
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+verbose: true
+
+rules:
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # RULE 1: COMPOSITION (Steps 0-5)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # Establish contrast and color immediately.
+  - start_sigma: 1.0
+    apg_scale: 4.0       # High projection keeps colors in check
+    cfg: 3.2             # Valid because APG is active
+    predict_image: true
+    momentum: 0.5
+    norm_threshold: 2.0
+    mode: "pure_apg"
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # RULE 2: SHARPENING (Steps 6-10)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # Increase pressure slightly to refine edges.
+  - start_sigma: 0.5
+    apg_scale: 4.2
+    cfg: 3.5
+    predict_image: true
+    momentum: 0.3
+    norm_threshold: 2.0
+    mode: "pure_apg"
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # RULE 3: SAFETY NET (Fallback)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  - start_sigma: -1
+    apg_scale: 0.0
+    cfg: 1.0             # Fall back to native 1.0 if logic fails
+    predict_image: true

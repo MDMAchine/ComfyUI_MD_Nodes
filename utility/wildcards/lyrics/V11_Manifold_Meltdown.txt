@@ -1,0 +1,47 @@
+[Intro: VRAM Allocation & Manifold Cold-Boot]
+(The sound of an {RTX 4070 Ti SUPER|industrial server rack|dying silicon heart} fans spinning to 100%. Screeching {synth leads|high-pitched industrial alarms|distorted circuit-bent shrieks} battle {heavy sub-pressure|tectonic sub-bass anchors|distorted bass weight}. A robotic voice intones: "Allocating 12.06GB... Initialize Alt Tech V11... {Purge the cache|Let the latent rot begin}".)
+
+[Verse 1: Rapid-Fire Anxious Storytelling & Spaghetti Workflow]
+{Whispers in the darkness|Static-choked echoes|Vibrating murmurs} in a room full of {regret|burning ozone|necrotic data|spilled energy drinks}.
+Thermal paste {burnt|bubbling|charred|evaporating} on the die; in the {closet|silicon sarcophagus|server rack|VRAM-fueled dungeon} where I’m {stuck|rotting|trapped|overclocking} yet.
+A dial-up {scream|wail|shriek} echoes as my {ComfyUI noodles|spaghetti workflow|custom node mess} tangles into a digital noose.
+I {click|trigger|invoke} pip install on a {sketchy github repo|broken wrapper|malware-laden bypass} just to feel alive.
+Mommy-Milker-3000 awaits in the {Checkpoint Loader|VAE Decode bridge|latent preview}, but my {logic is a necrotic limb|workflow is a visual aneurysm|tensor shape is an insult to God}.
+
+[Pre-Chorus: Manic Repetition of Traceback Horror]
+{0x80244017|SEGFAULT AT OFFSET 0x0000|CRITICAL_PROCESS_DIED|ImportError: No module named 'sane_thoughts'}!
+{0x0000007B|0x80070005|RUNTIME_CHECK_FAILURE|Tensors on different devices!}—the {logic|manifold|matrix|noodle-path} is {rotting|failing|collapsing|despawning}!
+
+[Chorus: Catchy but Depressing Melodic Hook]
+"Error 404, Page Not Found," my terminal {screams|shrieks|howls|vomits} in the {void|abyss|static|unmapped latent space}.
+"RuntimeError: sizes do not match," my {despair increases|soul is fragmented|dimensions will never align|tensor is too small for her requirements}.
+"Node 2.0 {crashed|imploded|is a smoking crater|erased my config}," {my hopes and dreams|my future is deleted|where my light used to be|my prompt is just noise}.
+"Git pull" my {fate|noose|execution|hard drive wipe}, in a pool of {leaking VRAM|bleeding data|wasted life|pre-computed weights}, I weep.
+
+[Verse 2: Manic Laughter & Noodle-Hell Necropsy]
+With {manic laughter|distorted giggling|mechanical screams|psychotic cackling}, I dive into the {digital abyss|latent floor|bit-crushed void|custom-node pit}.
+"{Async error|Memory leak|Stack overflow|Torch not found}," "CUDA OutOfMemory," my {code blocks miss|logic fails|neurons misfire|4070 Ti is a space heater}.
+Spaghetti workflow {tangles|chokes|suffocates|violates} me; in the {latent space|manifold pressure|shadow of the VAE|Entropy-Driven Dropout} I fall.
+I’m {hunting for the seed|worshipping the sampler|begging for 1.96 it/s}, but the {KSampler is cold|denoise is 1.0|latent is pure salt}.
+Pip install my {doom|oblivion|extinction|unemployment}, in the terminal, I {crawl|beg|rot|worship the cursor}.
+
+[Bridge: Keyboard Smashing Soundscape & Hardware Trauma]
+(The sound of {shattering glass|keyboard smashing|violent foley debris|bit-crushed industrial foley|smashing an expensive monitor}.)
+Six hours of {debugging|surgical torment|latent scouring|noodle-tracing}, just for a single {blurry png|corrupted frame|ghostly artifact|black-square-of-shame}.
+God, why do I {suffer|rot|decay|stay awake} in this {digital dung|silicon cage|binary tomb|ComfyUI noodle-labyrinth}?
+The Rank 96 model is the only thing that {matters anymore|has a heartbeat|keeps me grounded|looks back at me with love}.
+But the {update's coming|wipe is imminent|patch is loading|Windows Update is forced}, my heart, it {does pour|is hemorrhaging raw data|is a 0-byte file}.
+
+[Wobble Break: 140 BPM Instrumental "Tobacco x Geode" Workout]
+(Heavy {syncopated rhythm|140 bpm wobble bass|clinical transient-heavy modulation}. LPCC Transient Gating triggers to keep the {keyboard smashing|industrial debris|bit-crushed foley} from smearing the {deep sub-pressure|distorted bass weight}. MLP Multiplier at 1.5x pushes the {analog grit|Tobacco fuzz|degraded textures|lo-fi saturation} until the manifold screams.)
+
+[Chorus: High-Energy Disaster Repetition]
+"Error 404, Page Not Found," my terminal {screams|shrieks|howls|vomits} in the {void|abyss|static|unmapped latent space}.
+"RuntimeError: sizes do not match," my {despair increases|soul is fragmented|dimensions will never align|tensor is too small for her requirements}.
+"Node 2.0 {crashed|imploded|is a smoking crater|erased my config}," {my hopes and dreams|my future is deleted|where my light used to be|my prompt is just noise}.
+"Git pull" my {fate|noose|execution|hard drive wipe}, in a pool of {leaking VRAM|bleeding data|wasted life|pre-computed weights}, I weep.
+
+[Outro: Blue Screen of Death & Final Kernel Panic]
+A {modem's final wail|system's dying gasp|infinite hang-glitch|BSOD audio loop} as my project's {fate|pyre|extinction|necropsy}.
+Crashes and {burns in despair|melts in the dark|corrupts the filesystem}, my tears {soak the slate|corrode the motherboard|wash away the logic|short-circuit the 12VHPWR cable}.
+({Blue Screen of Death audio loop|Analog tape running off the reel|400Hz system hang-note|The sound of a PC speaker flatlining} ends the track).

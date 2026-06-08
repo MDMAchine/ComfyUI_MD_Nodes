@@ -1,0 +1,107 @@
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ████ MD_SAMPLER: Z-IMAGE OPTIMIZED (4-9 Steps) ███████████▓▒░
+# © 2025 MDMAchine
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ░▒▓ DESCRIPTION:
+#   Optimized configuration for "Z-Image" and other Turbo/Distilled models
+#   that require very few steps (4-9) and low CFG (1.0).
+#   It disables random seed variation to ensure deterministic behavior
+#   compatible with Z-Image's specific requirements.
+#
+# ░▒▓ FEATURES:
+#   • Deterministic Stepping: Randomization disabled (step_random_mode: off).
+#   • Image Optimization: Uses 'lerp' blending and 'detail_focus' restarts.
+#   • Low Step Logic: Explicit restart steps at 1 and 2 for 4-step flows.
+#
+# ░▒▓ COMPATIBILITY:
+#   • Model: Z-Image (or similar 1-step/few-step distilled models).
+#   • Scheduler: 'simple' (ComfyUI standard).
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+# ───────────────────────────────────────────────────────────────
+# CORE SETTINGS (Deterministic)
+# ───────────────────────────────────────────────────────────────
+step_random_mode: "off"          # Z-Image requires stability
+step_size: 1
+seed: 0                          # Set specific seed in node, or use 0 here
+
+# ───────────────────────────────────────────────────────────────
+# ANCESTRAL SETTINGS (Disabled)
+# ───────────────────────────────────────────────────────────────
+# Z-Image is deterministic and does not use ancestral noise.
+first_ancestral_step: 0
+last_ancestral_step: -1
+ancestral_noise_type: "gaussian" # Default placeholder
+
+# ───────────────────────────────────────────────────────────────
+# BLENDING (Image Optimized)
+# ───────────────────────────────────────────────────────────────
+blend_mode: "lerp"               # ✅ LERP is cleaner for image edges than Slerp
+step_blend_mode: "lerp"
+
+conditional_blend_mode: false
+conditional_blend_sigma_threshold: 0.3
+conditional_blend_function_name: "lerp"
+conditional_blend_on_change: false
+progressive_blend_mode: false
+
+# ───────────────────────────────────────────────────────────────
+# NOISE CONTROL (Disabled)
+# ───────────────────────────────────────────────────────────────
+clamp_noise_norm: false
+max_noise_norm: 1.5
+adaptive_noise_scaling: false
+noise_scale_factor: 1.0
+
+# ───────────────────────────────────────────────────────────────
+# FBG TUNING (Gentle Guidance)
+# ───────────────────────────────────────────────────────────────
+sigma_range_preset: "Custom"
+fbg_sampler_mode: "PINGPONG"     # Active mode to enable Restarts
+
+# Guidance Settings (Targeting CFG 1.0 Model)
+cfg_scale: 1.0                   # Native Z-Image CFG
+cfg_start_sigma: 1.0
+cfg_end_sigma: 0.004
+
+# FBG Range
+fbg_start_sigma: 1.0
+fbg_end_sigma: 0.004
+
+# Power Settings (Scaled down for CFG 1.0)
+max_guidance_scale: 1000.0
+initial_guidance_scale: 1.0
+fbg_guidance_multiplier: 1.0     # Low multiplier for subtle correction
+guidance_max_change: 0.5         # Restrict adaptation speed
+
+# FBG Math (Image Tuning)
+pi: 0.65                         # Moderate sensitivity
+t_0: 0.3
+t_1: 0.8
+fbg_temp: 0.0
+fbg_offset: 0.0
+
+# ───────────────────────────────────────────────────────────────
+# POSTERIOR (State Management)
+# ───────────────────────────────────────────────────────────────
+max_posterior_scale: 3.0
+log_posterior_initial_value: 0.0
+log_posterior_ema_factor: 0.6    # Lower smoothing for short steps
+
+# ───────────────────────────────────────────────────────────────
+# RESTARTS (Res 2 - Detail Focus)
+# ───────────────────────────────────────────────────────────────
+enable_restarts: true
+restart_mode: "detail_focus"     # Optimized for sharpening edges
+restart_noise_scale: 0.7         # 30% jump back (high for short steps)
+restart_s_noise: 1.0
+restart_steps: "1,2"             # Explicit steps for 4-step workflow
+
+# ───────────────────────────────────────────────────────────────
+# SYSTEM
+# ───────────────────────────────────────────────────────────────
+debug_mode: 2
+enable_profiling: true
+tensor_memory_optimization: false
+gradient_norm_tracking: false
+early_exit_threshold: 0.000001

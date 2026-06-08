@@ -1,0 +1,15 @@
+[Genre: {Cinematic Soul|Modern Library Music|Psychedelic Funk|Breakbeat}]
+[BPM: {90|105|110|115} BPM, {Tight, syncopated drum breaks|Heavy bongo and conga rhythms|In-the-pocket funk groove}]
+
+[Instrumentation]
+The track is driven by a {plucky, rubbery bass guitar|tight, repetitive Motown-style bassline}.
+The drums are {heavily compressed vinyl drum breaks|dry, deadened 70s studio kits with crisp hi-hats}.
+Bright {vibraphone melodies|staccato horn stabs|wah-wah pedal guitar sweeps} accent the chorus.
+Synths are {vintage Clavinet riffs|eerie Theremin leads|buzzy Moog synthesizers}.
+
+[Vocal Style]
+{Wordless cinematic choirs|Occasional funky grunts or shouts|Vintage spoken-word dialogue samples|Entirely instrumental}.
+Lyrics focus on {instrumental groove|vintage cinematic moods}.
+
+[Vibe]
+The atmosphere is {spy-movie cool|retro and eclectic|head-nodding|vintage heist montage}.

@@ -1,0 +1,16 @@
+[Genre: {Slacker Rock|Psych-Folk|Coastal Indie|Hazy Blues}]
+[BPM: {80|85|90} BPM, {Sluggish groove|Behind the beat|Stoned tempo}]
+
+[Instrumentation]
+The drums are {loose and dry|muffled and lazy}, often just a kick and rimshot.
+The guitars are {drenched in spring reverb|tremolo-heavy|clean and noodling}.
+Basslines are {simple and plodding|melodic and warm}.
+Key elements: {Whistling hooks|Shaker percussion|Vintage organ drones}.
+
+[Vocal Style]
+{Raspy, mumbled baritone|Sleepy crooning|Whispered story-telling}.
+Lyrics are about {honeybones|golden lights|summertime|coastal living}.
+
+[Vibe]
+The atmosphere is {smoky and relaxed|late night whiskey|sun-drunk afternoon}.
+Feels like {driving a vintage Cadillac|lying in a hammock}.

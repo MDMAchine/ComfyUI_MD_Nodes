@@ -1,0 +1,16 @@
+[Genre: {Downtempo|Space Pop|French Ambient|Dream Pop|Trip Hop}]
+[BPM: {80|90|100} BPM, {Floating and weightless|Slow motion groove|Cinematic}]
+
+[Instrumentation]
+The sound is built on {lush orchestral strings|vintage Korg synths|warm Moog bass}.
+Acoustic guitars are {strummed gently|picked with delay}.
+The drums are {dry and muffled|soft and jazzy|electronic but organic}.
+Key elements: {Vocoders|Whistling melodies|Fender Rhodes piano|Theremin sounds}.
+
+[Vocal Style]
+{Whispered female vocals| heavily vocoded robot voices|Soft, breathy male singing}.
+Lyrics are {surreal|romantic|about space travel|abstract and poetic}.
+
+[Vibe]
+The feeling is {melancholic but sexy|nostalgic for the future|floating in zero gravity}.
+Imagine a soundtrack for {a trip to the moon|a rainy day in Paris|a love affair in space}.

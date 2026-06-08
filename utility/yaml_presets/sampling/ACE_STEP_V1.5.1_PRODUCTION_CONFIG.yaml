@@ -1,0 +1,122 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# ACE-STEP AUDIO CONFIGURATION (v1.5.0/v1.5.1 COMPATIBLE)
+# ══════════════════════════════════════════════════════════════════════════════
+# Target Node: MD: PingPong FBG (v1.5.0 - Full Control)
+# Optimization: High-Fidelity Audio Generation
+# Version: v1.5.1 Production
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ───────────────────────────────────────────────────────────────────────────────
+# CORE SAMPLER SETTINGS
+# ───────────────────────────────────────────────────────────────────────────────
+
+# Seed behavior: 'block' is best for audio structure consistency
+step_random_mode: "block"
+step_size: 25
+
+# Ancestral Noise: Inject noise from start (0) to finish (-1)
+first_ancestral_step: 0
+last_ancestral_step: -1
+ancestral_noise_type: "gaussian"
+
+# Schedule: Run full range
+start_sigma_index: 0
+end_sigma_index: -1
+
+# ⚠️ Audio Protection: Never clamp output for audio latents
+enable_clamp_output: false
+
+# ───────────────────────────────────────────────────────────────────────────────
+# BLENDING (INTERPOLATION)
+# ───────────────────────────────────────────────────────────────────────────────
+
+# 'lerp' is standard, 'slerp' preserves magnitude better for high energy
+blend_mode: "lerp"
+step_blend_mode: "lerp"
+
+# Progressive/Conditional blending (Advanced Features)
+# Kept off for stability, enable if refining specific segments
+progressive_blend_mode: false
+conditional_blend_mode: false
+conditional_blend_sigma_threshold: 0.3
+conditional_blend_function_name: "slerp"
+conditional_blend_on_change: false
+conditional_blend_change_threshold: 0.2
+
+# ───────────────────────────────────────────────────────────────────────────────
+# NOISE SCALING
+# ───────────────────────────────────────────────────────────────────────────────
+
+# ⚠️ Audio Protection: Do not clamp noise norm
+clamp_noise_norm: false
+max_noise_norm: 1.5
+
+# Standard scaling
+adaptive_noise_scaling: false
+noise_scale_factor: 1.0
+
+# ───────────────────────────────────────────────────────────────────────────────
+# RES 2 RESTARTS (Error Correction)
+# ───────────────────────────────────────────────────────────────────────────────
+# Iteratively fixes artifacts. 'Conservative' is safest for audio.
+
+enable_restarts: true
+restart_mode: "conservative"
+restart_noise_scale: 0.10
+# Note: Code uses float for s_noise. 0.5 - 1.0 is standard.
+restart_s_noise: 0.1
+restart_steps: ""
+
+# ───────────────────────────────────────────────────────────────────────────────
+# FBG (FEEDBACK GUIDANCE) & CFG
+# ───────────────────────────────────────────────────────────────────────────────
+
+# Must be PINGPONG for Ace-Step Audio
+fbg_sampler_mode: "PINGPONG"
+sigma_range_preset: "Custom"
+
+# CFG Settings (Base Guidance)
+cfg_scale: 12.0
+cfg_start_sigma: 1.0
+cfg_end_sigma: 0.004
+
+# FBG Settings (Dynamic Guidance)
+fbg_start_sigma: 1.0
+fbg_end_sigma: 0.004
+
+# Ace-Step Audio specific high-value tuning:
+max_guidance_scale: 2000.0
+initial_guidance_scale: 250.0
+fbg_guidance_multiplier: 550.0
+guidance_max_change: 1000.0
+
+# ───────────────────────────────────────────────────────────────────────────────
+# FBG MATH (Auto-Calculation)
+# ───────────────────────────────────────────────────────────────────────────────
+# The node calculates fbg_temp/offset automatically if t_0 and t_1 are > 0
+
+pi: 0.35
+t_0: 0.7
+t_1: 0.4
+
+# These are ignored because t_0/t_1 are set, but kept for safety
+fbg_temp: 0.0
+fbg_offset: 0.0
+
+# ───────────────────────────────────────────────────────────────────────────────
+# POSTERIOR
+# ───────────────────────────────────────────────────────────────────────────────
+
+max_posterior_scale: 3.0
+log_posterior_initial_value: 0.0
+log_posterior_ema_factor: 0.8
+
+# ───────────────────────────────────────────────────────────────────────────────
+# SYSTEM
+# ───────────────────────────────────────────────────────────────────────────────
+
+# 0=Off, 1=Info, 2=Debug
+debug_mode: 2
+enable_profiling: true
+tensor_memory_optimization: false
+early_exit_threshold: 0.000001

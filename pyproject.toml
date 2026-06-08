@@ -1,29 +1,44 @@
+# flashinfer is optional — install the wheel matching your CUDA/torch version:
+# uv pip install flashinfer -i https://flashinfer.ai/whl/cu130/torch2.11/
+
 [project]
-version = "1.5.1"
+name = "ComfyUI_MD_Nodes"
+version = "1.6.0"
+description = "Advanced ComfyUI custom nodes for diffusion models — audio, image, video, and GGUF workflows."
+authors = [
+    { name = "MDMAchine" },
+]
+requires-python = ">=3.10"
 dependencies = [
-    "Jinja2",
-    "MarkupSafe",
-    "av",
     "bitsandbytes",
-    "filelock",
-    "fsspec",
+    "google-api-python-client",
+    "google-auth",
+    "h5py",
+    "hdf5plugin",
+    "huggingface_hub",
     "imageio",
     "librosa",
     "lion_pytorch",
     "lmstudio",
+    "loguru",
+    "lpips",
     "matplotlib",
-    "mpmath",
-    "networkx",
+    "natsort",
     "ollama",
     "pedalboard",
     "piexif",
     "prodigyopt",
     "pykakasi",
     "pyloudnorm",
-    "requests",
-    "scipy",
-    "sentencepiece",
-    "sympy",
-    "tokenizers",
-    "tqdm",
+    "pynvml",
+    "pytorch_lightning",
+    "rich",
+    "soundfile",
+    "stdlib_list",
+    "tomli",
+    "tomli_w",
+    "torchcodec",
 ]
+
+[project.license]
+text = "GPL-3.0-or-later"

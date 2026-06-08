@@ -1,0 +1,97 @@
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ████ ACE-STEP PRESET: LEGACY ANALOG (v1.5.1 Replica) ███████▓▒░
+# © 2025 MDMAchine
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ░▒▓ DESCRIPTION:
+#   This preset replicates the "Warm & Punchy" sound of the v1.5.1 engine.
+#   It uses lower precision math (1e-6) which naturally "blurs" high-frequency
+#   static, resulting in a classic analog tape saturation feel.
+#
+# ░▒▓ RECOMMENDED USAGE:
+#   • Steps: 50 - 100+ (Handles high steps beautifully without burning)
+#   • Scheduler: 'sgm_uniform' (Linear) for tightest bass response.
+#   • Genres: Synthwave, Techno, Ambient, Bass Heavy genres.
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+# ──────────────────────────────────────────────────────────────────────────────
+# ENGINE MODE
+# ──────────────────────────────────────────────────────────────────────────────
+legacy_v1_5_mode: true           # ✅ TRUE = Reverts to v1.5.1 math (1e-6 precision)
+
+# ──────────────────────────────────────────────────────────────────────────────
+# CORE SETTINGS
+# ──────────────────────────────────────────────────────────────────────────────
+step_random_mode: "block"        # "block" is best for rhythmic consistency
+step_size: 25                    # Size of seed blocks
+seed: 0                          # 0 = Random
+
+# Ancestral Noise
+first_ancestral_step: 0
+last_ancestral_step: -1
+ancestral_noise_type: "gaussian" # v1.5.1 default (sharper than brownian)
+
+# Schedule
+start_sigma_index: 0
+end_sigma_index: -1
+enable_clamp_output: false       # ⚠️ AUDIO: Always FALSE
+
+# ──────────────────────────────────────────────────────────────────────────────
+# BLENDING
+# ──────────────────────────────────────────────────────────────────────────────
+blend_mode: "lerp"               # Linear blend works best with Legacy math
+step_blend_mode: "lerp"
+
+progressive_blend_mode: false
+conditional_blend_mode: false    # Keep simple for pure legacy sound
+
+# ──────────────────────────────────────────────────────────────────────────────
+# RESTARTS (ERROR CORRECTION)
+# ──────────────────────────────────────────────────────────────────────────────
+enable_restarts: true
+restart_mode: "conservative"     # "conservative" prevents destruction of transients
+restart_noise_scale: 0.10
+restart_s_noise: 0.10            # Low noise injection
+restart_steps: ""
+
+# ──────────────────────────────────────────────────────────────────────────────
+# FBG TUNING (FULL RANGE POWER)
+# ──────────────────────────────────────────────────────────────────────────────
+fbg_sampler_mode: "PINGPONG"
+sigma_range_preset: "All"        # Legacy typically ran full range
+
+# High Power Guidance (Safe in Legacy Mode due to 'drift')
+cfg_scale: 12.0
+cfg_start_sigma: 1.0
+cfg_end_sigma: 0.004
+
+fbg_start_sigma: 1.0
+fbg_end_sigma: 0.004
+
+max_guidance_scale: 2000.0
+initial_guidance_scale: 250.0
+fbg_guidance_multiplier: 550.0
+guidance_max_change: 1000.0
+
+# ──────────────────────────────────────────────────────────────────────────────
+# FBG MATH
+# ──────────────────────────────────────────────────────────────────────────────
+pi: 0.35                         # Classic audio sweetspot
+t_0: 0.7
+t_1: 0.4
+fbg_temp: 0.0                    # Ignored (Auto-calc active)
+fbg_offset: 0.0                  # Ignored (Auto-calc active)
+
+# ──────────────────────────────────────────────────────────────────────────────
+# POSTERIOR (CLASSIC SMOOTHING)
+# ──────────────────────────────────────────────────────────────────────────────
+max_posterior_scale: 3.0
+log_posterior_initial_value: 0.0
+log_posterior_ema_factor: 0.8    # Classic v1.5.1 smoothing value
+
+# ──────────────────────────────────────────────────────────────────────────────
+# SYSTEM
+# ──────────────────────────────────────────────────────────────────────────────
+debug_mode: 1
+enable_profiling: true
+tensor_memory_optimization: false
+sst_mode: "auto"                 # Legacy engine ignores SST, but keeping consistent

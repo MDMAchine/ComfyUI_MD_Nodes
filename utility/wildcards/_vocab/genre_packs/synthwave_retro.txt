@@ -1,0 +1,25 @@
+# MD_Nodes - Synthwave / Retro Genre Pack
+
+[BASE_GENRE]
+Synthwave
+Darkwave
+Vaporwave
+Chillwave
+Outrun
+Cyberpunk
+EBM
+Industrial
+Aggrotech
+
+[BASS_CHARACTER]
+Warm analog synth bass with slight chorus
+Pulsing EBM bass sequence
+Moog-style sub with portamento
+Cold darkwave bass pulse
+Vaporwave pitched-down bass line with reverb
+
+[PERCUSSION_STYLE]
+Gated reverb 80s toms with punchy snare
+Electronic drum machine with swing
+Cold industrial percussion with metallic hits
+Retro 808 pattern with claps

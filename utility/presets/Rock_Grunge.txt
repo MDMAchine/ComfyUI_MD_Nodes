@@ -1,0 +1,16 @@
+[Genre: {Grunge|90s Alternative Rock|Hard Rock|Post-Grunge}]
+[BPM: {110|120|130|140} BPM, {Driving rhythm|Sludgy groove|Aggressive energy}]
+
+[Instrumentation]
+The song features {muddy, distorted electric guitars|jangly clean verses exploding into heavy choruses}.
+The bass is {thick and fuzzy|driving and melodic}, locking in with the drums.
+The drums are {heavy and crashing|loud and roomy}, with a focus on {open hi-hats|punishing snare hits}.
+Feedback and amplifier hum are audible in the quiet sections.
+
+[Vocal Style]
+The singer has a {raspy, angsty baritone|powerful, wailing tenor|mumbled, introspective delivery}.
+The lyrics focus on {alienation and apathy|social rebellion|personal demons|vague metaphors}.
+Harmonies are {rough and untamed|absent|haunting and minor-key}.
+
+[Structure]
+{Quiet verse, loud chorus|Relentless energy from start to finish|Slow build-up to a chaotic ending}.

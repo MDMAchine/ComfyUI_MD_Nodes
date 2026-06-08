@@ -1,0 +1,15 @@
+[Genre: {Library Funk|Cinematic Soul|Spy Soundtrack|Psychedelic Breakbeat}]
+[BPM: {100|110|120} BPM, {Funky break|Walking tempo|Chase scene groove}]
+
+[Instrumentation]
+Defined by quirky percussion: {Bongos|Xylophones|Vibraphones|Woodblocks}.
+Guitars use {heavy wah-wah pedals|surf rock reverb|funk scratching}.
+Bass is {plucky and rhythmic|walking jazz lines}.
+Additions: {Flute solos|Sitar drones|Dramatic brass stabs}.
+
+[Vocal Style]
+{Mostly Instrumental|Wordless choirs|Spoken word intro|Cool retro crooning}.
+
+[Vibe]
+The feeling is {retro-cool|mysterious|kitsch and fun}.
+Sounds like a soundtrack for {a 60s heist movie|a secret agent montage|a kung-fu film}.

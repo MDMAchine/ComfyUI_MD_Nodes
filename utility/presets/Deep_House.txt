@@ -1,0 +1,16 @@
+[Genre: {Deep House|Soulful House|Jazz House|Organic House}]
+[BPM: {118|120|122|124} BPM, {Steady four-on-the-floor|Swung and syncopated hi-hats|Laid-back groove}]
+
+[Instrumentation]
+The track is driven by a {muted, jazzy sub-bass|warm, walking upright bassline}.
+The drums are {classic Roland 909s|layered with live congas and shakers|warm and analog}.
+Bright {muted trumpet solos|jazzy saxophone riffs|jazz-funk guitar chords} accent the chorus.
+Synths are {vintage Rhodes electric pianos|deep, dubby chords|lush, sweeping pads}.
+
+[Vocal Style]
+{Soulful R&B vocal chops|Spoken word poetry|Gospel-influenced house diva hooks|Deep, pitched-down vocal loops}.
+Lyrics focus on {late-night reflections|spiritual liberation|getting lost in the rhythm|underground culture}.
+
+[Vibe]
+The atmosphere is {soulful and warm|late-night and sophisticated|underground club|smoky lounge}.
+Think Larry Heard (Mr. Fingers) or Kerri Chandler.

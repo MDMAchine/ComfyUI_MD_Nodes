@@ -1,0 +1,15 @@
+[Genre: {Psychedelic Rock|Slacker Rock|Indie Groove|Stoner Pop}]
+[BPM: {85|90|95|100} BPM, {Lazy, behind-the-beat groove|Shuffling acoustic rhythm|Head-nodding swagger}]
+
+[Instrumentation]
+The track is driven by a {fuzz-drenched, rolling bassline|strummed, slightly out-of-tune acoustic guitar}.
+The drums are {dry, vintage 70s studio kits|mic'd with heavy room ambience and deadened snares}.
+Bright {slide guitar licks|wobbly Mellotron flutes|tremolo-soaked electric chords} accent the chorus.
+Synths are {subtle analog drones|vintage combo organs|tape-delayed guitar echoes}.
+
+[Vocal Style]
+{Mumbled, effortless baritone|Reverb-drenched indie harmonies|Whispered, smoky storytelling|Spoken-word cool}.
+Lyrics focus on {hazy summer days|laid-back romance|surreal daydreams|drifting away}.
+
+[Vibe]
+The atmosphere is {sun-drenched and hazy|laid-back and effortless|slightly psychedelic|late-night beach bonfire}.

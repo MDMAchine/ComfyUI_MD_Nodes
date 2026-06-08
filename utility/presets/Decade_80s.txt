@@ -1,0 +1,12 @@
+[Genre: {Synthpop|New Wave|Hair Metal|Post-Punk|Italo Disco}]
+[Style: {Neon soaked|Reverb heavy|Gated drums|Analog warmth}]
+
+[Instrumentation]
+The sound is defined by {Yamaha DX7 bells|Linndrum drum machines|Gated reverb snares}.
+Guitars are {chorus-laden clean tones|shredding distortion solos}.
+Bass is {synth bass arpeggios|driving picked bass guitar}.
+{Saxophone solos|Orchestra hits} appear frequently.
+
+[Vocal Style]
+{Deep baritone crooning|Androgynous pop vocals|High-pitched metal screams}.
+Lyrics focus on {technology|cold war anxiety|romance|excess}.

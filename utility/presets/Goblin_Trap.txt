@@ -1,0 +1,16 @@
+[Genre: {Goblin Trap|Swamp Bounce|Gremlin-Core|Feral Bass}]
+[BPM: {140|150|160} BPM, {Erratic skittering hi-hats|Bouncy, lopsided groove|Manic triplet drops}]
+
+[Instrumentation]
+The track is driven by a {bouncy, detuned sub-bass|muddy, distorted 808|plucked rubber-band bass}.
+The drums are {made of clanging pots and pans|crunching dry leaves|snapping twigs and cowbells}.
+Weird {kazoo fanfare drops|pitch-bent jaw harp boings|out-of-tune music boxes} accent the beat.
+Synths are {squelchy acid chirps|wobbly, chaotic leads|dissonant wooden flutes}.
+
+[Vocal Style]
+{High-pitched cackling|Feral, goblin-like grunts and murmurs|Squeaky, hyper-pop chanting}.
+Lyrics focus on {collecting shiny rocks|stealing left socks|living in a damp log|eating bugs}.
+
+[Vibe]
+The atmosphere is {chaotic and feral|grimy and mischievous|hyperactive and bizarre}.
+Think 100 gecs meets the soundtrack of a swamp level in a 90s platformer.

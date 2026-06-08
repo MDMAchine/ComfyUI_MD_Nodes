@@ -1,0 +1,14 @@
+[Genre: {Lo-Fi Hip Hop|Chillhop|Study Beats|Bedroom Pop}]
+[BPM: {70|75|80} BPM, {Swing heavy|Drunken drummer feel|Relaxed}]
+
+[Instrumentation]
+The drums are {soft and muffled|jazzy brush kits}, with plenty of swing.
+The main instrument is a {warped cassette tape piano|mellow electric guitar|nostalgic music box}.
+Background noise: {Rain on a window|Cafe ambience|Vinyl static|Turning pages}.
+
+[Vocal Style]
+{Instrumental only|Short vocal chops from old movies|Soft whispering|Humming melody}.
+
+[Vibe]
+The feeling is {lonely but comforting|warm and nostalgic|sleepy and dreamy}.
+Perfect for {studying at 3AM|watching the rain|walking home alone}.

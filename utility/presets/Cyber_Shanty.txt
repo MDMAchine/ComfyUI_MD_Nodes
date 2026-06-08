@@ -1,0 +1,16 @@
+[Genre: {Cyber-Shanty|Neon Maritime|Hologram Folk|Industrial Whaling Song}]
+[BPM: {100|110|115} BPM, {Heavy, swaying 6/8 sea rhythm|Mechanical stomp|Glitching rolling wave}]
+
+[Instrumentation]
+The track is driven by a {grinding synth-bass|sub-heavy 808|stuttering digitized drone}.
+The drums are {crushing industrial kicks and anvils|crisp digital claps|heavy metallic stomps}.
+Bright {distorted accordion runs|chiptune flute melodies|laser synth zaps} accent the chorus.
+Synths are {wavering holographic pads|aggressive fm-bass growls|arpeggiated sonar blips}.
+
+[Vocal Style]
+{A gruff, heavily vocoded sea captain|A crew of cyborgs chanting in unison|A synthetic AI siren}.
+Lyrics focus on {hunting neon whales|corporate space-piracy|navigating the data-sea|running out of battery}.
+
+[Vibe]
+The atmosphere is {rowdy and dystopian|maritime and mechanical|glitchy and triumphant}.
+Think "The Wellerman" but produced by Daft Punk and Trent Reznor.

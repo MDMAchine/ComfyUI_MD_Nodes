@@ -1,0 +1,10 @@
+verbose: true
+rules:
+- start_sigma: 1.0
+  apg_scale: 3.0
+  cfg: 2.2
+  predict_image: true
+- start_sigma: 0.5
+  apg_scale: 3.2
+  cfg: 2.5
+  predict_image: true

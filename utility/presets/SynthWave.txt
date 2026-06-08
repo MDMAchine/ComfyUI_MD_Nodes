@@ -1,0 +1,16 @@
+[Genre: {Synthwave|Retrowave|Outrun|Cyberpunk}]
+[BPM: {90|100|115|125} BPM, {Driving 16th-note pulse|Four-on-the-floor|Cinematic half-time}]
+
+[Instrumentation]
+The track is driven by a {rolling analog bassline|chugging Juno-style arpeggio}.
+The drums are {punchy retro drum machines|LinnDrum samples with massive gated snares}.
+Bright {FM synth bells|wailing saxophone solos|electric guitar licks} accent the chorus.
+Synths are {lush vintage pads|neon-drenched leads|dark pulsating drones}.
+
+[Vocal Style]
+{Reverb-soaked melancholic vocals|Ethereal female pop hooks|Robotic vocoder phrases|Instrumental only}.
+Lyrics focus on {midnight drives|neon cityscapes|retro-futuristic romance|escaping the grid}.
+
+[Vibe]
+The atmosphere is {nostalgic|cinematic and brooding|neon-drenched|driving at night}.
+Think "Nightcall" by Kavinsky or "Blinding Lights" by The Weeknd.

@@ -1,0 +1,95 @@
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ████ MD_SAMPLER: QWEN STANDARD (High Fidelity) ███████████▓▒░
+# © 2025 MDMAchine
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ░▒▓ DESCRIPTION:
+#   Optimized for the BASE Qwen-Image-Edit model (non-Lightning).
+#   Prioritizes instruction adherence and texture fidelity.
+#
+#   • Steps: 15 - 30 (Sweet spot for Qwen Base)
+#   • CFG: 2.0 - 5.0 (Allows creative steering)
+#   • Sampler: 'res_multistep' with 'beta' scheduler
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+# ───────────────────────────────────────────────────────────────
+# CORE SETTINGS
+# ───────────────────────────────────────────────────────────────
+step_random_mode: "block"        # Standard randomization for texture variety
+step_size: 25
+seed: 0
+
+# Qwen Base benefits from standard ancestral noise
+first_ancestral_step: 0
+last_ancestral_step: -1
+ancestral_noise_type: "gaussian"
+
+# ───────────────────────────────────────────────────────────────
+# BLENDING (Detail Preservation)
+# ───────────────────────────────────────────────────────────────
+blend_mode: "slerp"              # Slerp maintains color vibrancy better than lerp
+step_blend_mode: "cosine"        # Smoother transitions for higher step counts
+
+conditional_blend_mode: true
+conditional_blend_sigma_threshold: 0.3
+conditional_blend_function_name: "cubic" # Soft landing for final details
+conditional_blend_on_change: true
+conditional_blend_change_threshold: 0.15
+
+# ───────────────────────────────────────────────────────────────
+# NOISE CONTROL
+# ───────────────────────────────────────────────────────────────
+clamp_noise_norm: false          # Qwen output is usually stable
+max_noise_norm: 2.0
+adaptive_noise_scaling: true     # Helps with complex editing prompts
+noise_scale_factor: 1.0
+
+# ───────────────────────────────────────────────────────────────
+# FBG TUNING (Instruction Following)
+# ───────────────────────────────────────────────────────────────
+fbg_sampler_mode: "PINGPONG"
+sigma_range_preset: "Custom"
+
+# Guidance Settings (Supports higher CFG than Lightning)
+cfg_scale: 4.0                   # Base CFG for edits
+cfg_start_sigma: 1.0
+cfg_end_sigma: 0.004
+
+# FBG Range
+fbg_start_sigma: 1.0
+fbg_end_sigma: 0.004
+
+# Power Settings
+max_guidance_scale: 2000.0
+initial_guidance_scale: 2.0      # Stronger start for editing
+fbg_guidance_multiplier: 10.0    # Reactive guidance
+guidance_max_change: 100.0
+
+# FBG Math (Balanced)
+pi: 0.45
+t_0: 0.5
+t_1: 0.5
+fbg_temp: 0.0
+fbg_offset: 0.0
+
+# ───────────────────────────────────────────────────────────────
+# POSTERIOR
+# ───────────────────────────────────────────────────────────────
+max_posterior_scale: 3.0
+log_posterior_initial_value: 0.0
+log_posterior_ema_factor: 0.8    # Standard smoothing
+
+# ───────────────────────────────────────────────────────────────
+# RESTARTS (Correction)
+# ───────────────────────────────────────────────────────────────
+enable_restarts: true
+restart_mode: "conservative"     # Safe defaults
+restart_noise_scale: 0.10
+restart_s_noise: 1.0
+restart_steps: ""
+
+# ───────────────────────────────────────────────────────────────
+# SYSTEM
+# ───────────────────────────────────────────────────────────────
+debug_mode: 1
+enable_profiling: true
+tensor_memory_optimization: true # Qwen is VRAM hungry

@@ -1,0 +1,15 @@
+[Genre: {Deep 140|Jazz-Step|Chillstep|Future Garage}]
+[BPM: {135|140|142} BPM (half-time feel), {Swung, shuffling garage beat|Laid-back, syncopated half-step|Deep sub-heavy groove}]
+
+[Instrumentation]
+The track is driven by a {massive, warm sine-wave sub-bass|rolling, jazzy low-end progression}.
+The drums are {crisp, Foley-layered percussion|swung hi-hats with woody, organic snares}.
+Bright {jazzy trumpet samples|intricate Foley textures (vinyl crackle, keys clinking)|syncopated woodblocks} accent the drop.
+Synths are {rich, complex Rhodes electric piano chords|warm, jazzy FM synthesis|lush, evolving atmospheric pads}.
+
+[Vocal Style]
+{Pitched-down, chopped R&B vocals|Ethereal, heavily reverbed sighs|Spoken-word jazz poetry samples|Minimal, ambient vocal textures}.
+Lyrics focus on {late-night introspection|soulful longing|instrumental atmosphere}.
+
+[Vibe]
+The atmosphere is {deep and meditative|smoky jazz club at 3 AM|introspective and chilled|bass-heavy and sophisticated}.

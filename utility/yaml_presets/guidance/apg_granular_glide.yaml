@@ -1,0 +1,111 @@
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ████ APG GUIDANCE: GRANULAR GLIDE (Chronological) █████████▓▒░
+# © 2025 MDMAchine
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ░▒▓ DESCRIPTION:
+#   A sophisticated multi-phase guidance strategy for APG Guider v1.4.2.
+#   It implements the "Heavy Construction -> Gentle Polish" workflow.
+#
+#   • Phase 0-1: Max Noise (High CFG/APG) -> Builds structure & Bass.
+#   • Phase 2-4: Mid Noise (Tapering) -> Refines details.
+#   • Phase 5-6: Low Noise (Low CFG) -> Scrubs static & hiss.
+#
+# ░▒▓ COMPATIBILITY:
+#   • Works best with 'sgm_uniform' (Linear) scheduler.
+#   • Designed for Audio Diffusion.
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+verbose: true # Show detailed rule matching in console
+
+# ───────────────────────────────────────────────────────────────
+# GUIDANCE RULES (Chronological Order)
+# ───────────────────────────────────────────────────────────────
+
+rules:
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # PHASE 0: BOOTSTRAP - Max Noise (All σ > 0.9)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # Catch-all for the very first step. High CFG, No APG interference.
+  - start_sigma: -1      # Catches all sigmas > 0.9
+    apg_scale: 0.0       # APG is OFF
+    cfg: 12.0            # Strong CFG for initial direction
+    predict_image: true
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # PHASE 1: EARLY STRUCTURE - Very High Noise (σ ≤ 0.9)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  - start_sigma: 0.9
+    apg_scale: 6.0       # Strongest APG application
+    cfg: 10.0            # CFG begins its descent
+    predict_image: true
+    pre_cfg_mode: false
+    update_mode: "DEFAULT"
+    update_blend_mode: "lerp"    # Smooth momentum blending
+    dims: [-1]                   # Normalize over frequency dimension
+    momentum: 0.8                # Positive momentum for stability
+    norm_threshold: 2.5          # Prevent extreme corrections
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # PHASE 2: MAIN GUIDANCE - High Noise (σ ≤ 0.6)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  - start_sigma: 0.6
+    apg_scale: 4.0       # Tapering APG strength
+    cfg: 7.0             # Tapering CFG strength
+    predict_image: true
+    pre_cfg_mode: false
+    update_mode: "DEFAULT"
+    update_blend_mode: "lerp"
+    dims: [-1]
+    momentum: 0.8
+    norm_threshold: 2.5
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # PHASE 3: MID-RANGE REFINEMENT - Medium Noise (σ ≤ 0.4)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  - start_sigma: 0.4
+    apg_scale: 3.5       # APG is now half its initial strength
+    cfg: 6.0             # CFG continues to soften
+    predict_image: true
+    pre_cfg_mode: false
+    update_mode: "DEFAULT"
+    update_blend_mode: "lerp"
+    dims: [-1]
+    momentum: 0.7
+    norm_threshold: 2.5
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # PHASE 4: LATE DETAIL - Low-Medium Noise (σ ≤ 0.25)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  - start_sigma: 0.25
+    apg_scale: 1.5       # Gentle guidance for details
+    cfg: 5.0             # Lower CFG
+    predict_image: true
+    pre_cfg_mode: false
+    update_mode: "DEFAULT"
+    update_blend_mode: "slerp"
+    dims: [-1]
+    momentum: 0.6
+    norm_threshold: 2.5
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # PHASE 5: FINE-TUNING - Low Noise (σ ≤ 0.1)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  - start_sigma: 0.1
+    apg_scale: 0.75      # APG is barely active
+    cfg: 4.0
+    predict_image: true
+    pre_cfg_mode: false
+    update_mode: "DEFAULT"
+    update_blend_mode: "slerp"
+    dims: [-1]
+    momentum: 0.6
+    norm_threshold: 2.5
+
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # PHASE 6: FINAL POLISH - Very Low Noise (σ ≤ 0.05)
+  # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # The "Static Killer" Phase. Very low CFG scrubs the hiss.
+  - start_sigma: 0.01
+    apg_scale: 0.0       # APG is fully OFF
+    cfg: 3.0             # Very low CFG for a clean, natural finish
+    predict_image: true

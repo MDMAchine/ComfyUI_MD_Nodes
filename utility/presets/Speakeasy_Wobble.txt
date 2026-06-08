@@ -1,0 +1,16 @@
+[Genre: {Speakeasy Wobble|Bootlegger Bass|Flapper Riddim|Tommy-Gun Trap}]
+[BPM: {140|145|150} BPM, {Half-time swagger|Syncopated Charleston swing|Heavy mobster stomp}]
+
+[Instrumentation]
+The track is driven by a {dirty, wobbling brass-section synth|slapping acoustic upright bass|distorted tuba sub}.
+The drums are {heavy vintage kick-drums|rhythmic tom-my gun stutters|syncopated washboard scrapes}.
+Weird {clinking giggle-water glasses|police whistle drops|old-timey camera flash pops} accent the beat.
+Synths are {crackling vinyl noise combined with modern bass growls|dissonant ragtime pianos|heavy jazz-club chords}.
+
+[Vocal Style]
+{Fast-talking 1920s mobster ("Lissen 'ere, see?")|Betty Boop-style squeak|Transatlantic radio announcer with heavy vinyl distortion}.
+Lyrics focus on {dodgin' the fuzz|drinkin' bootleg bathtub gin|doing the Charleston in a speakeasy|how the bass drop is "the cat's pajamas"}.
+
+[Vibe]
+The atmosphere is {black-and-white but bass-heavy|clandestine and chaotic|swinging but filthy}.
+Think Al Capone stepping into a Skrillex mosh pit.

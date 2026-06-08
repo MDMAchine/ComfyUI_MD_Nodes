@@ -1,0 +1,42 @@
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ████ ACE-STEP PRESET: LITE / RAW SPEED █████████████████▓▒░
+# © 2025 MDMAchine
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ░▒▓ DESCRIPTION:
+#   A stripped-down configuration for maximum speed and raw model testing.
+#   Disables FBG completely. Uses standard CFG and simple noise handling.
+#   Ideal for checking if a model works before applying heavy guidance.
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+# ──────────────────────────────────────────────────────────────────────────────
+# CORE SETTINGS
+# ──────────────────────────────────────────────────────────────────────────────
+step_random_mode: "block"
+step_size: 25
+seed: 0
+
+# Noise Behavior Presets (Internal to Lite Node logic)
+# Options: "Default (Raw)", "Dynamic", "Smooth", "Textured Grain", "Soft"
+noise_behavior: "Dynamic"        # Balanced starting point
+
+# Manual Overrides (if using Custom behavior logic)
+ancestral_strength: 1.0
+noise_coherence: 0.25
+
+# ──────────────────────────────────────────────────────────────────────────────
+# BLENDING
+# ──────────────────────────────────────────────────────────────────────────────
+blend_mode: "lerp"
+enable_clamp_output: false
+
+# ──────────────────────────────────────────────────────────────────────────────
+# RESTARTS
+# ──────────────────────────────────────────────────────────────────────────────
+enable_restarts: true
+restart_mode: "balanced"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# SYSTEM
+# ──────────────────────────────────────────────────────────────────────────────
+debug_mode: 1
+enable_profiling: false

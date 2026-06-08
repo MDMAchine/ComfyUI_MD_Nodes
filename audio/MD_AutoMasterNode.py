@@ -1,686 +1,769 @@
-# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-# ████ MD_Nodes/AudioAutoMasterPro – Iterative Mastering Chain v6.9.2 ████▓▒░
-# © 2025 MDMAchine
-# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-# ░▒▓ ORIGIN & DEV:
-#   • Cast into the void by: MDMAchine
-#   • Enhanced by: Gemini, Claude
-#   • License: Apache 2.0 — Sharing is caring
-
-# ░▒▓ DESCRIPTION:
-#   An all-in-one, iterative audio mastering node. It automatically analyzes
-#   and processes audio using a chain of filtering, iterative spectral EQ,
-#   de-essing, 3-band compression, stereo widening, and limiting.
-
-# ░▒▓ FEATURES:
-#   ✓ Hits a user-defined target_lufs (via Pyloudnorm).
-#   ✓ Iterative spectral EQ to tame harsh highs and muddy lows.
-#   ✓ 3-band multiband compressor with Linkwitz-Riley crossovers.
-#   ✓ Built-in de-esser, stereo widener, and brickwall limiter.
-#   ✓ 5+ mastering presets (Standard, Podcast, Aggressive, etc.).
-#   ✓ Returns detailed text log and before/after waveform images.
-
-# ░▒▓ CHANGELOG:
-#   - v6.9.2 (Final Polish - Nov 2025):
-#       • COMPLIANCE: Removed version number from runtime logs.
-#       • UX: Added comprehensive tooltips to all optional parameters.
-#       • REFACTOR: Extracted magic numbers to constants.
-#   - v6.9.1 (Critical Fix):
-#       • FIXED: Normalized SOS filter coefficients (a0=1.0).
-#       • FIXED: Error handler returns blank images instead of None.
-
-# ░▒▓ CONFIGURATION:
-#   → Primary Use: One-click "Standard" or "Podcast" profile mastering to -14 LUFS.
-#   → Edge Use: Disabling all modules to use as a "smart" normalizer.
-
-# ░▒▓ WARNING:
-#   This node may trigger:
-#   ▓▒░ A sudden, god-like complex after turning a muddy .wav into a -14 LUFS banger.
-#   ▓▒░ Compulsively checking the analysis log, whispering "just one more iteration."
-#   Consult your nearest demoscene vet if hallucinations persist.
-# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+# ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+# █▓▒░                                                                     ░▒▓█
+# █▓▒░         MD_Nodes/AudioAutoMasterPro – v6.32.0 (Enterprise)          ░▒▓█
+# █▓▒░                                                                     ░▒▓█
+# ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+# ╠═ © 2026 MDMAchine
+# ╠═ License: GNU General Public License v3.0 (GPL v3)
+# ║
+# ║  This program is free software: you can redistribute it and/or modify
+# ║  it under the terms of the GNU General Public License as published by
+# ║  the Free Software Foundation, either version 3 of the License, or
+# ║  (at your option) any later version.
+# ║
+# ║  This program is distributed in the hope that it will be useful,
+# ║  but WITHOUT ANY WARRANTY; without even the implied warranty of
+# ║  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# ║  GNU General Public License for more details.
+# ║
+# ║  You should have received a copy of the GNU General Public License
+# ║  along with this program. If not, see <https://www.gnu.org/licenses/>.
+# ╠════════════════════════════════════════════════════════════════════════════
+# ║ ░▒▓ DESCRIPTION:
+# ║   The ultimate AI-assisted mastering chain wrapper. Manages YAML loading,
+# ║   local Ollama vision/text analysis, and parameter resolution before handing
+# ║   execution off to the compiled DSP core.
+# ║   NOTE: This is a public wrapper. Missing binaries will gracefully pass 
+# ║   audio through unchanged.
+# ╚════════════════════════════════════════════════════════════════════════════
 
 
-# =================================================================================
-# == Standard Library Imports                                                     ==
-# =================================================================================
-import io
-import logging
-import traceback
+VERSION = "v6.32.0"  # UPS v1.5.8
 
-# =================================================================================
-# == Third-Party Imports                                                          ==
-# =================================================================================
-import torch
-import numpy as np
-import pyloudnorm as pln
-import librosa
-from scipy import signal
-from scipy.signal import lfilter, sosfilt
-from pedalboard import Pedalboard, Compressor, Limiter, Gain
-import matplotlib as mpl
-# CRITICAL: Set non-interactive backend BEFORE importing pyplot
-mpl.use('Agg')
-import matplotlib.pyplot as plt
+import io, os, sys, json, time, logging, requests, yaml, base64
+import torch, numpy as np
 from PIL import Image
 
 # =================================================================================
-# == Constants                                                                    ==
+# == Dependency Fallback Pattern
 # =================================================================================
 
-# Magic Numbers
-MAX_SAMPLES_PLOT = 150000
-LIMITER_RELEASE_MS = 5.0
-CLIPPING_THRESHOLD = 0.99
+import logging
+try:
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    MATPLOTLIB_AVAILABLE = True
+except ImportError:
+    MATPLOTLIB_AVAILABLE = False
+
+try:
+    import librosa
+    LIBROSA_AVAILABLE = True
+except ImportError:
+    LIBROSA_AVAILABLE = False
+
+try:
+    import pyloudnorm as pln
+    PYLOUDNORM_AVAILABLE = True
+except ImportError:
+    PYLOUDNORM_AVAILABLE = False
+
+# =================================================================================
+# == MD_Nodes Universal Binary Loader (v1.6.1)
+# =================================================================================
+
+def find_core_paths():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    candidates = []
+    candidates.append(os.path.abspath(os.path.join(current_dir, "core")))
+    candidates.append(os.path.abspath(os.path.join(current_dir, "..", "core")))
+    candidates.append(os.path.abspath(os.path.join(current_dir, "..", "..", "core")))
+    
+    pointer = current_dir
+    root_found = None
+    for _ in range(4):
+        if os.path.basename(pointer) == "ComfyUI_MD_Nodes":
+            root_found = pointer
+            break
+        parent = os.path.dirname(pointer)
+        if parent == pointer: break
+        pointer = parent
+    
+    if root_found: candidates.append(os.path.join(root_found, "core"))
+    return list(dict.fromkeys(candidates))
+
+CORE_LOCATIONS = find_core_paths()
+AM_CORE_LOADED = False
+AM_CORE_MODE = None
+AM_CORE_ERROR = None
+
+for loc in CORE_LOCATIONS:
+    if loc not in sys.path: sys.path.insert(0, loc)
+
+try:
+    import automaster_core_bin as am_core
+    AM_CORE_LOADED = True
+    AM_CORE_MODE = "Binary (Production)"
+except ImportError as e1:
+    try:
+        import automaster_core as am_core
+        AM_CORE_LOADED = True
+        AM_CORE_MODE = "Source (Development)"
+    except ImportError as e2:
+        AM_CORE_ERROR = f"Binary: {e1} | Source: {e2}"
+
+# =================================================================================
+# == Configuration Constants
+# =================================================================================
+
+logger = logging.getLogger("MD_Nodes.Audio.AutoMaster")
+CONST_MAX_SAMPLES_PLOT = 150000
+CONST_WAVEFORM_COLOR = '#87CEEB'
+CONST_PEAK_COLOR = 'orangered'
+CONST_BACKGROUND_COLOR = '#1e1e1e'
+CONST_PLOT_DPI = 100
 
 MASTERING_PROFILES = {
-    "Standard": {
-        "hp": 30, "lp": 0, "eq": True, "bass": 1.5, "high": 0.4, "adapt": True,
-        "deess": True, "deess_db": -10.0, "mbc": True,
-        "x_low": 300, "x_high": 3000, "x_order": 8,
-        "mbc_L": (-18.0, 2.0), "mbc_M": (-18.0, 2.0), "mbc_H": (-18.0, 2.0),
-        "lim": True, "lim_db": -0.1, "width": 1.0
-    },
-    "Aggressive": {
-        "hp": 40, "lp": 0, "eq": True, "bass": 1.2, "high": 0.3, "adapt": True,
-        "deess": True, "deess_db": -12.0, "mbc": True,
-        "x_low": 250, "x_high": 2500, "x_order": 10,
-        "mbc_L": (-20.0, 3.0), "mbc_M": (-20.0, 3.0), "mbc_H": (-19.0, 2.5),
-        "lim": True, "lim_db": -0.1, "width": 1.1
-    },
-    "Podcast (Clarity)": {
-        "hp": 80, "lp": 16000, "eq": True, "bass": 2.0, "high": 0.5, "adapt": True,
-        "deess": True, "deess_db": -15.0, "mbc": True,
-        "x_low": 400, "x_high": 3500, "x_order": 6,
-        "mbc_L": (-16.0, 2.5), "mbc_M": (-18.0, 3.0), "mbc_H": (-18.0, 2.0),
-        "lim": True, "lim_db": -1.0, "width": 0.8
-    },
-    "Gentle (Tame)": {
-        "hp": 20, "lp": 0, "eq": True, "bass": 2.0, "high": 0.6, "adapt": True,
-        "deess": False, "deess_db": 0.0, "mbc": True,
-        "x_low": 300, "x_high": 3000, "x_order": 8,
-        "mbc_L": (-16.0, 1.8), "mbc_M": (-17.0, 1.8), "mbc_H": (-17.0, 1.5),
-        "lim": True, "lim_db": -0.5, "width": 1.0
-    },
-    "Mastering (Transparent)": {
-        "hp": 20, "lp": 0, "eq": True, "bass": 1.8, "high": 0.5, "adapt": True,
-        "deess": True, "deess_db": -12.0, "mbc": True,
-        "x_low": 200, "x_high": 4000, "x_order": 8,
-        "mbc_L": (-15.0, 1.5), "mbc_M": (-16.0, 1.5), "mbc_H": (-16.0, 1.4),
-        "lim": True, "lim_db": -0.3, "width": 1.0
-    }
+    "Custom": {"desc": "Manual parameter control", "hp": 0, "lp": 0, "eq": True, "bass": 9.5, "high": 5.5, "adapt": True, "deess": True, "deess_db": -10.0, "mbc": True, "x_low": 300, "x_high": 3000, "x_order": 8, "mbc_L_t": -24.0, "mbc_L_r": 2.5, "mbc_M_t": -22.0, "mbc_M_r": 2.5, "mbc_H_t": -20.0, "mbc_H_r": 2.0, "lim": True, "lim_db": -0.1, "width": 1.0, "tilt": 0.0, "tamer": 0.0, "mud": 0.0, "thump": 0.0, "exciter": 0.0},
+    "Standard": {"desc": "Balanced all-purpose mastering", "hp": 30, "lp": 0, "eq": True, "bass": 9.5, "high": 5.5, "adapt": True, "deess": True, "deess_db": -10.0, "mbc": True, "x_low": 250, "x_high": 3000, "x_order": 8, "mbc_L_t": -24.0, "mbc_L_r": 2.5, "mbc_M_t": -22.0, "mbc_M_r": 2.5, "mbc_H_t": -20.0, "mbc_H_r": 2.0, "lim": True, "lim_db": -0.1, "width": 1.0, "tilt": 0.0, "tamer": 0.0, "mud": 0.0, "thump": 0.0, "exciter": 0.0},
+    "Diffusion Repair (Clean)": {"desc": "Surgical AI cleanup", "hp": 35, "lp": 18500, "eq": True, "bass": 8.5, "high": 5.0, "adapt": True, "deess": True, "deess_db": -15.0, "mbc": True, "x_low": 200, "x_high": 3500, "x_order": 8, "mbc_L_t": -28.0, "mbc_L_r": 3.0, "mbc_M_t": -26.0, "mbc_M_r": 3.5, "mbc_H_t": -22.0, "mbc_H_r": 2.0, "lim": True, "lim_db": -0.2, "width": 0.85, "tilt": -0.5, "tamer": 1.0, "mud": -7.5, "thump": 5.5, "exciter": 0.1},
+    "Aggressive": {"desc": "Heavy compression", "hp": 40, "lp": 0, "eq": True, "bass": 8.5, "high": 4.5, "adapt": True, "deess": True, "deess_db": -12.0, "mbc": True, "x_low": 250, "x_high": 2800, "x_order": 10, "mbc_L_t": -22.0, "mbc_L_r": 3.5, "mbc_M_t": -20.0, "mbc_M_r": 3.5, "mbc_H_t": -18.0, "mbc_H_r": 3.0, "lim": True, "lim_db": -0.1, "width": 1.1, "tilt": 0.0, "tamer": 0.0, "mud": 0.0, "thump": 0.0, "exciter": 0.2},
+    "Podcast (Clarity)": {"desc": "Voice-optimized", "hp": 80, "lp": 16000, "eq": True, "bass": 7.5, "high": 6.0, "adapt": True, "deess": True, "deess_db": -15.0, "mbc": True, "x_low": 400, "x_high": 3500, "x_order": 6, "mbc_L_t": -28.0, "mbc_L_r": 2.0, "mbc_M_t": -20.0, "mbc_M_r": 3.5, "mbc_H_t": -18.0, "mbc_H_r": 2.5, "lim": True, "lim_db": -1.0, "width": 0.8, "tilt": 0.0, "tamer": 0.0, "mud": 0.0, "thump": 0.0, "exciter": 0.0},
+    "Gentle (Tame)": {"desc": "Minimal processing", "hp": 20, "lp": 0, "eq": True, "bass": 10.5, "high": 6.5, "adapt": True, "deess": False, "deess_db": 0.0, "mbc": True, "x_low": 300, "x_high": 3000, "x_order": 8, "mbc_L_t": -28.0, "mbc_L_r": 1.8, "mbc_M_t": -26.0, "mbc_M_r": 1.8, "mbc_H_t": -24.0, "mbc_H_r": 1.5, "lim": True, "lim_db": -0.5, "width": 1.0, "tilt": 0.0, "tamer": 0.0, "mud": 0.0, "thump": 0.0, "exciter": 0.0},
+    "Mastering (Transparent)": {"desc": "Subtle enhancement", "hp": 20, "lp": 0, "eq": True, "bass": 9.0, "high": 5.0, "adapt": True, "deess": True, "deess_db": -12.0, "mbc": True, "x_low": 200, "x_high": 3800, "x_order": 8, "mbc_L_t": -26.0, "mbc_L_r": 2.0, "mbc_M_t": -24.0, "mbc_M_r": 2.0, "mbc_H_t": -22.0, "mbc_H_r": 1.8, "lim": True, "lim_db": -0.3, "width": 1.0, "tilt": 0.0, "tamer": 0.0, "mud": 0.0, "thump": 0.0, "exciter": 0.0},
+    "Full Bass (Electronic)": {"desc": "Maximum low-end", "hp": 25, "lp": 0, "eq": True, "bass": 11.5, "high": 7.0, "adapt": True, "deess": True, "deess_db": -8.0, "mbc": True, "x_low": 200, "x_high": 2800, "x_order": 8, "mbc_L_t": -26.0, "mbc_L_r": 2.8, "mbc_M_t": -22.0, "mbc_M_r": 2.5, "mbc_H_t": -20.0, "mbc_H_r": 2.2, "lim": True, "lim_db": -0.1, "width": 1.15, "tilt": 0.0, "tamer": 0.0, "mud": 0.0, "thump": 0.0, "exciter": 0.15}
 }
 
 # =================================================================================
-# == Core Node Class                                                              ==
+# == Performance Profiler
+# =================================================================================
+
+class PerformanceProfiler:
+    """Standard performance profiler for MD_Nodes."""
+    def __init__(self, enabled=True):
+        self.enabled = enabled
+        self.timings = {}
+        self.start_times = {}
+    
+    def start(self, op):
+        if not self.enabled: return
+        self.start_times[op] = time.perf_counter()
+    
+    def stop(self, op):
+        if not self.enabled: return
+        if op in self.start_times:
+            elapsed = time.perf_counter() - self.start_times[op]
+            self.timings.setdefault(op, []).append(elapsed)
+            del self.start_times[op]
+    
+    def print_report(self):
+        if not self.enabled or not self.timings: return
+        logging.info("\n⏱️  PERFORMANCE (AI/DSP):")
+        total = sum(sum(times) for times in self.timings.values())
+        logging.info(f"    • Total Time: {total:.4f}s")
+        for op, times in sorted(self.timings.items()):
+            logging.info(f"    • {op}: {sum(times)/len(times):.4f}s avg")
+
+# =================================================================================
+# == Main Wrapper Class
 # =================================================================================
 
 class MD_AutoMasterNode:
     """
-    Audio Auto Master Pro (MD_AutoMasterNode)
-    An all-in-one, iterative audio mastering node.
+    MD Audio Auto Master Pro v6.32.0 (Enterprise)
+    Wrapper with Unified Parameter Resolution and AI Co-Pilot.
     """
     
     def __init__(self):
         self.analysis_log = []
+        self.log_verbosity = "0 - Silent"
 
     @classmethod
     def INPUT_TYPES(cls):
+        profile_options = ["Custom", "Auto-Detect Genre", "AI Co-Pilot (Ollama)"] + \
+                          [f"{n} - {MASTERING_PROFILES[n]['desc']}" for n in MASTERING_PROFILES.keys() if n != "Custom"]
+        
         return {
             "required": {
-                "audio": ("AUDIO", {"tooltip": "AUDIO INPUT\n- The audio data to process."}),
-                "target_lufs": ("FLOAT", {
-                    "default": -14.0, "min": -24.0, "max": -6.0, "step": 0.1,
-                    "tooltip": "TARGET LOUDNESS (LUFS)\n- -14.0 LUFS is standard for streaming."
+                "audio": ("AUDIO", {
+                    "tooltip": (
+                        "AUDIO INPUT\n"
+                        "• Purpose: Unprocessed audio waveform to master.\n"
+                        "• Requirement: Standard ComfyUI AUDIO dict."
+                    )
                 }),
-                "profile": (["Custom"] + list(MASTERING_PROFILES.keys()), {
-                    "default": "Standard",
-                    "tooltip": "MASTERING PROFILE\n- Select a preset to auto-configure all parameters."
+                "target_lufs": ("FLOAT", {
+                    "default": -14.0, "min": -30.0, "max": -6.0, "step": 0.1,
+                    "tooltip": (
+                        "TARGET LOUDNESS\n"
+                        "• Purpose: The final perceived loudness target (LUFS).\n"
+                        "• Options: -14.0 (Streaming), -23.0 (Broadcast).\n"
+                        "\n⭐ Recommended: -14.0"
+                    )
+                }),
+                "profile": (profile_options, {
+                    "default": "Standard - Balanced all-purpose mastering",
+                    "tooltip": (
+                        "MASTERING PROFILE\n"
+                        "• Purpose: Automatically sets dozens of DSP parameters.\n"
+                        "• Options: 'Standard', 'Diffusion Repair' (fixes AI noise), 'Podcast'.\n"
+                        "\n⭐ Recommended: 'Diffusion Repair' for raw audio generation outputs."
+                    )
                 }),
             },
             "optional": {
-                "input_gain_db": ("FLOAT", {
-                    "default": 0.0, "min": -12.0, "max": 12.0, "step": 0.1, 
-                    "tooltip": "INPUT GAIN (dB)\n- Pre-processing gain adjustment."
+                # --- Intelligence & Output ---
+                "output_mode": (["Mastered Audio", "Delta (Difference)"], {
+                    "default": "Mastered Audio",
+                    "tooltip": (
+                        "OUTPUT MODE\n"
+                        "• Purpose: Defines what audio is sent to the output node.\n"
+                        "• Options: 'Mastered' (Final result) or 'Delta' (Only what was changed).\n"
+                        "\n⭐ Recommended: Mastered Audio."
+                    )
                 }),
+                "enable_ai_helper": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": (
+                        "AI CO-PILOT\n"
+                        "• Purpose: Queries a local Ollama LLM to fine-tune EQ based on analysis.\n"
+                        "• Requirement: Ollama must be running locally.\n"
+                        "\n⭐ Recommended: True for experimental/creative runs."
+                    )
+                }),
+                "genre_hint": ("STRING", {
+                    "default": "",
+                    "tooltip": "GENRE HINT\n• Purpose: Text clue to help the AI Co-Pilot make better EQ decisions."
+                }),
+                "ollama_url": ("STRING", {
+                    "default": "http://localhost:11434",
+                    "tooltip": "OLLAMA URL\n• Purpose: Endpoint for the local LLM API."
+                }),
+                "ollama_model": ("STRING", {
+                    "default": "qwen2.5:14b",
+                    "tooltip": "AI MODEL\n• Purpose: Model used for Co-Pilot reasoning."
+                }),
+                "debug_mode": (["0 - Silent", "1 - Info", "2 - Verbose"], {
+                    "default": "1 - Info",
+                    "tooltip": "LOGGING VERBOSITY\n• Controls console logging and AI explanation detail."
+                }),
+                "enable_profiling": ("BOOLEAN", {
+                    "default": False,
+                    "tooltip": "ENABLE PROFILING\n• Track execution time of LLM vs DSP stages."
+                }),
+                "yaml_config": ("STRING", {
+                    "default": "", "multiline": True,
+                    "tooltip": "YAML CONFIG\n• Purpose: Paste exported settings here to override all GUI controls."
+                }),
+                "export_yaml": ("BOOLEAN", {
+                    "default": False,
+                    "tooltip": "EXPORT YAML\n• Purpose: Outputs the final computed settings as YAML text for saving."
+                }),
+                
+                # --- DSP Parameters (Calibrated Steps for Sensitivity) ---
+                "input_gain_db": ("FLOAT", {
+                    "default": 0.0, "min": -36.0, "max": 36.0, "step": 0.1,
+                    "tooltip": "INPUT GAIN (dB)\n• Pre-processing volume adjustment."
+                }),
+                "spectral_tilt": ("FLOAT", {
+                    "default": 0.0, "min": -12.0, "max": 12.0, "step": 0.01,
+                    "tooltip": "SPECTRAL TILT\n• Extremely sensitive macro EQ.\n• +0.05 = Brighter, -0.05 = Warmer."
+                }),
+                "vocal_tamer_strength": ("FLOAT", {
+                    "default": 0.0, "min": 0.0, "max": 2.0, "step": 0.05,
+                    "tooltip": "VOCAL TAMER\n• Purpose: Dynamically cuts harsh 1-3kHz resonances common in AI voices."
+                }),
+                "harmonic_exciter_drive": ("FLOAT", {
+                    "default": 0.0, "min": 0.0, "max": 2.0, "step": 0.01,
+                    "tooltip": "HARMONIC EXCITER\n• Purpose: Tube-style saturation for warmth. Use sparingly (0.05 - 0.20)."
+                }),
+                "fix_sub_mud_db": ("FLOAT", {
+                    "default": 0.0, "min": -36.0, "max": 0.0, "step": 0.5,
+                    "tooltip": "FIX SUB MUD\n• Purpose: Low shelf cut (75Hz) to remove boominess."
+                }),
+                "fix_kick_thump_db": ("FLOAT", {
+                    "default": 0.0, "min": 0.0, "max": 12.0, "step": 0.5,
+                    "tooltip": "FIX KICK THUMP\n• Purpose: Targeted narrow boost (90Hz) to restore punch."
+                }),
+                
+                # --- Filters & EQ ---
                 "highpass_freq": ("FLOAT", {
-                    "default": 0, "min": 0, "max": 500, "step": 1, 
-                    "tooltip": "HIGH-PASS FILTER (Hz)\n- Cuts sub-bass rumble.\n- 30-40Hz is typical."
+                    "default": 0, "min": 0, "max": 1000, "step": 5,
+                    "tooltip": "HIGHPASS FILTER\n• Cut frequencies below this point (Hz)."
                 }),
                 "lowpass_freq": ("FLOAT", {
-                    "default": 0, "min": 0, "max": 20000, "step": 100, 
-                    "tooltip": "LOW-PASS FILTER (Hz)\n- Cuts ultra-high hiss.\n- 18kHz+ is typical."
+                    "default": 0, "min": 0, "max": 22000, "step": 100,
+                    "tooltip": "LOWPASS FILTER\n• Cut frequencies above this point (Hz)."
                 }),
-                "do_eq": ("BOOLEAN", {"default": True, "label_on": "Run Iterative EQ", "label_off": "Skip EQ"}),
+                "do_eq": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": "ENABLE ADAPTIVE EQ\n• Auto-balance the spectrum to targets using Librosa FFT analysis."
+                }),
                 "eq_bass_target": ("FLOAT", {
-                    "default": 1.5, "min": 0.0, "max": 30.0, "step": 0.1, 
-                    "tooltip": "EQ BASS TARGET\n- Lower = Tighter bass.\n- Higher = Fuller bass."
+                    "default": 9.5, "min": 0.0, "max": 20.0, "step": 0.1,
+                    "tooltip": "EQ BASS TARGET\n• Desired low-end energy distribution."
                 }),
                 "eq_high_target": ("FLOAT", {
-                    "default": 0.4, "min": 0.0, "max": 30.0, "step": 0.01, 
-                    "tooltip": "EQ HIGH TARGET\n- Lower = Darker.\n- Higher = Brighter/Airy."
+                    "default": 5.5, "min": 0.0, "max": 20.0, "step": 0.1,
+                    "tooltip": "EQ HIGH TARGET\n• Desired high-end energy distribution."
                 }),
-                "eq_adaptive": ("BOOLEAN", {"default": True, "tooltip": "ADAPTIVE EQ\n- Dynamically scales EQ cuts based on analysis."}),
-                "do_deess": ("BOOLEAN", {"default": True, "label_on": "Run De-Esser", "label_off": "Skip De-Esser"}),
-                "deess_amount_db": ("FLOAT", {"default": -10.0, "min": -40.0, "max": 0.0, "step": 0.5}),
-                "do_mbc": ("BOOLEAN", {"default": True, "label_on": "Run Single-Pass MBC", "label_off": "Skip MBC"}),
-                
-                # MBC Params - Added Tooltips
-                "mbc_crossover_low": ("FLOAT", {
-                    "default": 300, "min": 100, "max": 1000, "step": 10,
-                    "tooltip": "MBC CROSSOVER LOW (Hz)\n- Split point between Low and Mid bands."
-                }),
-                "mbc_crossover_high": ("FLOAT", {
-                    "default": 3000, "min": 1000, "max": 8000, "step": 100,
-                    "tooltip": "MBC CROSSOVER HIGH (Hz)\n- Split point between Mid and High bands."
-                }),
-                "mbc_crossover_order": ("INT", {
-                    "default": 8, "min": 4, "max": 12, "step": 2,
-                    "tooltip": "MBC CROSSOVER ORDER\n- Filter steepness. Higher = sharper separation."
-                }),
-                "mbc_low_thresh_db": ("FLOAT", {"default": -18.0, "min": -60.0, "max": 0.0, "step": 0.5, "tooltip": "Low Band Threshold"}),
-                "mbc_low_ratio": ("FLOAT", {"default": 2.0, "min": 1.0, "max": 20.0, "step": 0.1, "tooltip": "Low Band Ratio"}),
-                "mbc_mid_thresh_db": ("FLOAT", {"default": -18.0, "min": -60.0, "max": 0.0, "step": 0.5, "tooltip": "Mid Band Threshold"}),
-                "mbc_mid_ratio": ("FLOAT", {"default": 2.0, "min": 1.0, "max": 20.0, "step": 0.1, "tooltip": "Mid Band Ratio"}),
-                "mbc_high_thresh_db": ("FLOAT", {"default": -18.0, "min": -60.0, "max": 0.0, "step": 0.5, "tooltip": "High Band Threshold"}),
-                "mbc_high_ratio": ("FLOAT", {"default": 2.0, "min": 1.0, "max": 20.0, "step": 0.1, "tooltip": "High Band Ratio"}),
-                
-                "do_limiter": ("BOOLEAN", {"default": True, "label_on": "Run Final Limiter", "label_off": "Skip Limiter"}),
-                "limiter_threshold_db": ("FLOAT", {
-                    "default": -0.1, "min": -3.0, "max": 0.0, "step": 0.1,
-                    "tooltip": "LIMITER CEILING (dB)\n- Final brickwall limit."
-                }),
-                "stereo_width": ("FLOAT", {
-                    "default": 1.0, "min": 0.0, "max": 2.0, "step": 0.05,
-                    "tooltip": "STEREO WIDTH\n- 1.0 = Normal, <1.0 = Narrower, >1.0 = Wider."
+                "eq_adaptive": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": "ADAPTIVE MODE\n• Dynamically scale EQ adjustments based on input deviation."
                 }),
                 "max_iterations_eq": ("INT", {
                     "default": 5, "min": 1, "max": 20,
-                    "tooltip": "EQ ITERATIONS\n- Max passes for the auto-EQ loop."
+                    "tooltip": "EQ ITERATIONS\n• How many analysis/adjustment passes to reach perfect balance."
+                }),
+                
+                # --- Dynamics ---
+                "do_deess": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": "ENABLE DE-ESSER\n• Dynamically reduces harsh 'S' sounds in the 7kHz range."
+                }),
+                "deess_amount_db": ("FLOAT", {
+                    "default": -10.0, "min": -60.0, "max": 0.0, "step": 0.5,
+                    "tooltip": "DE-ESS AMOUNT (dB)\n• Maximum intensity of sibilance reduction."
+                }),
+                "do_mbc": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": "ENABLE MULTIBAND COMPRESSOR\n• Enables independent 3-Band dynamics processing."
+                }),
+                "mbc_crossover_low": ("FLOAT", {
+                    "default": 300, "min": 40, "max": 1000, "step": 10,
+                    "tooltip": "MBC CROSSOVER LOW\n• Frequency split point between Bass and Mids."
+                }),
+                "mbc_crossover_high": ("FLOAT", {
+                    "default": 3000, "min": 1000, "max": 16000, "step": 100,
+                    "tooltip": "MBC CROSSOVER HIGH\n• Frequency split point between Mids and Highs."
+                }),
+                "mbc_crossover_order": ("INT", {
+                    "default": 8, "min": 2, "max": 8, "step": 2,
+                    "tooltip": "CROSSOVER SLOPE\n• Higher numbers create sharper frequency separation."
+                }),
+                
+                # MBC Thresholds & Ratios
+                "mbc_low_thresh_db": ("FLOAT", {
+                    "default": -24.0, "min": -60.0, "max": 0.0, "step": 0.5,
+                    "tooltip": "LOW BAND THRESHOLD\n• Level at which bass compression engages."
+                }),
+                "mbc_low_ratio": ("FLOAT", {
+                    "default": 2.5, "min": 1.0, "max": 20.0, "step": 0.1,
+                    "tooltip": "LOW BAND RATIO\n• Severity of bass compression."
+                }),
+                "mbc_mid_thresh_db": ("FLOAT", {
+                    "default": -22.0, "min": -60.0, "max": 0.0, "step": 0.5,
+                    "tooltip": "MID BAND THRESHOLD\n• Level at which mid compression engages."
+                }),
+                "mbc_mid_ratio": ("FLOAT", {
+                    "default": 2.5, "min": 1.0, "max": 20.0, "step": 0.1,
+                    "tooltip": "MID BAND RATIO\n• Severity of mid compression."
+                }),
+                "mbc_high_thresh_db": ("FLOAT", {
+                    "default": -20.0, "min": -60.0, "max": 0.0, "step": 0.5,
+                    "tooltip": "HIGH BAND THRESHOLD\n• Level at which treble compression engages."
+                }),
+                "mbc_high_ratio": ("FLOAT", {
+                    "default": 2.0, "min": 1.0, "max": 20.0, "step": 0.1,
+                    "tooltip": "HIGH BAND RATIO\n• Severity of treble compression."
+                }),
+                
+                # --- Finalize ---
+                "do_limiter": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": "ENABLE LIMITER\n• Engages the final brickwall lookahead limiter to prevent clipping."
+                }),
+                "limiter_threshold_db": ("FLOAT", {
+                    "default": -1.0, "min": -24.0, "max": 0.0, "step": 0.1,
+                    "tooltip": "LIMITER CEILING\n• Maximum allowed True Peak level (-1.0 is standard safety margin)."
+                }),
+                "soft_clip_drive": ("FLOAT", {
+                    "default": 1.0, "min": 0.8, "max": 1.5, "step": 0.05,
+                    "tooltip": "SOFT CLIP DRIVE\n• Pre-limiter saturation gain. Higher = Louder/Dirtier, Lower = Clean."
+                }),
+                "stereo_width": ("FLOAT", {
+                    "default": 1.0, "min": 0.0, "max": 2.5, "step": 0.05,
+                    "tooltip": "STEREO WIDTH\n• 1.0 = Original, >1.0 = Wider (Haas effect), <1.0 = Narrower."
                 }),
                 "fast_mode": ("BOOLEAN", {
                     "default": False,
-                    "tooltip": "FAST MODE\n- Skips intermediate normalization steps."
+                    "tooltip": "FAST MODE\n• Skips intermediate LUFS normalization passes for a speed boost."
+                }),
+                "skip_initial_analysis": ("BOOLEAN", {
+                    "default": False,
+                    "tooltip": "SKIP PRE-ANALYSIS\n• Skips initial chart generation to save time."
                 }),
                 "mix": ("FLOAT", {
                     "default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "DRY/WET MIX\n- Blend original signal (0.0) with mastered signal (1.0)."
+                    "tooltip": "GLOBAL MIX\n• Final Dry/Wet blend parameter (1.0 = 100% Processed)."
                 }),
             }
         }
 
-    RETURN_TYPES = ("AUDIO", "STRING", "IMAGE", "IMAGE")
-    RETURN_NAMES = ("audio", "analysis_details", "waveform_before", "waveform_after")
+    RETURN_TYPES = ("AUDIO", "STRING", "STRING", "IMAGE", "IMAGE", "IMAGE", "IMAGE", "IMAGE")
+    RETURN_NAMES = ("audio", "analysis_details", "yaml_config", "waveform_before", "waveform_after", "spectrum_plot", "dynamics_plot", "lufs_history_plot")
     FUNCTION = "master_audio"
-    CATEGORY = "MD_Nodes/Audio"
+    CATEGORY = "MD_Nodes/Audio Processing"
+    OUTPUT_NODE = True
 
-    # --- Helper Methods ---
+    def _log(self, message):
+        self.analysis_log.append(message)
+        if int(self.log_verbosity.split(" ")[0]) >= 1: logger.info(message)
 
-    def _normalize(self, audio, sr, meter_obj, target):
-        loudness = meter_obj.integrated_loudness(audio)
-        if loudness == -float('inf'):
-            self.analysis_log.append(f"⚠️ Skipped normalization (silence)")
-            return audio, -float('inf')
-        normalized_audio = pln.normalize.loudness(audio, loudness, target)
-        self.analysis_log.append(f"🎚️ Normalized to {target} LUFS (was {loudness:.2f} LUFS)")
-        return normalized_audio, loudness
-    
-    def _check_for_clipping(self, audio, stage_name):
-        if isinstance(audio, torch.Tensor):
-            audio_np = audio.cpu().numpy()
-        else:
-            audio_np = audio
-
-        if isinstance(audio_np, np.ndarray) and audio_np.size > 0:
-            clips = np.sum(np.abs(audio_np) > CLIPPING_THRESHOLD)
-            peak = np.max(np.abs(audio_np))
-            if clips > 0:
-                self.analysis_log.append(f"⚠️ WARNING: {clips} samples clipped after {stage_name} (peak: {peak:.3f})")
-        else:
-            self.analysis_log.append(f"⚠️ Skipping clipping check after {stage_name}: Invalid audio data")
-
-
-    def _analyze(self, audio, sr, meter_obj):
-        analysis_channel = audio[:, 0] if audio.ndim > 1 else audio
-        if analysis_channel.size == 0:
-            return {"bass": np.nan, "high": np.nan}
-
-        stft = np.abs(librosa.stft(analysis_channel))
-        freqs = librosa.fft_frequencies(sr=sr, n_fft=stft.shape[0]*2-2)
-        
-        bass_mask = freqs < 100
-        high_mask = freqs > 10000
-        
-        bass_energy = np.mean(stft[bass_mask]) if np.any(bass_mask) else 0.0
-        high_energy = np.mean(stft[high_mask]) if np.any(high_mask) else 0.0
-        
-        self.analysis_log.append(f"📊 Analysis: Bass={bass_energy:.2f}, Highs={high_energy:.2f}")
-        return {"bass": bass_energy, "high": high_energy}
-
-
-    def _apply_filters(self, audio, sr, highpass_freq, lowpass_freq):
-        try:
-            if highpass_freq > 0:
-                if highpass_freq >= sr / 2:
-                    self.analysis_log.append(f"⚠️ Highpass freq {highpass_freq}Hz >= Nyquist ({sr/2}Hz). Skipping.")
-                else:
-                    sos = signal.butter(4, highpass_freq, btype='highpass', fs=sr, output='sos')
-                    audio = signal.sosfiltfilt(sos, audio, axis=0)
-                    self.analysis_log.append(f"🔊 Applied highpass filter @ {highpass_freq} Hz")
+    def _resolve_all_parameters(self, kwargs, profile_dict):
+        def resolve(kw_n, p_k_list, d):
+            u_v = kwargs.get(kw_n, d)
+            if u_v != d: return u_v
             
-            if lowpass_freq > 0 and lowpass_freq < sr / 2:
-                sos = signal.butter(4, lowpass_freq, btype='lowpass', fs=sr, output='sos')
-                audio = signal.sosfiltfilt(sos, audio, axis=0)
-                self.analysis_log.append(f"🔉 Applied lowpass filter @ {lowpass_freq} Hz")
-            elif lowpass_freq >= sr / 2:
-                self.analysis_log.append(f"⚠️ Lowpass freq {lowpass_freq}Hz >= Nyquist ({sr/2}Hz). Skipping.")
-
-        except ValueError as e:
-            self.analysis_log.append(f"❌ Error applying filters: {e}")
-            raise ValueError(f"Filter design failed: {e}")
+            if not isinstance(p_k_list, list): p_k_list = [p_k_list]
+            for key in p_k_list:
+                if key in profile_dict: return profile_dict[key]
+            return d
         
-        return audio
+        p = {}
+        p['profile_name'] = kwargs.get('profile', 'Custom')
+        p['target_lufs'] = resolve('target_lufs', 'target_lufs', -14.0)
+        
+        p['hp'] = resolve('highpass_freq', 'hp', 0)
+        p['lp'] = resolve('lowpass_freq', 'lp', 0)
+        p['tilt'] = resolve('spectral_tilt', 'tilt', 0.0)
+        p['tamer'] = resolve('vocal_tamer_strength', 'tamer', 0.0)
+        p['mud'] = resolve('fix_sub_mud_db', 'mud', 0.0)
+        p['thump'] = resolve('fix_kick_thump_db', 'thump', 0.0)
+        p['exciter'] = resolve('harmonic_exciter_drive', 'exciter', 0.0)
+        
+        p['do_eq'] = resolve('do_eq', 'do_eq', True)
+        p['eq_bass'] = resolve('eq_bass_target', ['eq_bass', 'bass'], 9.5)
+        p['eq_high'] = resolve('eq_high_target', ['eq_high', 'high'], 5.5)
+        p['eq_adaptive'] = profile_dict.get('adapt', True) 
+        p['max_iterations_eq'] = resolve('max_iterations_eq', 'max_iterations_eq', 5)
+        
+        p['do_mbc'] = resolve('do_mbc', 'do_mbc', True)
+        p['x_low'] = resolve('mbc_crossover_low', 'x_low', 300)
+        p['x_high'] = resolve('mbc_crossover_high', 'x_high', 3000)
+        p['x_order'] = resolve('mbc_crossover_order', 'x_order', 8)
+        
+        p['mbc_low_thresh'] = resolve('mbc_low_thresh_db', ['mbc_low_thresh', 'mbc_L_t'], -24.0)
+        p['mbc_low_ratio'] = resolve('mbc_low_ratio', ['mbc_low_ratio', 'mbc_L_r'], 2.5)
+        p['mbc_mid_thresh'] = resolve('mbc_mid_thresh_db', ['mbc_mid_thresh', 'mbc_M_t'], -22.0)
+        p['mbc_mid_ratio'] = resolve('mbc_mid_ratio', ['mbc_mid_ratio', 'mbc_M_r'], 2.5)
+        p['mbc_high_thresh'] = resolve('mbc_high_thresh_db', ['mbc_high_thresh', 'mbc_H_t'], -20.0)
+        p['mbc_high_ratio'] = resolve('mbc_high_ratio', ['mbc_high_ratio', 'mbc_H_r'], 2.0)
+        
+        p['do_deess'] = resolve('do_deess', 'do_deess', True)
+        p['deess_amount'] = resolve('deess_amount_db', ['deess_amount', 'deess_db'], -10.0)
+        
+        p['width'] = resolve('stereo_width', 'width', 1.0)
+        p['do_limiter'] = resolve('do_limiter', 'do_limiter', True)
+        p['lim_db'] = resolve('limiter_threshold_db', 'lim_db', -1.0)
+        p['soft_clip_drive'] = resolve('soft_clip_drive', 'soft_clip_drive', 1.0)
+        p['fast_mode'] = resolve('fast_mode', 'fast_mode', False)
+        return p
 
-    def _design_shelf_sos(self, gain_db, freq, sample_rate, shelf_type='low'):
+    def _sanitize_ai_advice(self, advice):
+        clamped = {}
+        advice = {k.lower(): v for k, v in advice.items()}
+        
+        if 'tilt' in advice: clamped['tilt'] = max(-0.5, min(0.5, float(advice['tilt']))) 
+        if 'tamer' in advice: clamped['tamer'] = max(0.0, min(1.0, float(advice['tamer']))) 
+        if 'mud' in advice: clamped['mud'] = max(-20.0, min(0.0, float(advice['mud'])))
+        if 'thump' in advice: clamped['thump'] = max(0.0, min(8.0, float(advice['thump'])))
+        if 'exciter' in advice: clamped['exciter'] = max(0.0, min(0.4, float(advice['exciter']))) 
+        if 'width' in advice: clamped['width'] = max(0.0, min(2.5, float(advice['width'])))
+        if 'lim_db' in advice: clamped['lim_db'] = max(-20.0, min(0.0, float(advice['lim_db'])))
+        if 'eq_bass' in advice: clamped['eq_bass'] = max(0.0, min(20.0, float(advice['eq_bass'])))
+        if 'eq_high' in advice: clamped['eq_high'] = max(0.0, min(20.0, float(advice['eq_high'])))
+        if 'soft_clip_drive' in advice: clamped['soft_clip_drive'] = max(0.8, min(1.5, float(advice['soft_clip_drive'])))
+        return clamped
+
+    def _get_ollama_advice(self, metrics, model, hint, url, images=None):
+        prompt = f"""
+        Role: Senior Mastering Engineer using AutoMaster Pro.
+        Analyze the audio metrics and waveform context.
+        
+        Metrics:
+        - Centroid: {metrics['centroid']:.1f}Hz
+        - Crest Factor: {metrics['crest']:.1f}dB
+        - RMS: {metrics['rms']:.3f}
+        
+        TOOL SENSITIVITY & RANGES:
+        - 'tilt': EXTREMELY SENSITIVE. Range +/- 0.5. Step 0.05. (0.1 is large, 0.3 is huge). Use negatives for warmth.
+        - 'exciter': TUBE SATURATION. Range 0.0 - 0.4. (0.1 adds warmth, 0.3 adds crunch).
+        - 'tamer': SURGICAL CUT. Range 0.0 - 1.0. (0.3 is standard).
+        
+        Instruction:
+        Return a JSON object containing ONLY the keys you want to change.
+        Add a 'reason' key explaining your decision.
+        
+        CRITICAL RULES:
+        1. BE BOLD IN DECISION, PRECISE IN VALUE: If track is dull, use Tilt +0.05, not +1.0.
+        2. BODY FIRST: If you cut 'mud', increase 'thump'.
+        3. SAFETY: Keep 'lim_db' at -1.0 for Bluetooth safety.
+        4. FORMAT: Strict JSON. Lowercase keys.
         """
-        Designed as SOS (Second-Order Sections) with strict a0=1.0 normalization.
-        """
-        if abs(gain_db) < 0.001 or freq <= 0 or freq >= sample_rate / 2: return None
+        payload = {"model": model, "prompt": prompt, "stream": False, "format": "json"}
+        if images and ("vl" in model.lower() or "vision" in model.lower()): payload["images"] = images
         try:
-            A = 10**(gain_db / 40.0)
-            w0 = 2 * np.pi * freq / sample_rate
-            cos_w0 = np.cos(w0)
-            sin_w0 = np.sin(w0)
-            alpha = sin_w0 / 2.0 * np.sqrt(2)
-            
-            # RBJ Cookbook Formulas
-            if shelf_type == 'low':
-                b0 = A*((A+1)-(A-1)*cos_w0+2*np.sqrt(A)*alpha)
-                b1 = 2*A*((A-1)-(A+1)*cos_w0)
-                b2 = A*((A+1)-(A-1)*cos_w0-2*np.sqrt(A)*alpha)
-                a0 = (A+1)+(A-1)*cos_w0+2*np.sqrt(A)*alpha
-                a1 = -2*((A-1)+(A+1)*cos_w0)
-                a2 = (A+1)+(A-1)*cos_w0-2*np.sqrt(A)*alpha
-            elif shelf_type == 'high':
-                b0 = A*((A+1)+(A-1)*cos_w0+2*np.sqrt(A)*alpha)
-                b1 = -2*A*((A-1)+(A+1)*cos_w0)
-                b2 = A*((A+1)+(A-1)*cos_w0-2*np.sqrt(A)*alpha)
-                a0 = (A+1)-(A-1)*cos_w0+2*np.sqrt(A)*alpha
-                a1 = 2*((A-1)-(A+1)*cos_w0)
-                a2 = (A+1)-(A-1)*cos_w0-2*np.sqrt(A)*alpha
-            else:
-                return None
+            res = requests.post(f"{url}/api/generate", json=payload, timeout=10)
+            return json.loads(res.json()['response'])
+        except Exception: return None
 
-            # CRITICAL: Normalize coefficients so a0 = 1.0
-            # Scipy requires the 4th element (index 3) to be exactly 1.
-            norm_factor = a0
-            b0 /= norm_factor
-            b1 /= norm_factor
-            b2 /= norm_factor
-            a1 /= norm_factor
-            a2 /= norm_factor
-            # a0 becomes 1.0 (implicit in SOS division)
-
-            # SOS format: [b0, b1, b2, 1.0, a1, a2]
-            sos = np.array([[b0, b1, b2, 1.0, a1, a2]])
-            return sos
+    def _export_to_yaml(self, params):
+        try:
+            clean_params = {}
+            for k, v in params.items():
+                if isinstance(v, (int, float, str, bool)): clean_params[k] = v
+                elif isinstance(v, np.ndarray): clean_params[k] = v.tolist()
+                elif isinstance(v, torch.Tensor): clean_params[k] = v.cpu().numpy().tolist()
+            config = {'md_automaster_v6_27_0': clean_params}
+            return yaml.dump(config, default_flow_style=False, sort_keys=False)
         except Exception as e:
-            self.analysis_log.append(f"⚠️ Shelf filter design failed: {e}")
-            return None
+            return f"# YAML Export Error: {str(e)}"
 
-    def _apply_eq(self, audio, sr, adjustments, adaptive=False):
-        processed_audio = audio.copy()
+    def _generate_4stage_log(self, user_params, ai_advice, final_params, ai_source_tracker):
+        lines = ["\n" + "="*60, "📋 AUTOMASTER PROCESSING MANIFEST", "="*60]
+        lines.append(f"  Profile: {user_params['profile_name']}")
+        lines.append(f"  Target: {user_params['target_lufs']} LUFS")
         
-        # Low Shelf
-        if adjustments.get("bass_cut_db"):
-            cut = adjustments["bass_cut_db"]
-            if adaptive and "bass_scale" in adjustments: cut *= adjustments["bass_scale"]
-            sos = self._design_shelf_sos(cut, 120, sr, 'low')
-            if sos is not None:
-                processed_audio = sosfilt(sos, processed_audio, axis=0)
-                self.analysis_log.append(f"🎛️ Applied EQ: Low-shelf cut of {cut:.1f} dB @ 120 Hz")
-
-        # High Shelf
-        if adjustments.get("high_cut_db"):
-            cut = adjustments["high_cut_db"]
-            if adaptive and "high_scale" in adjustments: cut *= adjustments["high_scale"]
-            sos = self._design_shelf_sos(cut, 8000, sr, 'high')
-            if sos is not None:
-                processed_audio = sosfilt(sos, processed_audio, axis=0)
-                self.analysis_log.append(f"🎛️ Applied EQ: High-shelf cut of {cut:.1f} dB @ 8000 Hz")
-            
-        return processed_audio
-
-    def _design_linkwitz_riley_crossover(self, cutoff_freq, sample_rate, order=8):
-        if order % 2 != 0: order = order + 1
-        nyquist = 0.5 * sample_rate
-        normal_cutoff = np.clip(cutoff_freq / nyquist, 0.01, 0.99)
-        try:
-            sos_lp = signal.butter(order // 2, normal_cutoff, btype='lowpass', output='sos')
-            sos_hp = signal.butter(order // 2, normal_cutoff, btype='highpass', output='sos')
-            return [sos_lp, sos_lp], [sos_hp, sos_hp]
-        except ValueError as e:
-            raise
-
-    def _apply_single_band_compression(self, audio_data, threshold_db, ratio, 
-                                    attack_ms, release_ms, makeup_gain_db, sample_rate,
-                                    log_details=False): 
-        if log_details: self.analysis_log.append(f"     ↳ Band Comp: T={threshold_db:.1f}dB, R={ratio:.1f}:1")
-        audio_float = audio_data.astype(np.float32)
-        try:
-            compressor = Compressor(threshold_db=threshold_db, ratio=ratio, attack_ms=attack_ms, release_ms=release_ms)
-            if audio_float.ndim == 2: processed = compressor(audio_float.T, sample_rate=sample_rate).T
-            else: processed = compressor(audio_float, sample_rate=sample_rate)
-            if makeup_gain_db != 0.0: processed *= 10**(makeup_gain_db / 20.0)
-            return processed
-        except Exception as e:
-            self.analysis_log.append(f"❌ Error in single-band compression: {e}")
-            return audio_float
-
-
-    def _apply_multiband_compression_manual(self, audio_data, sample_rate, 
-                                            crossover_low_mid, crossover_mid_high,
-                                            crossover_order, low_params, mid_params, high_params):
-        self.analysis_log.append(f"🗜️ Applying Manual MBC (Single Pass)...") 
-        is_stereo = audio_data.ndim > 1 and audio_data.shape[1] == 2
-        if is_stereo: audio_ch = audio_data.T
-        else: audio_ch = audio_data[np.newaxis, :]
-        num_channels = audio_ch.shape[0]
-        processed_audio_accumulator = np.zeros_like(audio_ch, dtype=np.float64) 
+        lines.append("\n" + "-"*60)
+        lines.append("📥 STAGE 1: USER SETTINGS")
+        lines.append("-"*60)
+        lines.append(f"  Tilt: {user_params['tilt']:.2f}")
+        lines.append(f"  Tamer: {user_params['tamer']:.2f}")
+        lines.append(f"  Mud: {user_params['mud']:.1f} dB")
+        lines.append(f"  Thump: {user_params['thump']:.1f} dB")
+        lines.append(f"  Exciter: {user_params['exciter']:.2f}")
+        lines.append(f"  Stereo Width: {user_params['width']:.2f}")
         
-        try:
-            sos_lm_lp_list, sos_lm_hp_list = self._design_linkwitz_riley_crossover(crossover_low_mid, sample_rate, crossover_order)
-            sos_mh_lp_list, sos_mh_hp_list = self._design_linkwitz_riley_crossover(crossover_mid_high, sample_rate, crossover_order)
-        except ValueError as e:
-            self.analysis_log.append(f"❌ Critical Error: MBC Crossover design failed. {e}")
-            return audio_data 
-            
-        for c in range(num_channels):
-            ch_data = audio_ch[c, :].astype(np.float64) 
-            try:
-                # SOS Filtering (More stable than previous implementation)
-                low_band = signal.sosfiltfilt(sos_lm_lp_list[0], ch_data); low_band = signal.sosfiltfilt(sos_lm_lp_list[1], low_band)
-                high_band = signal.sosfiltfilt(sos_mh_hp_list[0], ch_data); high_band = signal.sosfiltfilt(sos_mh_hp_list[1], high_band)
-                mid_band_tmp = signal.sosfiltfilt(sos_lm_hp_list[0], ch_data); mid_band_tmp = signal.sosfiltfilt(sos_lm_hp_list[1], mid_band_tmp)
-                mid_band = signal.sosfiltfilt(sos_mh_lp_list[0], mid_band_tmp); mid_band = signal.sosfiltfilt(sos_mh_lp_list[1], mid_band)
-                
-                if not np.all(np.isfinite(low_band)) or not np.all(np.isfinite(mid_band)) or not np.all(np.isfinite(high_band)):
-                    processed_audio_accumulator[c, :] = ch_data
-                    continue
-
-            except Exception:
-                processed_audio_accumulator[c, :] = ch_data
-                continue
-
-            base_attack_release = [(10.0, 200.0), (10.0, 150.0), (5.0, 100.0)]
-            
-            comp_low = self._apply_single_band_compression(low_band, low_params['threshold_db'], low_params['ratio'], base_attack_release[0][0], base_attack_release[0][1], 0.0, sample_rate)
-            comp_mid = self._apply_single_band_compression(mid_band, mid_params['threshold_db'], mid_params['ratio'], base_attack_release[1][0], base_attack_release[1][1], 0.0, sample_rate)
-            comp_high = self._apply_single_band_compression(high_band, high_params['threshold_db'], high_params['ratio'], base_attack_release[2][0], base_attack_release[2][1], 0.0, sample_rate)
-            
-            summed_bands = comp_low + comp_mid + comp_high
-            processed_audio_accumulator[c, :] = summed_bands
-
-        if is_stereo: return processed_audio_accumulator.T.astype(np.float32)
-        else: return processed_audio_accumulator[0, :].astype(np.float32)
-            
-            
-    def _apply_deesser_manual(self, audio, sr, max_cut_db):
-        self.analysis_log.append(f"✂️ Manual De-Esser: Applying cuts up to {max_cut_db:.1f} dB")
-        processed_audio = audio.copy()
-        deess_targets = [(5500, 2.5), (7500, 3.0), (9500, 3.5)]
-        for freq, Q in deess_targets:
-            gain_for_filter = max_cut_db 
-            if freq >= sr / 2: continue
-            try:
-                # Peaking EQ cut for "De-essing" effect
-                A = 10**(gain_for_filter / 40.0); w0 = 2 * np.pi * freq / sr; alpha = np.sin(w0) / (2 * Q)
-                b0 = 1 - alpha * A; b1 = -2 * np.cos(w0); b2 = 1 + alpha * A
-                a0 = 1 + alpha / A; a1 = -2 * np.cos(w0); a2 = 1 - alpha / A
-                b = np.array([b0/a0, b1/a0, b2/a0]); a = np.array([1.0, a1/a0, a2/a0])
-                
-                processed_audio = lfilter(b, a, processed_audio, axis=0)
-            except Exception:
-                pass
-        return processed_audio
-
-
-    def _apply_stereo_width(self, audio, width):
-        if audio.ndim < 2 or audio.shape[1] < 2: return audio
-        if width == 1.0: return audio
-        mid = (audio[:, 0] + audio[:, 1]) / 2.0; side = (audio[:, 0] - audio[:, 1]) / 2.0
-        side *= width
-        left = mid + side; right = mid - side
-        processed = np.column_stack([left, right])
-        if width > 1.0:
-            max_peak = np.max(np.abs(processed))
-            if max_peak > 1.0:
-                processed = np.clip(processed, -1.0, 1.0)
-        self.analysis_log.append(f"↔️ Applied stereo width: {width:.2f}")
-        return processed
-
-
-    def _plot_waveform_to_tensor(self, audio_data, sample_rate, title="Waveform", max_samples=MAX_SAMPLES_PLOT): 
-        if audio_data is None or audio_data.size == 0:
-            return torch.zeros((1, 64, 64, 3), dtype=torch.float32)
-
-        fig = None
-        try: 
-            plt.style.use('dark_background'); fig, ax = plt.subplots(figsize=(10, 3)) 
-            if audio_data.ndim == 2: plot_data = audio_data[:, 0]
-            else: plot_data = audio_data
-            
-            if plot_data.size == 0:
-                plt.close(fig); return torch.zeros((1, 64, 64, 3), dtype=torch.float32)
-
-            num_samples_original = len(plot_data)
-            if num_samples_original > max_samples:
-                ds_factor = num_samples_original//max_samples; plot_data = plot_data[::ds_factor]
-                time_axis = np.linspace(0, num_samples_original/sample_rate, len(plot_data))
-            else: time_axis = np.linspace(0, num_samples_original/sample_rate, len(plot_data))
-            
-            if plot_data.size == 0:
-                plt.close(fig); return torch.zeros((1, 64, 64, 3), dtype=torch.float32)
-
-            ax.plot(time_axis, plot_data, color='#87CEEB', linewidth=0.5) 
-            peak_val = np.max(np.abs(plot_data)); rms = np.sqrt(np.mean(plot_data**2))
-            if peak_val > 0.8: 
-                ax.axhline(y=peak_val, color='orangered', ls='--', lw=0.7, alpha=0.6, label=f'Peak: {peak_val:.3f}')
-                ax.axhline(y=-peak_val, color='orangered', ls='--', lw=0.7, alpha=0.6)
-            ax.axhline(y=rms, color='mediumseagreen', ls=':', lw=0.7, alpha=0.6, label=f'RMS: {rms:.3f}')
-            ax.axhline(y=-rms, color='mediumseagreen', ls=':', lw=0.7, alpha=0.6)
-            ax.set_title(f"{title} | Peak: {peak_val:.3f} | RMS: {rms:.3f}", fontsize=10)
-            ax.set_xlabel("Time (s)", fontsize=8); ax.set_ylabel("Amplitude", fontsize=8)
-            ax.set_xlim(0, num_samples_original/sample_rate); ax.set_ylim(-1.05, 1.05); ax.set_yticks([-1, -0.5, 0, 0.5, 1])
-            ax.grid(True, ls=':', lw=0.5, alpha=0.3, color='gray'); ax.legend(loc='upper right', fontsize=7, framealpha=0.5)
-            ax.tick_params(axis='both', which='major', labelsize=7); ax.spines['top'].set_visible(False); ax.spines['right'].set_visible(False)
-            plt.tight_layout()
-            
-            buf = io.BytesIO()
-            fig.savefig(buf, format='png', bbox_inches='tight', dpi=96, facecolor=fig.get_facecolor())
-            buf.seek(0)
-            img = Image.open(buf).convert("RGB")
-            img_np = np.array(img).astype(np.float32) / 255.0
-            
-            buf.close()
-            plt.close(fig)
-            
-            return torch.from_numpy(img_np).unsqueeze(0)
+        if ai_advice and any(k != 'reason' for k in ai_advice.keys()):
+            lines.append("\n" + "-"*60)
+            lines.append("🤖 STAGE 2: AI RECOMMENDATIONS")
+            lines.append("-"*60)
+            for k, v in ai_advice.items():
+                if k == 'reason': lines.append(f"  Reasoning: {v}")
+                elif k in user_params: lines.append(f"  {k}: {user_params[k]} → {v} (AI suggests)")
         
-        except Exception as e:
-            logging.error(f"[MD_AutoMasterNode] Plotting Error: {e}")
-            if fig: plt.close(fig)
-            return torch.zeros((1, 64, 64, 3), dtype=torch.float32)
-
-    # --- Main Execution Function ---
-
-    def master_audio(self, audio, target_lufs, profile, 
-                      input_gain_db, highpass_freq, lowpass_freq,
-                      do_eq, eq_bass_target, eq_high_target, eq_adaptive,
-                      do_deess, deess_amount_db,
-                      do_mbc, mbc_crossover_low, mbc_crossover_high, mbc_crossover_order, 
-                      mbc_low_thresh_db, mbc_low_ratio, 
-                      mbc_mid_thresh_db, mbc_mid_ratio,
-                      mbc_high_thresh_db, mbc_high_ratio,
-                      do_limiter, limiter_threshold_db,
-                      stereo_width, max_iterations_eq, fast_mode, mix): 
-        """
-        Main execution function for iterative audio mastering.
+        lines.append("\n" + "-"*60)
+        lines.append("✅ STAGE 3: FINAL APPLIED SETTINGS")
+        lines.append("-"*60)
+        lines.append(f"  Tilt: {final_params['tilt']:.2f} {ai_source_tracker.get('tilt', '(USER)')}")
+        lines.append(f"  Tamer: {final_params['tamer']:.2f} {ai_source_tracker.get('tamer', '(USER)')}")
+        lines.append(f"  Mud: {final_params['mud']:.1f} dB {ai_source_tracker.get('mud', '(USER)')}")
+        lines.append(f"  Thump: {final_params['thump']:.1f} dB {ai_source_tracker.get('thump', '(USER)')}")
+        lines.append(f"  Exciter: {final_params['exciter']:.2f} {ai_source_tracker.get('exciter', '(USER)')}")
+        lines.append(f"  Stereo Width: {final_params['width']:.2f} {ai_source_tracker.get('width', '(USER)')}")
+        lines.append(f"  Soft Clip: {final_params['soft_clip_drive']:.2f}x (Saturation)")
         
-        Returns:
-            Tuple[dict, str, Tensor, Tensor]: Processed audio, log, before img, after img.
-        """
+        lines.append("\n" + "-"*60)
+        lines.append("🔧 STAGE 4: PROCESSING LOG")
+        lines.append("-"*60)
+        return "\n".join(lines)
+
+    def _fig_to_tensor(self, fig):
+        b = io.BytesIO()
+        fig.savefig(b, format='png', bbox_inches='tight', dpi=CONST_PLOT_DPI, facecolor=CONST_BACKGROUND_COLOR)
+        b.seek(0); i = Image.open(b).convert("RGB"); plt.close(fig)
+        return torch.from_numpy(np.array(i).astype(np.float32)/255.0).unsqueeze(0)
+
+    def _fig_to_base64(self, fig):
+        b = io.BytesIO(); fig.savefig(b, format='png', bbox_inches='tight', dpi=72, facecolor='white')
+        b.seek(0); return base64.b64encode(b.read()).decode('utf-8')
+
+    def _plot_spectrum(self, o, p, sr, ret_fig=False):
+        if not MATPLOTLIB_AVAILABLE: return torch.zeros((1,64,64,3))
+        plt.style.use('dark_background'); fig, ax = plt.subplots(figsize=(10,6))
+        def db(x): return librosa.amplitude_to_db(np.abs(librosa.stft(x[:,0] if x.ndim==2 else x)), ref=np.max).mean(axis=1)
+        f = librosa.fft_frequencies(sr=sr)
+        ax.semilogx(f, db(o), color='gray', alpha=0.5, label='In'); ax.semilogx(f, db(p), color=CONST_WAVEFORM_COLOR, label='Out')
+        ax.legend(); ax.set_xlim(20, 20000)
+        if ret_fig: return fig
+        return self._fig_to_tensor(fig)
+
+    def _plot_dynamics(self, history):
+        if not MATPLOTLIB_AVAILABLE: return torch.zeros((1,64,64,3))
+        plt.style.use('dark_background'); fig, (ax1,ax2) = plt.subplots(2,1, figsize=(10,8), sharex=True)
+        s = list(history['lufs'].keys())
+        ax1.plot(s, list(history['lufs'].values()), 'o-', color=CONST_WAVEFORM_COLOR); ax1.set_title("LUFS")
+        ax2.plot(s, list(history['peak'].values()), 'o-', color=CONST_PEAK_COLOR); ax2.set_title("Peak")
+        return self._fig_to_tensor(fig)
+
+    def _plot_meter(self, c, t):
+        if not MATPLOTLIB_AVAILABLE: return torch.zeros((1,64,64,3))
+        plt.style.use('dark_background'); fig, ax = plt.subplots(figsize=(6,2))
+        ax.barh(0, 1, color='#333'); ax.axvline((t+30)/30, color='cyan', lw=3)
+        ax.plot(np.clip((c+30)/30,0,1), 0, 'o', color='green', markersize=15); ax.set_yticks([])
+        return self._fig_to_tensor(fig)
+
+    def _plot_waveform(self, a, sr, t):
+        if not MATPLOTLIB_AVAILABLE: return torch.zeros((1,64,64,3))
+        plt.style.use('dark_background'); fig, ax = plt.subplots(figsize=(10,3))
+        d = a[:,0] if a.ndim==2 else a
+        if d.size > CONST_MAX_SAMPLES_PLOT: d = d[::d.size//CONST_MAX_SAMPLES_PLOT]
+        ax.plot(np.linspace(0, a.shape[0]/sr, d.size), d, color=CONST_WAVEFORM_COLOR, lw=0.5)
+        ax.set_title(t); return self._fig_to_tensor(fig)
+
+
+    def master_audio(self, audio, target_lufs, profile, **kwargs):
         
-        waveform_before = None
-        waveform_after = None
+        # Graceful Degradation: If core is missing, pass audio through unharmed.
+        if not AM_CORE_LOADED: 
+            error_msg = f"❌ Core Missing: {AM_CORE_ERROR}. Audio passed through unprocessed."
+            logging.warning(f"[MD_AutoMaster] {error_msg}")
+            return (audio, error_msg, "", *([torch.zeros((1,64,64,3))]*5))
+        
+        self.log_verbosity = kwargs.get("debug_mode", "1 - Info")
+        prof = PerformanceProfiler(enabled=kwargs.get("enable_profiling", False))
+        prof.start("total")
+        self.analysis_log = []
 
-        try:
-            self.analysis_log = []; self.analysis_log.append(f"{'='*50}")
-            self.analysis_log.append(f"🎧 MD AutoMaster - Processing Started")
-            self.analysis_log.append(f"{'='*50}")
+        sr = audio['sample_rate']
+        audio_data = audio['waveform'][0].T.cpu().numpy().astype(np.float32)
+        
+        if not np.all(np.isfinite(audio_data)):
+            audio_data = np.nan_to_num(audio_data, nan=0.0, posinf=1.0, neginf=-1.0)
+            self._log("⚠️ WARN: Input audio contained NaNs. Sanitized.")
             
-            waveform_tensor = audio['waveform']; sample_rate = audio['sample_rate']
-            audio_data = waveform_tensor[0].T.cpu().numpy().astype(np.float32)
+        orig_audio = audio_data.copy()
+        
+        # 1. Resolve Base Params (USER SETTINGS)
+        p_dict = MASTERING_PROFILES.get(profile.split(" - ")[0], MASTERING_PROFILES["Standard"])
+        
+        yaml_str = kwargs.get("yaml_config", "").strip()
+        if yaml_str:
+            try: 
+                y = yaml.safe_load(yaml_str)
+                if isinstance(y, dict):
+                    if 'md_automaster_v6_31_0' in y: 
+                        p_dict.update(y['md_automaster_v6_31_0'])
+                        self._log("📝 YAML: Loaded 'md_automaster_v6_31_0'")
+                    elif 'md_master' in y: 
+                        p_dict.update(y['md_master'])
+                        self._log("📝 YAML: Loaded 'md_master' (Generic)")
+                    elif any(k in y for k in ['tilt', 'tamer', 'exciter', 'lim_db']):
+                        p_dict.update(y)
+                        self._log("📝 YAML: Loaded root dictionary")
+                    else:
+                        first_val = next(iter(y.values()))
+                        if isinstance(first_val, dict): 
+                            p_dict.update(first_val)
+                            self._log("📝 YAML: Loaded greedy match")
+            except Exception as e:
+                self._log(f"⚠️ YAML Error: {str(e)}")
+        
+        user_params = self._resolve_all_parameters(kwargs, p_dict)
+        ai_source_tracker = {}
+        ai_advice_raw = None
+
+        # 2. AI Intelligence (if enabled)
+        if kwargs.get("enable_ai_helper") and kwargs.get("ollama_model"):
+            prof.start("ai")
+            mono = audio_data[:,0] if audio_data.ndim>1 else audio_data
+            cent = librosa.feature.spectral_centroid(y=mono, sr=sr).mean() if LIBROSA_AVAILABLE else 0
+            rms = np.sqrt(np.mean(mono**2))
+            crest = 20 * np.log10(np.max(np.abs(mono)) / (rms + 1e-6))
             
-            if audio_data.shape[0] == 0: return (audio, "❌ Error: Empty audio input.", None, None)
-            if sample_rate < 44100: return (audio, f"❌ Error: Sample rate {sample_rate}Hz < 44100 Hz.", None, None)
+            imgs = []
+            if "vl" in kwargs["ollama_model"].lower():
+                fig = self._plot_spectrum(orig_audio, orig_audio, sr, True)
+                imgs.append(self._fig_to_base64(fig)); plt.close(fig)
 
-            meter = pln.Meter(sample_rate)
-            channels = audio_data.shape[1] if audio_data.ndim > 1 else 1
+            ai_advice_raw = self._get_ollama_advice(
+                {"centroid": cent, "crest": crest, "rms": rms}, 
+                kwargs["ollama_model"], 
+                kwargs.get("genre_hint"), 
+                kwargs.get("ollama_url"), 
+                imgs
+            )
+            prof.stop("ai")
+
+        # 3. Create FINAL params (merge User + AI)
+        final_params = user_params.copy()
+        if ai_advice_raw:
+            safe_advice = self._sanitize_ai_advice(ai_advice_raw)
+            for k, v in safe_advice.items():
+                if k in final_params:
+                    ai_source_tracker[k] = "(AI OVERRIDE)"
+                    final_params[k] = v
+
+        # 4. Generate 4-Stage Log
+        manifest = self._generate_4stage_log(user_params, ai_advice_raw, final_params, ai_source_tracker)
+        self._log(manifest)
+
+        # 5. Execute Core DSP 
+        prof.start("dsp")
+        pipeline_out = am_core.execute_pipeline(
+            audio_data, sr, final_params, 
+            lambda m: self._log(m)
+        )
+        processed = pipeline_out[0]
+        history = pipeline_out[1]
+        
+        prof.stop("dsp")
+
+        # 6. Finalize Output
+        prof.start("vis")
+        
+        if kwargs.get("output_mode") == "Delta (Difference)":
+            L = min(len(orig_audio), len(processed))
+            processed = orig_audio[:L] - processed[:L]
             
-            original_audio_data = audio_data.copy()
-            waveform_before = self._plot_waveform_to_tensor(original_audio_data, sample_rate, "Original Waveform")
+        final_lufs = history['lufs'].get('Final', -14.0)
+        
+        out = {
+            "waveform": torch.from_numpy(processed.T).unsqueeze(0).to(audio['waveform'].device), 
+            "sample_rate": sr
+        }
+        
+        # 7. YAML Export
+        yaml_out = ""
+        if kwargs.get("export_yaml"): 
+            yaml_out = self._export_to_yaml(final_params)
+        
+        # 8. Generate Plots
+        wb = self._plot_waveform(orig_audio, sr, "Input")
+        wa = self._plot_waveform(processed, sr, "Output")
+        sp = self._plot_spectrum(orig_audio, processed, sr)
+        dp = self._plot_dynamics(history)
+        mp = self._plot_meter(final_lufs, target_lufs)
+        
+        prof.stop("vis")
+        prof.stop("total")
+        
+        # 9. Performance Report
+        if int(self.log_verbosity.split()[0]) >= 1:
+            self._log("\n" + "="*60)
+            prof.print_report()
+            self._log("="*60)
 
-            # Apply Profile Settings (Refactored using Dictionary)
-            if profile in MASTERING_PROFILES:
-                self.analysis_log.append(f"🎛️ Loading Profile: '{profile}'")
-                p = MASTERING_PROFILES[profile]
-                highpass_freq, lowpass_freq = p["hp"], p["lp"]
-                do_eq, eq_bass_target, eq_high_target, eq_adaptive = p["eq"], p["bass"], p["high"], p["adapt"]
-                do_deess, deess_amount_db = p["deess"], p["deess_db"]
-                do_mbc = p["mbc"]
-                mbc_crossover_low, mbc_crossover_high, mbc_crossover_order = p["x_low"], p["x_high"], p["x_order"]
-                mbc_low_thresh_db, mbc_low_ratio = p["mbc_L"]
-                mbc_mid_thresh_db, mbc_mid_ratio = p["mbc_M"]
-                mbc_high_thresh_db, mbc_high_ratio = p["mbc_H"]
-                do_limiter, limiter_threshold_db = p["lim"], p["lim_db"]
-                stereo_width = p["width"]
-            
-            # --- Processing Chain ---
-            processed_audio = original_audio_data.copy()
-
-            if input_gain_db != 0.0:
-                self.analysis_log.append(f"📈 Input Gain: {input_gain_db:+.1f} dB")
-                board = Pedalboard([Gain(gain_db=input_gain_db)])
-                processed_audio = board(processed_audio, sample_rate=sample_rate)
-                original_audio_data = processed_audio.copy() 
-
-            if highpass_freq > 0 or lowpass_freq > 0:
-                processed_audio = self._apply_filters(processed_audio, sample_rate, highpass_freq, lowpass_freq)
-
-            processed_audio, _ = self._normalize(processed_audio, sample_rate, meter, target_lufs)
-            
-            if do_eq:
-                current_analysis = self._analyze(processed_audio, sample_rate, meter)
-                eq_iteration = 0; bass_ok = current_analysis["bass"] <= eq_bass_target; high_ok = current_analysis["high"] <= eq_high_target
-                while (not bass_ok or not high_ok) and eq_iteration < max_iterations_eq:
-                    eq_adjustments = {}
-                    if not bass_ok:
-                        if eq_adaptive: overage=np.clip((current_analysis["bass"]-eq_bass_target),0,None)/max(eq_bass_target,0.1); eq_adjustments["bass_cut_db"]=-2.0; eq_adjustments["bass_scale"]=min(overage,2.0)
-                        else: eq_adjustments["bass_cut_db"] = -2.0
-                    if not high_ok:
-                        if eq_adaptive: overage=np.clip((current_analysis["high"]-eq_high_target),0,None)/max(eq_high_target,0.1); eq_adjustments["high_cut_db"]=-1.5; eq_adjustments["high_scale"]=min(overage,2.0)
-                        else: eq_adjustments["high_cut_db"] = -1.5
-                    
-                    if not eq_adjustments: break 
-
-                    processed_audio = self._apply_eq(processed_audio, sample_rate, eq_adjustments, eq_adaptive)
-                    self._check_for_clipping(processed_audio, "EQ")
-                    if not fast_mode: processed_audio, _ = self._normalize(processed_audio, sample_rate, meter, target_lufs)
-                    current_analysis = self._analyze(processed_audio, sample_rate, meter)
-                    bass_ok = current_analysis["bass"] <= eq_bass_target; high_ok = current_analysis["high"] <= eq_high_target
-                    eq_iteration += 1
-                self.analysis_log.append(f"✅ EQ completed after {eq_iteration} iteration(s)")
-            else: self.analysis_log.append("⏭️ Skipped Iterative EQ")
-
-            if do_deess: processed_audio = self._apply_deesser_manual(processed_audio, sample_rate, deess_amount_db) 
-            else: self.analysis_log.append("⏭️ Skipped De-Esser")
-
-            if stereo_width != 1.0: processed_audio = self._apply_stereo_width(processed_audio, stereo_width)
-
-            if do_mbc:
-                if not fast_mode: processed_audio, _ = self._normalize(processed_audio, sample_rate, meter, target_lufs)
-                low_params = {'threshold_db': mbc_low_thresh_db, 'ratio': mbc_low_ratio}
-                mid_params = {'threshold_db': mbc_mid_thresh_db, 'ratio': mbc_mid_ratio}
-                high_params = {'threshold_db': mbc_high_thresh_db, 'ratio': mbc_high_ratio}
-                processed_audio = self._apply_multiband_compression_manual(processed_audio, sample_rate, mbc_crossover_low, mbc_crossover_high, mbc_crossover_order, low_params, mid_params, high_params)
-                self._check_for_clipping(processed_audio, "Manual MBC")
-                self.analysis_log.append(f"✅ Manual MBC applied (Single Pass)") 
-            else: self.analysis_log.append("⏭️ Skipped MBC")
-
-            needs_final_processing = fast_mode or mix < 1.0
-            if not fast_mode and mix == 1.0:
-                if do_limiter:
-                    limiter = Limiter(threshold_db=limiter_threshold_db, release_ms=LIMITER_RELEASE_MS)
-                    board = Pedalboard([limiter])
-                    processed_audio = board(processed_audio.astype(np.float32), sample_rate=sample_rate)
-                else: self.analysis_log.append("⏭️ Skipped Final Limiter")
-
-            if mix < 1.0:
-                self.analysis_log.append(f"🧪 Applying {mix*100:.0f}% wet mix")
-                L = min(processed_audio.shape[0], original_audio_data.shape[0])
-                processed_audio = (processed_audio[:L] * mix) + (original_audio_data[:L] * (1.0 - mix))
-            
-            if needs_final_processing:
-                log_prefix = "⚡ Fast Mode:" if fast_mode else "🧪 Post-mix:"
-                self.analysis_log.append(f"{log_prefix} Applying final normalization & limiting")
-                processed_audio, _ = self._normalize(processed_audio, sample_rate, meter, target_lufs)
-                if do_limiter:
-                    limiter = Limiter(threshold_db=limiter_threshold_db, release_ms=LIMITER_RELEASE_MS)
-                    board = Pedalboard([limiter])
-                    processed_audio = board(processed_audio.astype(np.float32), sample_rate=sample_rate)
-
-            # --- Final Analysis ---
-            final_analysis = self._analyze(processed_audio, sample_rate, meter) 
-            final_lufs = meter.integrated_loudness(processed_audio)
-            final_peak = np.max(np.abs(processed_audio)) if processed_audio.size > 0 else 0.0
-            final_peak_db = -np.inf if final_peak <= 0 else 20*np.log10(final_peak)
-
-            self.analysis_log.append(f"\n{'='*50}"); self.analysis_log.append(f"🏁 FINAL RESULTS"); self.analysis_log.append(f"{'='*50}")
-            self.analysis_log.append(f"  LUFS: {final_lufs:.2f} (target: {target_lufs})")
-            self.analysis_log.append(f"  Peak: {final_peak:.3f} ({final_peak_db:.1f} dBFS)")
-            self.analysis_log.append(f"  Bass: {final_analysis.get('bass', np.nan):.2f} (target: ≤{eq_bass_target})")
-            self.analysis_log.append(f"  Highs: {final_analysis.get('high', np.nan):.2f} (target: ≤{eq_high_target})")
-            
-            waveform_after = self._plot_waveform_to_tensor(processed_audio, sample_rate, "Processed Waveform")
-
-            if channels == 1 and processed_audio.ndim == 2: processed_audio = processed_audio[:, 0]
-            if processed_audio.ndim == 1: final_tensor = torch.from_numpy(processed_audio).unsqueeze(0)
-            else: final_tensor = torch.from_numpy(processed_audio.T)
-            final_tensor = final_tensor.unsqueeze(0).to(waveform_tensor.device)
-            output_audio = {"waveform": final_tensor, "sample_rate": sample_rate}
-            
-            return (output_audio, "\n".join(self.analysis_log), waveform_before, waveform_after)
-
-        except Exception as e:
-            error_msg = f"❌ [MD_AutoMasterNode] Error: {e}"
-            logging.error(error_msg)
-            logging.debug(traceback.format_exc())
-            print(f"[MD_AutoMasterNode] ⚠️ Error encountered, returning input unchanged")
-            
-            safe_waveform_before = waveform_before if waveform_before is not None else torch.zeros((1, 64, 64, 3))
-            safe_waveform_after = torch.zeros((1, 64, 64, 3))
-            
-            return (audio, f"{error_msg}\n{traceback.format_exc()}", safe_waveform_before, safe_waveform_after)
+        return (out, "\n".join(self.analysis_log), yaml_out, wb, wa, sp, dp, mp)
 
 # =================================================================================
-# == Node Registration                                                            ==
+# == ComfyUI Node Registration
 # =================================================================================
 
-NODE_CLASS_MAPPINGS = {
-    "MD_AutoMasterNode": MD_AutoMasterNode
-}
+NODE_CLASS_MAPPINGS = {"MD_AutoMasterNode": MD_AutoMasterNode}
+NODE_DISPLAY_NAME_MAPPINGS = {"MD_AutoMasterNode": "MD: Audio Auto Master Pro"}
 
-NODE_DISPLAY_NAME_MAPPINGS = {
-    "MD_AutoMasterNode": "MD: Audio Auto Master Pro"
-}
+
+# ==============================================================================
+# == Unit Tests (smoke — runs without ComfyUI)
+# ==============================================================================
+
+if __name__ == "__main__":
+    print("\n🧪 Smoke tests: MD_AutoMasterNode")
+    print("   VERSION :", VERSION)
+    _pass = _fail = 0
+
+    def _check(label, expr):
+        global _pass, _fail
+        if expr:
+            print(f"  ✅  {label}")
+            _pass += 1
+        else:
+            print(f"  ❌  {label}")
+            _fail += 1
+
+    _check("VERSION defined",    VERSION == "v6.32.0")
+    _check("CONST CONST_MAX_SAMPLES_PLOT defined", CONST_MAX_SAMPLES_PLOT is not None)
+    _check("CONST CONST_WAVEFORM_COLOR defined", CONST_WAVEFORM_COLOR is not None)
+    _check("CONST CONST_PEAK_COLOR defined", CONST_PEAK_COLOR is not None)
+    _check("CONST CONST_BACKGROUND_COLOR defined", CONST_BACKGROUND_COLOR is not None)
+    _check("CONST CONST_PLOT_DPI defined", CONST_PLOT_DPI is not None)
+    _check("NODE_CLASS_MAPPINGS defined",
+           isinstance(NODE_CLASS_MAPPINGS, dict) and len(NODE_CLASS_MAPPINGS) > 0)
+    _check("  class MD_AutoMasterNode in map", "MD_AutoMasterNode" in NODE_CLASS_MAPPINGS)
+
+    print(f"\n  {_pass} passed, {_fail} failed")
+    if _fail == 0:
+        print("  🎉 All good.")

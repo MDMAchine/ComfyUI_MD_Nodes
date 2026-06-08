@@ -1,0 +1,15 @@
+[Genre: {West Coast Hip Hop|G-Funk|Gangsta Rap|90s Golden Era}]
+[BPM: {90|92|94|96} BPM, {Laid back bounce|Swinging groove|Cruising tempo}]
+
+[Instrumentation]
+The track is anchored by a {deep, rolling Moog bassline|slapping funk bass guitar|bouncy synth bass}. The drums are {crisp and punchy|dry and snapping}, featuring a {heavy kick and rimshot|syncopated breakbeat}.
+Layered on top is a {whining, high-pitched G-Funk whistle|smooth Rhodes piano chord progression|funky wah-wah guitar riff}.
+Background textures include {vinyl crackle|police sirens|birdsong and street ambience|a deep male vocal chant}.
+
+[Vocal Style]
+The vocal delivery is {laid-back and melodic like Snoop|aggressive and rhythmic like Ice Cube|commanding and nasal like Eazy-E}.
+The flow is {behind the beat|perfectly in the pocket}, with a {charismatic|menacing} tone.
+
+[Lyrical Theme]
+A narrative about {cruising in a lowrider|surviving the concrete jungle|a sunny day in the hood|the duality of street life}.
+Key imagery: {Palm trees and pistols|Hydraulics and hesitation|Blue skies and red lights}.
